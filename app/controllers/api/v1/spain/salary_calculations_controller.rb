@@ -3,20 +3,22 @@ module Api
     module Spain
       class SalaryCalculationsController < ApplicationController
         rescue_from Taxerase::Spain2025::EmployeeSalaryCalculator::ValidationError, with: :render_validation_error
+        rescue_from Taxerase::Spain2025::SelfEmployedCalculator::ValidationError, with: :render_validation_error
         rescue_from Taxerase::Spain2025::CalculationRouter::UnsupportedRegimeError, with: :render_validation_error
 
         def create
           render json: Taxerase::Spain2025::CalculationRouter.call(
             gross_income: calculation_params[:gross_income],
             salary_period: calculation_params[:salary_period],
-            tax_regime_key: calculation_params[:tax_regime_key]
+            tax_regime_key: calculation_params[:tax_regime_key],
+            deductible_expenses: calculation_params[:deductible_expenses]
           )
         end
 
         private
 
         def calculation_params
-          params.require(:calculation).permit(:gross_income, :salary_period, :tax_regime_key)
+          params.require(:calculation).permit(:gross_income, :salary_period, :tax_regime_key, :deductible_expenses)
         end
 
         def render_validation_error(error)
