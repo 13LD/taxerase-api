@@ -7,6 +7,7 @@ RSpec.describe "Api::V1::Spain::SalaryCalculations", type: :request do
         params: {
           calculation: {
             gross_income: 60_000,
+            tax_year: 2025,
             salary_period: "YEAR",
             tax_regime_key: "employee_madrid"
           }
@@ -19,7 +20,9 @@ RSpec.describe "Api::V1::Spain::SalaryCalculations", type: :request do
 
       expect(json.dig("metadata", "country_code")).to eq("ES")
       expect(json.dig("metadata", "tax_regime_key")).to eq("employee_madrid")
+      expect(json.dig("metadata", "tax_year")).to eq(2025)
       expect(json.dig("breakdown", "annual_net_income")).to be_within(0.01).of(42_236.36)
+      expect(json["sources"]).not_to be_empty
     end
 
     it "returns a self-employed breakdown" do
@@ -28,6 +31,7 @@ RSpec.describe "Api::V1::Spain::SalaryCalculations", type: :request do
           calculation: {
             gross_income: 60_000,
             deductible_expenses: 10_000,
+            tax_year: 2025,
             salary_period: "YEAR",
             tax_regime_key: "self_employed_madrid"
           }
@@ -39,8 +43,30 @@ RSpec.describe "Api::V1::Spain::SalaryCalculations", type: :request do
       json = JSON.parse(response.body)
 
       expect(json.dig("metadata", "tax_regime_key")).to eq("self_employed_madrid")
+      expect(json.dig("metadata", "tax_year")).to eq(2025)
       expect(json.dig("breakdown", "annual_deductible_expenses")).to eq(10_000.0)
       expect(json.dig("breakdown", "annual_net_income")).to be_within(0.01).of(34_405.84)
+    end
+
+    it "returns a year-scoped unsupported message for source-backed foral regimes" do
+      post api_v1_spain_salary_calculation_path,
+        params: {
+          calculation: {
+            gross_income: 60_000,
+            tax_year: 2024,
+            salary_period: "YEAR",
+            tax_regime_key: "employee_navarre"
+          }
+        },
+        as: :json
+
+      expect(response).to have_http_status(:unprocessable_content)
+
+      json = JSON.parse(response.body)
+
+      expect(json["errors"]).to include(
+        "Resident employee - Navarre has official sources linked for 2024, but its calculator flow is not implemented yet."
+      )
     end
 
     it "returns validation errors for invalid input" do
@@ -48,7 +74,9 @@ RSpec.describe "Api::V1::Spain::SalaryCalculations", type: :request do
         params: {
           calculation: {
             gross_income: 0,
-            salary_period: "DAY"
+            tax_year: 2025,
+            salary_period: "DAY",
+            tax_regime_key: "employee_madrid"
           }
         },
         as: :json
@@ -66,6 +94,7 @@ RSpec.describe "Api::V1::Spain::SalaryCalculations", type: :request do
         params: {
           calculation: {
             gross_income: 60_000,
+            tax_year: 2025,
             salary_period: "YEAR",
             tax_regime_key: "corporate_income_general"
           }

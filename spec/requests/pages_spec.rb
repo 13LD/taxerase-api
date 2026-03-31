@@ -10,6 +10,9 @@ RSpec.describe "Pages", type: :request do
       expect(response.body).to include("spain-calculator-app")
       expect(response.body).to include("employee_madrid")
       expect(response.body).to include("self_employed_madrid")
+      expect(response.body).to include("employee_navarre")
+      expect(response.body).to include("2024")
+      expect(response.body).to include("2026")
     end
   end
 end

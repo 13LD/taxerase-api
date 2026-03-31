@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_31_214500) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_31_232000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -21,6 +21,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_31_214500) do
     t.string "name", null: false
     t.datetime "updated_at", null: false
     t.index ["code"], name: "index_countries_on_code", unique: true
+  end
+
+  create_table "official_tax_sources", force: :cascade do |t|
+    t.string "authority_name", null: false
+    t.string "country_code", null: false
+    t.datetime "created_at", null: false
+    t.string "jurisdiction", null: false
+    t.string "key", null: false
+    t.date "last_verified_on"
+    t.text "notes"
+    t.date "published_on"
+    t.string "source_type", null: false
+    t.integer "tax_year"
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.string "url", null: false
+    t.index ["key"], name: "index_official_tax_sources_on_key", unique: true
   end
 
   create_table "tax_brackets", force: :cascade do |t|
@@ -65,7 +82,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_31_214500) do
     t.index ["country_id"], name: "index_tax_regimes_on_country_id"
   end
 
+  create_table "tax_source_usages", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "label", null: false
+    t.text "notes"
+    t.bigint "official_tax_source_id", null: false
+    t.integer "position", default: 1, null: false
+    t.bigint "tax_regime_id", null: false
+    t.datetime "updated_at", null: false
+    t.string "usage_type", null: false
+    t.index ["official_tax_source_id"], name: "index_tax_source_usages_on_official_tax_source_id"
+    t.index ["tax_regime_id", "official_tax_source_id", "usage_type"], name: "idx_tax_source_usages_unique_link", unique: true
+    t.index ["tax_regime_id"], name: "index_tax_source_usages_on_tax_regime_id"
+  end
+
   add_foreign_key "tax_brackets", "tax_regimes"
   add_foreign_key "tax_parameters", "tax_regimes"
   add_foreign_key "tax_regimes", "countries"
+  add_foreign_key "tax_source_usages", "official_tax_sources"
+  add_foreign_key "tax_source_usages", "tax_regimes"
 end

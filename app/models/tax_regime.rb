@@ -2,6 +2,8 @@ class TaxRegime < ApplicationRecord
   belongs_to :country
   has_many :tax_brackets, dependent: :destroy
   has_many :tax_parameters, dependent: :destroy
+  has_many :tax_source_usages, dependent: :destroy
+  has_many :official_tax_sources, through: :tax_source_usages
 
   validates :key, presence: true
   validates :name, presence: true
@@ -33,5 +35,27 @@ class TaxRegime < ApplicationRecord
   def parameter_decimal!(key)
     tax_parameters.find { |parameter| parameter.key == key }&.value_decimal&.to_d ||
       raise(KeyError, "Missing tax parameter #{key} for #{self.key}")
+  end
+
+  def parameter_text(key)
+    tax_parameters.find { |parameter| parameter.key == key }&.value_text
+  end
+
+  def parameter_text!(key)
+    parameter_text(key) || raise(KeyError, "Missing tax parameter #{key} for #{self.key}")
+  end
+
+  def source_links
+    tax_source_usages.includes(:official_tax_source).sort_by(&:position).map do |usage|
+      {
+        label: usage.label,
+        href: usage.official_tax_source.url,
+        usage_type: usage.usage_type,
+        authority_name: usage.official_tax_source.authority_name,
+        jurisdiction: usage.official_tax_source.jurisdiction,
+        tax_year: usage.official_tax_source.tax_year,
+        notes: usage.notes.presence || usage.official_tax_source.notes
+      }
+    end
   end
 end
