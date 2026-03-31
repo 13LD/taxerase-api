@@ -28,23 +28,23 @@ module Taxerase
 
         annual_gross_income = normalize_annual_gross_income
         annual_deductible_expenses = parsed_deductible_expenses
-        net_income_before_social_security = [annual_gross_income - annual_deductible_expenses, 0].max
+        net_income_before_social_security = [ annual_gross_income - annual_deductible_expenses, 0 ].max
         monthly_net_returns_for_social_security = average_monthly_net_returns_for_social_security(net_income_before_social_security)
         social_security_band = social_security_band_for(monthly_net_returns_for_social_security)
         monthly_social_security_base = social_security_band.base_min.to_d
         annual_social_security = monthly_social_security_base * 12 * parameter_decimal!("self_employed_social_security_rate")
-        activity_income_before_generic_deduction = [net_income_before_social_security - annual_social_security, 0].max
+        activity_income_before_generic_deduction = [ net_income_before_social_security - annual_social_security, 0 ].max
         difficult_to_justify_deduction = [
           activity_income_before_generic_deduction * parameter_decimal!("difficult_to_justify_deduction_rate"),
           parameter_decimal!("difficult_to_justify_deduction_cap")
         ].min
-        taxable_activity_income = [activity_income_before_generic_deduction - difficult_to_justify_deduction, 0].max
+        taxable_activity_income = [ activity_income_before_generic_deduction - difficult_to_justify_deduction, 0 ].max
         state_brackets = regime.brackets_for("state_irpf")
         regional_brackets = regime.brackets_for("regional_irpf")
         state_tax_before_minimum = ProgressiveTax.call(amount: taxable_activity_income, brackets: state_brackets)
         regional_tax_before_minimum = ProgressiveTax.call(amount: taxable_activity_income, brackets: regional_brackets)
-        state_minimum_relief = ProgressiveTax.call(amount: [taxable_activity_income, parameter_decimal!("state_taxpayer_minimum")].min, brackets: state_brackets)
-        regional_minimum_relief = ProgressiveTax.call(amount: [taxable_activity_income, parameter_decimal!("regional_taxpayer_minimum")].min, brackets: regional_brackets)
+        state_minimum_relief = ProgressiveTax.call(amount: [ taxable_activity_income, parameter_decimal!("state_taxpayer_minimum") ].min, brackets: state_brackets)
+        regional_minimum_relief = ProgressiveTax.call(amount: [ taxable_activity_income, parameter_decimal!("regional_taxpayer_minimum") ].min, brackets: regional_brackets)
         annual_income_tax = [
           state_tax_before_minimum + regional_tax_before_minimum - state_minimum_relief - regional_minimum_relief,
           0

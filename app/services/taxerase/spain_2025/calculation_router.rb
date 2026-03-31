@@ -19,7 +19,7 @@ module Taxerase
         regime = regime_for!(tax_regime_key.presence || default_regime_key)
         calculator = SUPPORTED_CATEGORIES[regime.category]
 
-        raise UnsupportedRegimeError.new([unsupported_message_for(regime)]) unless calculator
+        raise UnsupportedRegimeError.new([ unsupported_message_for(regime) ]) unless calculator
 
         case regime.category
         when "employee"
@@ -27,7 +27,7 @@ module Taxerase
         when "self_employed"
           calculator.call(gross_income:, salary_period:, tax_regime_key: regime.key, deductible_expenses:)
         else
-          raise UnsupportedRegimeError.new([unsupported_message_for(regime)])
+          raise UnsupportedRegimeError.new([ unsupported_message_for(regime) ])
         end
       end
 
@@ -68,7 +68,7 @@ module Taxerase
           tax_year: EmployeeSalaryCalculator::TAX_YEAR
         )
       rescue ActiveRecord::RecordNotFound
-        raise UnsupportedRegimeError.new(["#{regime_key} is not available for Spain 2025."])
+        raise UnsupportedRegimeError.new([ "#{regime_key} is not available for Spain 2025." ])
       end
     end
   end

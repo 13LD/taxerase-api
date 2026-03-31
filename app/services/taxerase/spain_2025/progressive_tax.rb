@@ -13,7 +13,7 @@ module Taxerase
 
           if upper_bound
             upper_amount = BigDecimal(upper_bound.to_s)
-            slice = [taxable_amount, upper_amount].min - lower_bound
+            slice = [ taxable_amount, upper_amount ].min - lower_bound
             total += slice * rate_decimal if slice.positive?
             break if taxable_amount <= upper_amount
 

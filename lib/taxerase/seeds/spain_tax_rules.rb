@@ -2,12 +2,12 @@ module Taxerase
   module Seeds
     class SpainTaxRules
       SPECIAL_INBOUND_WORKER_BRACKETS = [
-        [600_000, 0.24],
-        [nil, 0.47]
+        [ 600_000, 0.24 ],
+        [ nil, 0.47 ]
       ].freeze
 
       COMPANY_BRACKETS = [
-        [nil, 0.25]
+        [ nil, 0.25 ]
       ].freeze
 
       def self.call

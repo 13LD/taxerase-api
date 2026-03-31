@@ -10,7 +10,7 @@ class TaxRegime < ApplicationRecord
   validates :key, uniqueness: { scope: %i[country_id tax_year] }
 
   def brackets_for(group)
-    bracket_records_for(group).map { |bracket| [bracket.upper_bound&.to_d, bracket.rate.to_d] }
+    bracket_records_for(group).map { |bracket| [ bracket.upper_bound&.to_d, bracket.rate.to_d ] }
   end
 
   def bracket_records_for(group)

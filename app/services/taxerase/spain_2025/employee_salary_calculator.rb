@@ -29,13 +29,13 @@ module Taxerase
         monthly_gross_income = annual_gross_income / 12
         contribution_base_monthly = monthly_contribution_base_for(monthly_gross_income)
         annual_social_security = contribution_base_monthly * 12 * parameter_decimal!("employee_social_security_rate")
-        taxable_work_income = [annual_gross_income - annual_social_security - parameter_decimal!("gross_work_income_deduction"), 0].max
+        taxable_work_income = [ annual_gross_income - annual_social_security - parameter_decimal!("gross_work_income_deduction"), 0 ].max
         state_brackets = regime.brackets_for("state_irpf")
         regional_brackets = regime.brackets_for("regional_irpf")
         state_tax_before_minimum = ProgressiveTax.call(amount: taxable_work_income, brackets: state_brackets)
         regional_tax_before_minimum = ProgressiveTax.call(amount: taxable_work_income, brackets: regional_brackets)
-        state_minimum_relief = ProgressiveTax.call(amount: [taxable_work_income, parameter_decimal!("state_taxpayer_minimum")].min, brackets: state_brackets)
-        regional_minimum_relief = ProgressiveTax.call(amount: [taxable_work_income, parameter_decimal!("regional_taxpayer_minimum")].min, brackets: regional_brackets)
+        state_minimum_relief = ProgressiveTax.call(amount: [ taxable_work_income, parameter_decimal!("state_taxpayer_minimum") ].min, brackets: state_brackets)
+        regional_minimum_relief = ProgressiveTax.call(amount: [ taxable_work_income, parameter_decimal!("regional_taxpayer_minimum") ].min, brackets: regional_brackets)
         work_income_deduction = low_income_deduction_for(annual_gross_income)
         annual_income_tax = [
           state_tax_before_minimum + regional_tax_before_minimum - state_minimum_relief - regional_minimum_relief - work_income_deduction,
@@ -148,7 +148,7 @@ module Taxerase
         min_base = parameter_decimal!("monthly_min_contribution_base")
         max_base = parameter_decimal!("monthly_max_contribution_base")
 
-        [[monthly_gross_income, max_base].min, min_base].max
+        [ [ monthly_gross_income, max_base ].min, min_base ].max
       end
 
       def low_income_deduction_for(annual_gross_income)
