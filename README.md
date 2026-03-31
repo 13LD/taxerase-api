@@ -72,6 +72,12 @@ For Ruby linting:
 RUBOCOP_CACHE_ROOT=tmp/rubocop_cache bundle exec rubocop --no-server
 ```
 
+For JavaScript linting:
+
+```sh
+yarn lint:js
+```
+
 The main GitHub Actions workflow lives in [.github/workflows/ci.yml](/Users/dmytrolysohor/Dev/taxera-api/.github/workflows/ci.yml) and runs against the `main` branch badge shown above.
 
 ## API

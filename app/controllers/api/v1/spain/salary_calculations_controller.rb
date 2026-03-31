@@ -12,14 +12,28 @@ module Api
             salary_period: calculation_params[:salary_period],
             tax_year: calculation_params[:tax_year].to_i,
             tax_regime_key: calculation_params[:tax_regime_key],
-            deductible_expenses: calculation_params[:deductible_expenses]
+            deductible_expenses: calculation_params[:deductible_expenses],
+            age_bracket: calculation_params[:age_bracket],
+            children_count: calculation_params[:children_count],
+            children_under_three_count: calculation_params[:children_under_three_count],
+            disability_level: calculation_params[:disability_level]
           )
         end
 
         private
 
         def calculation_params
-          params.require(:calculation).permit(:gross_income, :salary_period, :tax_year, :tax_regime_key, :deductible_expenses)
+          params.require(:calculation).permit(
+            :gross_income,
+            :salary_period,
+            :tax_year,
+            :tax_regime_key,
+            :deductible_expenses,
+            :age_bracket,
+            :children_count,
+            :children_under_three_count,
+            :disability_level
+          )
         end
 
         def render_validation_error(error)

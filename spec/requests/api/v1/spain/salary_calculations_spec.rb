@@ -25,6 +25,71 @@ RSpec.describe "Api::V1::Spain::SalaryCalculations", type: :request do
       expect(json["sources"]).not_to be_empty
     end
 
+    it "applies age, children, and disability inputs to the employee profile" do
+      post api_v1_spain_salary_calculation_path,
+        params: {
+          calculation: {
+            gross_income: 60_000,
+            tax_year: 2025,
+            salary_period: "YEAR",
+            tax_regime_key: "employee_madrid"
+          }
+        },
+        as: :json
+
+      expect(response).to have_http_status(:ok)
+      baseline = JSON.parse(response.body)
+
+      post api_v1_spain_salary_calculation_path,
+        params: {
+          calculation: {
+            gross_income: 60_000,
+            tax_year: 2025,
+            salary_period: "YEAR",
+            tax_regime_key: "employee_madrid",
+            age_bracket: "age_75_plus",
+            children_count: 2,
+            children_under_three_count: 1,
+            disability_level: "level_65_plus"
+          }
+        },
+        as: :json
+
+      expect(response).to have_http_status(:ok)
+
+      json = JSON.parse(response.body)
+
+      expect(json.dig("input", "age_bracket")).to eq("age_75_plus")
+      expect(json.dig("input", "children_count")).to eq(2)
+      expect(json.dig("input", "children_under_three_count")).to eq(1)
+      expect(json.dig("input", "disability_level")).to eq("level_65_plus")
+      expect(json.dig("breakdown", "state_personal_and_family_minimum")).to eq(28_000.0)
+      expect(json.dig("breakdown", "annual_income_tax")).to be < baseline.dig("breakdown", "annual_income_tax")
+      expect(json.dig("breakdown", "annual_net_income")).to be > baseline.dig("breakdown", "annual_net_income")
+    end
+
+    it "returns a 2024 employee salary breakdown" do
+      post api_v1_spain_salary_calculation_path,
+        params: {
+          calculation: {
+            gross_income: 60_000,
+            tax_year: 2024,
+            salary_period: "YEAR",
+            tax_regime_key: "employee_madrid"
+          }
+        },
+        as: :json
+
+      expect(response).to have_http_status(:ok)
+
+      json = JSON.parse(response.body)
+
+      expect(json.dig("metadata", "tax_regime_key")).to eq("employee_madrid")
+      expect(json.dig("metadata", "tax_year")).to eq(2024)
+      expect(json.dig("breakdown", "annual_net_income")).to be > 0
+      expect(json["sources"]).not_to be_empty
+    end
+
     it "returns a self-employed breakdown" do
       post api_v1_spain_salary_calculation_path,
         params: {
@@ -46,6 +111,29 @@ RSpec.describe "Api::V1::Spain::SalaryCalculations", type: :request do
       expect(json.dig("metadata", "tax_year")).to eq(2025)
       expect(json.dig("breakdown", "annual_deductible_expenses")).to eq(10_000.0)
       expect(json.dig("breakdown", "annual_net_income")).to be_within(0.01).of(34_405.84)
+    end
+
+    it "returns a 2024 self-employed breakdown" do
+      post api_v1_spain_salary_calculation_path,
+        params: {
+          calculation: {
+            gross_income: 60_000,
+            deductible_expenses: 10_000,
+            tax_year: 2024,
+            salary_period: "YEAR",
+            tax_regime_key: "self_employed_madrid"
+          }
+        },
+        as: :json
+
+      expect(response).to have_http_status(:ok)
+
+      json = JSON.parse(response.body)
+
+      expect(json.dig("metadata", "tax_regime_key")).to eq("self_employed_madrid")
+      expect(json.dig("metadata", "tax_year")).to eq(2024)
+      expect(json.dig("breakdown", "annual_deductible_expenses")).to eq(10_000.0)
+      expect(json.dig("breakdown", "annual_net_income")).to be > 0
     end
 
     it "returns a year-scoped unsupported message for source-backed foral regimes" do
@@ -76,7 +164,9 @@ RSpec.describe "Api::V1::Spain::SalaryCalculations", type: :request do
             gross_income: 0,
             tax_year: 2025,
             salary_period: "DAY",
-            tax_regime_key: "employee_madrid"
+            tax_regime_key: "employee_madrid",
+            children_count: 1,
+            children_under_three_count: 2
           }
         },
         as: :json
@@ -87,6 +177,7 @@ RSpec.describe "Api::V1::Spain::SalaryCalculations", type: :request do
 
       expect(json["errors"]).to include("gross_income must be a number greater than 0")
       expect(json["errors"]).to include("salary_period must be YEAR or MONTH")
+      expect(json["errors"]).to include("children_under_three_count must be an integer between 0 and children_count")
     end
 
     it "returns a clear error for unsupported regimes" do

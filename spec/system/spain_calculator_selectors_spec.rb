@@ -75,25 +75,55 @@ RSpec.describe "Spain calculator selectors", type: :system, js: true do
     expect_metric_card("Effective tax rate", /\d+\.\d{2}%/)
   end
 
-  it "shows research-pending tax breakdown values for unsupported year and region selections" do
+  it "recalculates automatically when the year dropdown changes to 2024" do
     visit root_path
 
+    select "Madrid", from: "Region"
     select "2024", from: "Tax year"
-    select "Navarre", from: "Region"
+
+    expect(page).to have_text("Resident employee - Madrid")
 
     within(".results-card") do
-      expect(page).to have_text("Annual net income")
-      expect(page).to have_text("Monthly net income")
-      expect(page).to have_text("Effective tax rate")
-      expect(page).to have_text("Research pending")
       expect(page).to have_text("Income tax")
       expect(page).to have_text("Employee social security")
-      expect(page).not_to have_text("Coverage status")
-      expect(page).not_to have_text("Official sources")
-      expect(page).not_to have_text("Regime key")
-      expect(page).not_to have_text("Calculation flow")
+      expect(page).to have_text("Madrid minimum relief")
+      expect(page).not_to have_text("Research pending")
     end
 
-    expect(page).to have_button("Recalculate", disabled: true)
+    expect_metric_card("Annual net income", /€\d[\d,]*\.\d{2}/)
+    expect_metric_card("Monthly net income", /€\d[\d,]*\.\d{2}/)
+    expect_metric_card("Effective tax rate", /\d+\.\d{2}%/)
+  end
+
+  it "recalculates automatically when age, children, and disability selectors change" do
+    visit root_path
+
+    select "Madrid", from: "Region"
+    select "75+", from: "Taxpayer age"
+    select "2", from: "Children"
+    select "1", from: "Children under 3"
+    select "65% or more", from: "Taxpayer disability"
+
+    within(".results-card") do
+      expect(page).to have_text("State personal and family minimum")
+      expect(page).to have_text("Madrid personal and family minimum")
+    end
+
+    expect_metric_card("State personal and family minimum", "€28,000.00")
+    expect_metric_card("Madrid personal and family minimum", "€28,406.65")
+    expect(page).to have_text("Profile inputs: 75 or older, 2 children (1 under 3), taxpayer disability 65% or more")
+  end
+
+  it "shows only fully supported public options" do
+    visit root_path
+
+    tax_year_options = find_field("Tax year").all("option").map(&:text)
+    region_options = find_field("Region").all("option").map(&:text)
+
+    expect(tax_year_options).to eq([ "2024", "2025" ])
+    expect(region_options).to include("Madrid")
+    expect(region_options).not_to include("Navarre")
+    expect(region_options).not_to include("Bizkaia")
+    expect(page).not_to have_text("Research pending")
   end
 end

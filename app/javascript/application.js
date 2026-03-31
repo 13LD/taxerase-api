@@ -1,11 +1,11 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import SpainCalculatorApp from "./components/SpainCalculatorApp";
+import CountryCalculatorApp from "./components/CountryCalculatorApp";
 
 document.addEventListener("DOMContentLoaded", () => {
-  const container = document.getElementById("spain-calculator-app");
+  const container = document.getElementById("country-calculator-app");
   if (!container) return;
 
   const props = JSON.parse(container.dataset.props || "{}");
-  createRoot(container).render(<SpainCalculatorApp {...props} />);
+  createRoot(container).render(<CountryCalculatorApp {...props} />);
 });

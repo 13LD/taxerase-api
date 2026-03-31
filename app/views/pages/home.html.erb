@@ -1,8 +1,8 @@
-<% content_for :title, "Taxerase | Spain Tax Calculator" %>
+<% content_for :title, @page_title %>
 
 <main class="page-shell">
   <div
-    id="spain-calculator-app"
+    id="country-calculator-app"
     data-props="<%= json_escape(@calculator_props.to_json) %>"
   ></div>
 

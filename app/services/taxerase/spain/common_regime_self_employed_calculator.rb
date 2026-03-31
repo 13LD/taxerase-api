@@ -12,16 +12,50 @@ module Taxerase
 
       CALCULATION_METHOD = "common_regime_self_employed_v1".freeze
 
-      def self.call(gross_income:, salary_period:, tax_regime_key:, tax_year:, deductible_expenses:)
-        new(gross_income:, salary_period:, tax_regime_key:, tax_year:, deductible_expenses:).call
+      def self.call(
+        gross_income:,
+        salary_period:,
+        tax_regime_key:,
+        tax_year:,
+        deductible_expenses:,
+        age_bracket:,
+        children_count:,
+        children_under_three_count:,
+        disability_level:
+      )
+        new(
+          gross_income:,
+          salary_period:,
+          tax_regime_key:,
+          tax_year:,
+          deductible_expenses:,
+          age_bracket:,
+          children_count:,
+          children_under_three_count:,
+          disability_level:
+        ).call
       end
 
-      def initialize(gross_income:, salary_period:, tax_regime_key:, tax_year:, deductible_expenses:)
+      def initialize(
+        gross_income:,
+        salary_period:,
+        tax_regime_key:,
+        tax_year:,
+        deductible_expenses:,
+        age_bracket:,
+        children_count:,
+        children_under_three_count:,
+        disability_level:
+      )
         @gross_income = gross_income
         @salary_period = salary_period
         @tax_regime_key = tax_regime_key
         @tax_year = tax_year
         @deductible_expenses = deductible_expenses
+        @age_bracket = age_bracket
+        @children_count = children_count
+        @children_under_three_count = children_under_three_count
+        @disability_level = disability_level
       end
 
       def call
@@ -29,23 +63,30 @@ module Taxerase
 
         annual_gross_income = normalize_annual_gross_income
         annual_deductible_expenses = parsed_deductible_expenses
-        net_income_before_social_security = [annual_gross_income - annual_deductible_expenses, 0].max
+        net_income_before_social_security = [ annual_gross_income - annual_deductible_expenses, 0 ].max
         monthly_net_returns_for_social_security = average_monthly_net_returns_for_social_security(net_income_before_social_security)
         social_security_band = social_security_band_for(monthly_net_returns_for_social_security)
         monthly_social_security_base = social_security_band.base_min.to_d
         annual_social_security = monthly_social_security_base * 12 * parameter_decimal!("self_employed_social_security_rate")
-        activity_income_before_generic_deduction = [net_income_before_social_security - annual_social_security, 0].max
+        activity_income_before_generic_deduction = [ net_income_before_social_security - annual_social_security, 0 ].max
         difficult_to_justify_deduction = [
           activity_income_before_generic_deduction * parameter_decimal!("difficult_to_justify_deduction_rate"),
           parameter_decimal!("difficult_to_justify_deduction_cap")
         ].min
-        taxable_activity_income = [activity_income_before_generic_deduction - difficult_to_justify_deduction, 0].max
+        taxable_activity_income = [ activity_income_before_generic_deduction - difficult_to_justify_deduction, 0 ].max
+        personal_family_minimums = personal_family_minimums_data
         state_brackets = regime.brackets_for("state_irpf")
         regional_brackets = regime.brackets_for("regional_irpf")
         state_tax_before_minimum = ProgressiveTax.call(amount: taxable_activity_income, brackets: state_brackets)
         regional_tax_before_minimum = ProgressiveTax.call(amount: taxable_activity_income, brackets: regional_brackets)
-        state_minimum_relief = ProgressiveTax.call(amount: [taxable_activity_income, parameter_decimal!("state_taxpayer_minimum")].min, brackets: state_brackets)
-        regional_minimum_relief = ProgressiveTax.call(amount: [taxable_activity_income, parameter_decimal!("regional_taxpayer_minimum")].min, brackets: regional_brackets)
+        state_minimum_relief = ProgressiveTax.call(
+          amount: [ taxable_activity_income, personal_family_minimums[:state_amount] ].min,
+          brackets: state_brackets
+        )
+        regional_minimum_relief = ProgressiveTax.call(
+          amount: [ taxable_activity_income, personal_family_minimums[:regional_amount] ].min,
+          brackets: regional_brackets
+        )
         annual_income_tax = [
           state_tax_before_minimum + regional_tax_before_minimum - state_minimum_relief - regional_minimum_relief,
           0
@@ -61,7 +102,11 @@ module Taxerase
             salary_period: normalized_salary_period,
             tax_year: tax_year,
             annual_gross_income: round_currency(annual_gross_income),
-            monthly_gross_income: round_currency(annual_gross_income / 12)
+            monthly_gross_income: round_currency(annual_gross_income / 12),
+            age_bracket: age_bracket,
+            children_count: parsed_children_count,
+            children_under_three_count: parsed_children_under_three_count,
+            disability_level: disability_level
           },
           breakdown: {
             annual_deductible_expenses: round_currency(annual_deductible_expenses),
@@ -73,6 +118,8 @@ module Taxerase
             taxable_activity_income: round_currency(taxable_activity_income),
             state_tax_before_minimum: round_currency(state_tax_before_minimum),
             regional_tax_before_minimum: round_currency(regional_tax_before_minimum),
+            state_personal_and_family_minimum: round_currency(personal_family_minimums[:state_amount]),
+            regional_personal_and_family_minimum: round_currency(personal_family_minimums[:regional_amount]),
             state_minimum_relief: round_currency(state_minimum_relief),
             regional_minimum_relief: round_currency(regional_minimum_relief),
             annual_income_tax: round_currency(annual_income_tax),
@@ -87,6 +134,8 @@ module Taxerase
             { label: "Self-employed social security", value: round_currency(annual_social_security) },
             { label: "5% difficult-to-justify deduction", value: round_currency(difficult_to_justify_deduction) },
             { label: "Taxable activity income", value: round_currency(taxable_activity_income) },
+            { label: "State personal and family minimum", value: round_currency(personal_family_minimums[:state_amount]) },
+            { label: "#{regime.region} personal and family minimum", value: round_currency(personal_family_minimums[:regional_amount]) },
             { label: "Income tax", value: round_currency(annual_income_tax) },
             { label: "Total tax", value: round_currency(total_tax) },
             { label: "Estimated monthly RETA base", value: round_currency(monthly_social_security_base) }
@@ -98,7 +147,7 @@ module Taxerase
 
       private
 
-      attr_reader :gross_income, :salary_period, :tax_regime_key, :tax_year, :deductible_expenses
+      attr_reader :gross_income, :salary_period, :tax_regime_key, :tax_year, :deductible_expenses, :age_bracket, :children_count, :children_under_three_count, :disability_level
 
       def validate!
         errors = []
@@ -108,6 +157,14 @@ module Taxerase
         errors << "deductible_expenses is too large for the current calculator" if parsed_deductible_expenses > 2_000_000
         errors << "salary_period must be YEAR or MONTH" unless %w[YEAR MONTH].include?(normalized_salary_period)
         errors << "tax_regime_key must point to a supported self-employed regime" if regime.blank?
+        errors.concat(
+          PersonalFamilyMinimums.validation_errors(
+            age_bracket:,
+            children_count:,
+            children_under_three_count:,
+            disability_level:
+          )
+        )
         raise ValidationError.new(errors) if errors.any?
       end
 
@@ -135,10 +192,12 @@ module Taxerase
         [
           "Spain only, tax year #{tax_year}.",
           "Resident self-employed person in #{regime.region} using direct estimation simplified.",
+          "Profile inputs: #{personal_family_minimums_data[:summary]}. No ascendants, joint filing, or other deductions and credits are included.",
           "User-entered deductible expenses are treated as ordinary deductible business expenses.",
           "The RETA band is estimated from annual revenue minus deductible expenses, less the official 7% generic expense adjustment.",
           "The monthly RETA contribution basis is set to the minimum basis of the matching official band (#{social_security_band.label}).",
-          "The 5% difficult-to-justify deduction is applied with the official annual cap."
+          "The 5% difficult-to-justify deduction is applied with the official annual cap.",
+          "Age, children, and taxpayer-disability inputs are applied through the official common personal-and-family minimum structure, using the region-specific taxpayer base minimum already stored for the selected jurisdiction."
         ]
       end
 
@@ -152,6 +211,14 @@ module Taxerase
         @parsed_deductible_expenses ||= BigDecimal(deductible_expenses.to_s)
       rescue ArgumentError
         BigDecimal("0")
+      end
+
+      def parsed_children_count
+        @parsed_children_count ||= personal_family_minimums_data[:children_count]
+      end
+
+      def parsed_children_under_three_count
+        @parsed_children_under_three_count ||= personal_family_minimums_data[:children_under_three_count]
       end
 
       def normalized_salary_period
@@ -182,6 +249,16 @@ module Taxerase
 
       def round_percentage(decimal)
         (decimal * 100).round(2).to_f
+      end
+
+      def personal_family_minimums_data
+        @personal_family_minimums_data ||= PersonalFamilyMinimums.call(
+          regime:,
+          age_bracket:,
+          children_count:,
+          children_under_three_count:,
+          disability_level:
+        )
       end
     end
   end

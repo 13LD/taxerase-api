@@ -15,16 +15,49 @@ module Taxerase
         CommonRegimeSelfEmployedCalculator::CALCULATION_METHOD => CommonRegimeSelfEmployedCalculator
       }.freeze
 
-      def self.call(gross_income:, salary_period:, tax_year:, tax_regime_key: nil, deductible_expenses: 0)
+      def self.call(
+        gross_income:,
+        salary_period:,
+        tax_year:,
+        tax_regime_key: nil,
+        deductible_expenses: 0,
+        age_bracket: "under_65",
+        children_count: 0,
+        children_under_three_count: 0,
+        disability_level: "none"
+      )
+        age_bracket = age_bracket.presence || "under_65"
+        children_count = children_count.nil? ? 0 : children_count
+        children_under_three_count = children_under_three_count.nil? ? 0 : children_under_three_count
+        disability_level = disability_level.presence || "none"
         regime = regime_for!(tax_regime_key.presence || default_regime_key(tax_year), tax_year)
         calculator = SUPPORTED_METHODS[regime.parameter_text("calculation_method")]
 
-        raise UnsupportedRegimeError.new([unsupported_message_for(regime)]) unless calculator
+        raise UnsupportedRegimeError.new([ unsupported_message_for(regime) ]) unless calculator
 
         if calculator == CommonRegimeSelfEmployedCalculator
-          calculator.call(gross_income:, salary_period:, tax_regime_key: regime.key, tax_year:, deductible_expenses:)
+          calculator.call(
+            gross_income:,
+            salary_period:,
+            tax_regime_key: regime.key,
+            tax_year:,
+            deductible_expenses:,
+            age_bracket:,
+            children_count:,
+            children_under_three_count:,
+            disability_level:
+          )
         else
-          calculator.call(gross_income:, salary_period:, tax_regime_key: regime.key, tax_year:)
+          calculator.call(
+            gross_income:,
+            salary_period:,
+            tax_regime_key: regime.key,
+            tax_year:,
+            age_bracket:,
+            children_count:,
+            children_under_three_count:,
+            disability_level:
+          )
         end
       end
 
@@ -64,6 +97,14 @@ module Taxerase
           end
       end
 
+      def self.public_regime_options
+        regime_options.select { |regime| regime[:supported] }
+      end
+
+      def self.public_tax_year_options
+        public_regime_options.map { |regime| regime[:tax_year] }.uniq.sort
+      end
+
       def self.supported?(regime_or_key, tax_year = nil)
         regime = regime_or_key.is_a?(TaxRegime) ? regime_or_key : TaxRegime.find_by(key: regime_or_key, tax_year:)
         regime.present? && SUPPORTED_METHODS.key?(regime.parameter_text("calculation_method"))
@@ -75,7 +116,7 @@ module Taxerase
           tax_year:
         )
       rescue ActiveRecord::RecordNotFound
-        raise UnsupportedRegimeError.new(["#{regime_key} is not available for Spain #{tax_year}."])
+        raise UnsupportedRegimeError.new([ "#{regime_key} is not available for Spain #{tax_year}." ])
       end
 
       def self.unsupported_message_for(regime)
