@@ -1,4 +1,4 @@
-import React, { startTransition, useMemo, useState } from "react";
+import React, { startTransition, useEffect, useMemo, useState } from "react";
 
 const currencyFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -10,6 +10,11 @@ const percentageFormatter = new Intl.NumberFormat("en-US", {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2
 });
+
+const profileLabels = {
+  employee: "Employed",
+  self_employed: "Self-employed"
+};
 
 function MetricCard({ label, value, tone = "default" }) {
   return (
@@ -46,23 +51,64 @@ export default function SpainCalculatorApp({
   research_tracks: researchTracks,
   sources
 }) {
-  const [taxRegimeKey, setTaxRegimeKey] = useState(defaultTaxRegimeKey);
+  const liveRegimes = useMemo(
+    () => regimeOptions.filter((regime) => regime.supported),
+    [regimeOptions]
+  );
+  const defaultRegime = useMemo(
+    () =>
+      liveRegimes.find((regime) => regime.key === defaultTaxRegimeKey) || liveRegimes[0],
+    [defaultTaxRegimeKey, liveRegimes]
+  );
+
+  const [selectedCategory, setSelectedCategory] = useState(defaultRegime?.category || "employee");
+  const [selectedRegion, setSelectedRegion] = useState(defaultRegime?.region || "");
   const [grossIncome, setGrossIncome] = useState(String(defaultInput.gross_income));
+  const [deductibleExpenses, setDeductibleExpenses] = useState(
+    String(defaultInput.deductible_expenses || 0)
+  );
   const [salaryPeriod, setSalaryPeriod] = useState(defaultInput.salary_period);
   const [result, setResult] = useState(initialResult);
   const [status, setStatus] = useState("ready");
   const [errors, setErrors] = useState([]);
 
+  const profileOptions = useMemo(
+    () =>
+      Object.entries(profileLabels)
+        .filter(([category]) => liveRegimes.some((regime) => regime.category === category))
+        .map(([value, label]) => ({ value, label })),
+    [liveRegimes]
+  );
+
+  const regionOptions = useMemo(() => {
+    const seenRegions = new Set();
+
+    return liveRegimes.filter((regime) => {
+      if (regime.category !== selectedCategory) return false;
+      if (seenRegions.has(regime.region)) return false;
+
+      seenRegions.add(regime.region);
+      return true;
+    });
+  }, [liveRegimes, selectedCategory]);
+
+  useEffect(() => {
+    if (regionOptions.some((region) => region.region === selectedRegion)) return;
+
+    setSelectedRegion(regionOptions[0]?.region || "");
+  }, [regionOptions, selectedRegion]);
+
   const selectedRegime =
-    regimeOptions.find((regime) => regime.key === taxRegimeKey) || regimeOptions[0];
-  const isSupportedRegime = Boolean(selectedRegime?.supported);
-  const displayStatus = isSupportedRegime ? status : "unavailable";
-  const assumptionItems = isSupportedRegime
-    ? result.assumptions
-    : [
-        selectedRegime?.description || "This regime exists in the database.",
-        "The rules are stored in PostgreSQL, but the interactive calculator flow is not implemented yet."
-      ];
+    liveRegimes.find(
+      (regime) =>
+        regime.category === selectedCategory && regime.region === selectedRegion
+    ) || defaultRegime;
+
+  const incomeLabel =
+    selectedCategory === "self_employed" ? "Revenue before expenses" : "Gross income";
+  const periodLabel =
+    selectedCategory === "self_employed" ? "Income period" : "Salary period";
+  const showDeductibleExpenses = selectedCategory === "self_employed";
 
   const headlineMetrics = useMemo(
     () => [
@@ -85,15 +131,24 @@ export default function SpainCalculatorApp({
     [result]
   );
 
-  function handleRegimeChange(event) {
-    setTaxRegimeKey(event.target.value);
+  function resetFormState() {
     setErrors([]);
     setStatus("ready");
   }
 
+  function handleCategoryChange(category) {
+    setSelectedCategory(category);
+    resetFormState();
+  }
+
+  function handleRegionChange(event) {
+    setSelectedRegion(event.target.value);
+    resetFormState();
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
-    if (!isSupportedRegime) return;
+    if (!selectedRegime) return;
 
     setStatus("loading");
     setErrors([]);
@@ -111,8 +166,9 @@ export default function SpainCalculatorApp({
         body: JSON.stringify({
           calculation: {
             gross_income: grossIncome,
+            deductible_expenses: showDeductibleExpenses ? deductibleExpenses : 0,
             salary_period: salaryPeriod,
-            tax_regime_key: taxRegimeKey
+            tax_regime_key: selectedRegime.key
           }
         })
       });
@@ -150,21 +206,39 @@ export default function SpainCalculatorApp({
           </div>
 
           <form className="calculator-form" onSubmit={handleSubmit}>
-            <label className="field">
-              <span className="field-label">Tax regime</span>
-              <div className="select-shell">
-                <select value={taxRegimeKey} onChange={handleRegimeChange}>
-                  {regimeOptions.map((regime) => (
-                    <option key={regime.key} value={regime.key}>
-                      {regime.name} {regime.supported ? "" : "(Research)"}
-                    </option>
+            <div className="field-row">
+              <div className="field">
+                <span className="field-label">Tax profile</span>
+                <div className="segmented-control">
+                  {profileOptions.map((profile) => (
+                    <button
+                      key={profile.value}
+                      className={profile.value === selectedCategory ? "is-active" : ""}
+                      type="button"
+                      onClick={() => handleCategoryChange(profile.value)}
+                    >
+                      {profile.label}
+                    </button>
                   ))}
-                </select>
+                </div>
               </div>
-            </label>
+
+              <label className="field">
+                <span className="field-label">Region</span>
+                <div className="select-shell">
+                  <select value={selectedRegion} onChange={handleRegionChange}>
+                    {regionOptions.map((region) => (
+                      <option key={region.key} value={region.region}>
+                        {region.region}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </label>
+            </div>
 
             <label className="field">
-              <span className="field-label">Gross income</span>
+              <span className="field-label">{incomeLabel}</span>
               <div className="currency-input">
                 <span>€</span>
                 <input
@@ -173,20 +247,46 @@ export default function SpainCalculatorApp({
                   step="0.01"
                   inputMode="decimal"
                   value={grossIncome}
-                  onChange={(event) => setGrossIncome(event.target.value)}
+                  onChange={(event) => {
+                    setGrossIncome(event.target.value);
+                    resetFormState();
+                  }}
                 />
               </div>
             </label>
 
+            {showDeductibleExpenses ? (
+              <label className="field">
+                <span className="field-label">Deductible expenses</span>
+                <div className="currency-input">
+                  <span>€</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    inputMode="decimal"
+                    value={deductibleExpenses}
+                    onChange={(event) => {
+                      setDeductibleExpenses(event.target.value);
+                      resetFormState();
+                    }}
+                  />
+                </div>
+              </label>
+            ) : null}
+
             <div className="field">
-              <span className="field-label">Salary period</span>
+              <span className="field-label">{periodLabel}</span>
               <div className="segmented-control">
                 {["YEAR", "MONTH"].map((period) => (
                   <button
                     key={period}
                     className={period === salaryPeriod ? "is-active" : ""}
                     type="button"
-                    onClick={() => setSalaryPeriod(period)}
+                    onClick={() => {
+                      setSalaryPeriod(period);
+                      resetFormState();
+                    }}
                   >
                     {period === "YEAR" ? "Annual" : "Monthly"}
                   </button>
@@ -194,20 +294,10 @@ export default function SpainCalculatorApp({
               </div>
             </div>
 
-            <button
-              className="primary-action"
-              type="submit"
-              disabled={status === "loading" || !isSupportedRegime}
-            >
+            <button className="primary-action" type="submit" disabled={status === "loading"}>
               {status === "loading" ? "Calculating..." : "Recalculate"}
             </button>
           </form>
-
-          {!isSupportedRegime ? (
-            <div className="availability-note">
-              <p>{selectedRegime?.status} only: this regime is already seeded in the database, but its UI and calculation flow are still pending.</p>
-            </div>
-          ) : null}
 
           {errors.length > 0 ? (
             <div className="error-panel">
@@ -216,7 +306,6 @@ export default function SpainCalculatorApp({
               ))}
             </div>
           ) : null}
-
         </section>
 
         <section className="liquid-card tracks-card">
@@ -251,55 +340,31 @@ export default function SpainCalculatorApp({
               <p className="section-kicker">Output</p>
               <h2>Transparent tax breakdown</h2>
             </div>
-            <span className={`response-state response-state--${displayStatus}`}>{displayStatus}</span>
+            <span className={`response-state response-state--${status}`}>
+              {result.metadata.tax_regime_name}
+            </span>
           </div>
 
-          {isSupportedRegime ? (
-            <>
-              <div className="metric-grid">
-                {headlineMetrics.map((metric) => (
-                  <MetricCard
-                    key={metric.label}
-                    label={metric.label}
-                    tone={metric.tone}
-                    value={metric.value}
-                  />
-                ))}
-              </div>
+          <div className="metric-grid">
+            {headlineMetrics.map((metric) => (
+              <MetricCard
+                key={metric.label}
+                label={metric.label}
+                tone={metric.tone}
+                value={metric.value}
+              />
+            ))}
+          </div>
 
-              <div className="detail-grid">
-                <MetricCard
-                  label="Income tax"
-                  value={formatCurrency(result.breakdown.annual_income_tax)}
-                />
-                <MetricCard
-                  label="Employee social security"
-                  value={formatCurrency(result.breakdown.annual_social_security)}
-                />
-                <MetricCard label="Total tax" value={formatCurrency(result.breakdown.total_tax)} />
-                <MetricCard
-                  label="Taxable work income"
-                  value={formatCurrency(result.breakdown.taxable_work_income)}
-                />
-                <MetricCard
-                  label="State minimum relief"
-                  value={formatCurrency(result.breakdown.state_minimum_relief)}
-                />
-                <MetricCard
-                  label="Madrid minimum relief"
-                  value={formatCurrency(result.breakdown.madrid_minimum_relief)}
-                />
-              </div>
-            </>
-          ) : (
-            <div className="unavailable-state">
-              <h3>No live calculator for this regime yet</h3>
-              <p>
-                The rule records are already in PostgreSQL, but this regime still needs its own
-                calculation workflow and result breakdown.
-              </p>
-            </div>
-          )}
+          <div className="detail-grid">
+            {result.detail_cards.map((card) => (
+              <MetricCard
+                key={card.label}
+                label={card.label}
+                value={formatCurrency(card.value)}
+              />
+            ))}
+          </div>
         </section>
 
         <section className="liquid-card assumptions-card">
@@ -311,7 +376,7 @@ export default function SpainCalculatorApp({
           </div>
 
           <div className="assumption-list">
-            {assumptionItems.map((assumption) => (
+            {result.assumptions.map((assumption) => (
               <p key={assumption}>{assumption}</p>
             ))}
           </div>

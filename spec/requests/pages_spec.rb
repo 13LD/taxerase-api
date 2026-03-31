@@ -8,7 +8,8 @@ RSpec.describe "Pages", type: :request do
       expect(response).to have_http_status(:ok)
       expect(response.body).to include("Taxerase")
       expect(response.body).to include("spain-calculator-app")
-      expect(response.body).to include("resident_self_employed_general")
+      expect(response.body).to include("employee_madrid")
+      expect(response.body).to include("self_employed_madrid")
     end
   end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_31_193000) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_31_214500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -24,10 +24,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_31_193000) do
   end
 
   create_table "tax_brackets", force: :cascade do |t|
+    t.decimal "base_max", precision: 12, scale: 2
+    t.decimal "base_min", precision: 12, scale: 2
     t.string "bracket_group", null: false
     t.datetime "created_at", null: false
+    t.string "label"
+    t.decimal "lower_bound", precision: 12, scale: 2
     t.integer "position", null: false
-    t.decimal "rate", precision: 8, scale: 5, null: false
+    t.decimal "rate", precision: 8, scale: 5
     t.bigint "tax_regime_id", null: false
     t.datetime "updated_at", null: false
     t.decimal "upper_bound", precision: 12, scale: 2
