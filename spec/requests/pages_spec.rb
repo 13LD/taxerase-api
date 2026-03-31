@@ -1,0 +1,14 @@
+require "rails_helper"
+
+RSpec.describe "Pages", type: :request do
+  describe "GET /" do
+    it "renders the home page" do
+      get root_path
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("Taxerase")
+      expect(response.body).to include("spain-calculator-app")
+      expect(response.body).to include("resident_self_employed_general")
+    end
+  end
+end

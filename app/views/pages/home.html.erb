@@ -1,0 +1,14 @@
+<% content_for :title, "Taxerase | Spain Salary Calculator" %>
+
+<main class="page-shell">
+  <div
+    id="spain-calculator-app"
+    data-props="<%= json_escape(@calculator_props.to_json) %>"
+  ></div>
+
+  <noscript>
+    <section class="noscript-panel">
+      <p>JavaScript is required for the interactive calculator.</p>
+    </section>
+  </noscript>
+</main>
