@@ -32,7 +32,9 @@ export function buildCalculationSignature({
   ageBracket,
   childrenCount,
   childrenUnderThreeCount,
-  disabilityLevel
+  disabilityLevel,
+  applyThirtyPercentRuling,
+  thirtyPercentRulingBasis
 }) {
   if (!selectedRegimeKey) return null;
 
@@ -42,7 +44,9 @@ export function buildCalculationSignature({
     ageBracket,
     childrenCount,
     childrenUnderThreeCount,
-    disabilityLevel
+    disabilityLevel,
+    applyThirtyPercentRuling ? "1" : "0",
+    thirtyPercentRulingBasis || ""
   ].join(":");
 }
 
@@ -64,6 +68,8 @@ export function buildResultCalculationSignature(result) {
     result.input.age_bracket,
     result.input.children_count,
     result.input.children_under_three_count,
-    result.input.disability_level
+    result.input.disability_level,
+    result.input.apply_thirty_percent_ruling ? "1" : "0",
+    result.input.thirty_percent_ruling_basis || ""
   ].join(":");
 }

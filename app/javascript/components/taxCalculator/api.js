@@ -3,6 +3,7 @@ function csrfToken() {
 }
 
 export function buildCalculationPayload({
+  applyThirtyPercentRuling,
   grossIncome,
   deductibleExpenses,
   salaryPeriod,
@@ -11,10 +12,12 @@ export function buildCalculationPayload({
   ageBracket,
   childrenCount,
   childrenUnderThreeCount,
-  disabilityLevel
+  disabilityLevel,
+  thirtyPercentRulingBasis
 }) {
   return {
     calculation: {
+      apply_thirty_percent_ruling: applyThirtyPercentRuling,
       gross_income: grossIncome,
       deductible_expenses: deductibleExpenses,
       salary_period: salaryPeriod,
@@ -23,7 +26,8 @@ export function buildCalculationPayload({
       age_bracket: ageBracket,
       children_count: childrenCount,
       children_under_three_count: childrenUnderThreeCount,
-      disability_level: disabilityLevel
+      disability_level: disabilityLevel,
+      thirty_percent_ruling_basis: thirtyPercentRulingBasis
     }
   };
 }

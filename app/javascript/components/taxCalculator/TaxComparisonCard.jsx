@@ -179,23 +179,25 @@ export default function TaxComparisonCard({
 
       {summaryMetrics.length > 0 ? (
         <div className="comparison-table">
-          <div className="comparison-table__head">
-            <span>Metric</span>
-            <span>{leftLabel}</span>
-            <span>{rightLabel}</span>
-            <span>Delta</span>
-          </div>
-
-          {summaryMetrics.map((metric) => (
-            <div className="comparison-table__row" key={metric.key}>
-              <span className="comparison-table__metric">{metric.label}</span>
-              <strong>{formatMetricValue(metric, metric.left_value)}</strong>
-              <strong>{formatMetricValue(metric, metric.right_value)}</strong>
-              <span className={`comparison-delta comparison-delta--${deltaTone(metric, metric.delta_value)}`}>
-                {formatDeltaValue(metric, metric.delta_value)}
-              </span>
+          <div className="comparison-table__track">
+            <div className="comparison-table__head">
+              <span>Metric</span>
+              <span>{leftLabel}</span>
+              <span>{rightLabel}</span>
+              <span>Delta</span>
             </div>
-          ))}
+
+            {summaryMetrics.map((metric) => (
+              <div className="comparison-table__row" key={metric.key}>
+                <span className="comparison-table__metric">{metric.label}</span>
+                <strong>{formatMetricValue(metric, metric.left_value)}</strong>
+                <strong>{formatMetricValue(metric, metric.right_value)}</strong>
+                <span className={`comparison-delta comparison-delta--${deltaTone(metric, metric.delta_value)}`}>
+                  {formatDeltaValue(metric, metric.delta_value)}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       ) : null}
 

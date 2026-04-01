@@ -40,6 +40,12 @@ Rails.application.configure do
   # Set localhost to be used by links generated in mailer templates.
   config.action_mailer.default_url_options = { host: "localhost", port: 3000 }
 
+  # Allow temporary Cloudflare tunnel hosts and optional extra local dev hosts.
+  config.hosts << /\A[a-z0-9-]+\.trycloudflare\.com\z/
+  ENV.fetch("RAILS_ALLOWED_HOSTS", "").split(",").map(&:strip).reject(&:empty?).each do |host|
+    config.hosts << host
+  end
+
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
 

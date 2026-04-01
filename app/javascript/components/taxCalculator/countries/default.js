@@ -7,7 +7,10 @@ const defaultCountryCalculatorConfig = {
     ageFieldHint: null,
     showChildrenFields: false,
     showDisabilityField: false,
-    ageBracketOptions: []
+    ageBracketOptions: [],
+    showThirtyPercentRulingField: false,
+    thirtyPercentRulingHint: null,
+    thirtyPercentRulingBasisOptions: []
   }
 };
 

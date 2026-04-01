@@ -24,6 +24,8 @@ module Taxerase
         tax_regime_key: nil,
         deductible_expenses: 0,
         age_bracket: "under_aow_age",
+        apply_thirty_percent_ruling: false,
+        thirty_percent_ruling_basis: nil,
         children_count: 0,
         children_under_three_count: 0,
         disability_level: "none"
@@ -48,7 +50,9 @@ module Taxerase
             salary_period:,
             tax_regime_key: regime.key,
             tax_year:,
-            age_bracket:
+            age_bracket:,
+            apply_thirty_percent_ruling:,
+            thirty_percent_ruling_basis:
           )
         end
       end

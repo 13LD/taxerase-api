@@ -1,6 +1,7 @@
 import React from "react";
 import { disabilityLevelOptions, salaryPeriodOptions } from "./options";
 import CurrencyField from "./fields/CurrencyField";
+import CheckboxField from "./fields/CheckboxField";
 import SegmentedControl from "./fields/SegmentedControl";
 import SelectField from "./fields/SelectField";
 
@@ -23,6 +24,7 @@ export default function TaxCalculatorForm({
   isSupportedRegime,
   onCountryChange,
   onAgeBracketChange,
+  onApplyThirtyPercentRulingChange,
   onCategoryChange,
   onChildrenCountChange,
   onChildrenUnderThreeChange,
@@ -33,9 +35,11 @@ export default function TaxCalculatorForm({
   onSalaryPeriodChange,
   onSubmit,
   onTaxYearChange,
+  onThirtyPercentRulingBasisChange,
   periodLabel,
   profileOptions,
   salaryPeriod,
+  showThirtyPercentRulingField,
   selectedCountryCode,
   selectedCategory,
   selectedRegime,
@@ -46,9 +50,14 @@ export default function TaxCalculatorForm({
   showDeductibleExpenses,
   showDisabilityField,
   taxYearOptions,
+  applyThirtyPercentRuling,
+  thirtyPercentRulingBasis,
+  thirtyPercentRulingBasisOptions,
+  thirtyPercentRulingHint,
   regionOptions
 }) {
   const showRegionField = regionOptions.length > 1;
+  const showThirtyPercentRulingControls = showThirtyPercentRulingField && selectedCategory === "employee";
 
   return (
     <form className="calculator-form" onSubmit={onSubmit}>
@@ -132,6 +141,26 @@ export default function TaxCalculatorForm({
           options={disabilityLevelOptions}
           value={disabilityLevel}
         />
+      ) : null}
+
+      {showThirtyPercentRulingControls ? (
+        <>
+          <CheckboxField
+            checked={applyThirtyPercentRuling}
+            hint={thirtyPercentRulingHint}
+            label="Apply 30% ruling"
+            onChange={onApplyThirtyPercentRulingChange}
+          />
+
+          {applyThirtyPercentRuling ? (
+            <SelectField
+              label="30% ruling basis"
+              onChange={onThirtyPercentRulingBasisChange}
+              options={thirtyPercentRulingBasisOptions}
+              value={thirtyPercentRulingBasis}
+            />
+          ) : null}
+        </>
       ) : null}
 
       <CurrencyField

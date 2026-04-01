@@ -34,6 +34,7 @@ export default function CountryCalculatorApp(props = {}) {
     defaultTaxRegimeKey,
     initialResult,
     regimeOptions,
+    supportsThirtyPercentRuling: Boolean(formConfig.showThirtyPercentRulingField),
     taxYearOptions
   });
   const { comparisonProps } = useTaxComparisonEngine({
@@ -76,6 +77,9 @@ export default function CountryCalculatorApp(props = {}) {
             showAgeField={Boolean(formConfig.showAgeField)}
             showChildrenFields={Boolean(formConfig.showChildrenFields)}
             showDisabilityField={Boolean(formConfig.showDisabilityField)}
+            showThirtyPercentRulingField={Boolean(formConfig.showThirtyPercentRulingField)}
+            thirtyPercentRulingBasisOptions={formConfig.thirtyPercentRulingBasisOptions || []}
+            thirtyPercentRulingHint={formConfig.thirtyPercentRulingHint}
           />
         </section>
       </div>

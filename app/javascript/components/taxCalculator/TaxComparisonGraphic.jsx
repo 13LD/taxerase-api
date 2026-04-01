@@ -53,6 +53,11 @@ function JurisdictionGraphic({ label, panelSummary, sidePrefix, summaryMetrics }
         <p>{panelSummary}</p>
       </div>
 
+      <div className="comparison-graphic__bar-summary">
+        <span>Net {formatPercentage(netRate)}</span>
+        <span>Tax {formatPercentage(taxRate)}</span>
+      </div>
+
       <div
         aria-label={`${label} gross income split`}
         className="comparison-graphic__bar"
@@ -62,13 +67,13 @@ function JurisdictionGraphic({ label, panelSummary, sidePrefix, summaryMetrics }
           className="comparison-graphic__segment comparison-graphic__segment--net"
           style={{ width: `${netRate}%` }}
         >
-          <span>Net {formatPercentage(netRate)}</span>
+          <span>Income</span>
         </div>
         <div
           className="comparison-graphic__segment comparison-graphic__segment--tax"
           style={{ width: `${taxRate}%` }}
         >
-          <span>Tax {formatPercentage(taxRate)}</span>
+          <span>Tax</span>
         </div>
       </div>
 

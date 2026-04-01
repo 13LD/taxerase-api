@@ -104,6 +104,20 @@ module Taxerase
           zvw_max_contribution_income: 75_864
         }
       }.freeze
+      THIRTY_PERCENT_RULING_RULES = {
+        2024 => {
+          rate: 0.30,
+          standard_threshold: 46_107,
+          under_30_master_threshold: 35_048,
+          salary_cap: 233_000
+        },
+        2025 => {
+          rate: 0.30,
+          standard_threshold: 46_660,
+          under_30_master_threshold: 35_468,
+          salary_cap: 246_000
+        }
+      }.freeze
       SOURCE_DEFINITIONS = {
         "nl_2024_box_1_rates" => {
           title: "Belastingdienst: Box 1 income tax rates 2024",
@@ -159,6 +173,24 @@ module Taxerase
           tax_year: 2024,
           url: "https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/werk_en_inkomen/zorgverzekeringswet/bijdrage_zorgverzekeringswet/tabel_werkgeversheffing_zvw_of_bijdrage_zvw/"
         },
+        "nl_2024_expat_scheme_conditions" => {
+          title: "Belastingdienst: Expat Scheme conditions and salary thresholds",
+          authority_name: "Belastingdienst",
+          country_code: "NL",
+          jurisdiction: "Netherlands",
+          source_type: "guidance",
+          tax_year: 2024,
+          url: "https://www.belastingdienst.nl/wps/wcm/connect/nl/buitenland/content/ik-kom-in-nederland-werken-30-procent-regeling-aanvragen"
+        },
+        "nl_2024_expat_scheme_cap" => {
+          title: "Belastingdienst: 30% ruling salary cap via 2024 WNT norm",
+          authority_name: "Belastingdienst",
+          country_code: "NL",
+          jurisdiction: "Netherlands",
+          source_type: "guidance",
+          tax_year: 2024,
+          url: "https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/zakelijk/internationaal/personeel/u_bent_niet_in_nederland_gevestigd_loonheffingen_inhouden/als_u_loonheffingen_gaat_inhouden/extraterritoriale_kosten_en_de_30procentregeling/voorwaarden_voor_de_30procentregeling1/beschikking_geldigheid_en_toetsen_voorwaarden"
+        },
         "nl_2025_box_1_rates" => {
           title: "Belastingdienst: provisional assessment rates and credits 2025",
           authority_name: "Belastingdienst",
@@ -212,6 +244,24 @@ module Taxerase
           source_type: "guidance",
           tax_year: 2025,
           url: "https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/prive/werk_en_inkomen/zorgverzekeringswet/bijdrage_zorgverzekeringswet/tabel_werkgeversheffing_zvw_of_bijdrage_zvw/"
+        },
+        "nl_2025_expat_scheme_conditions" => {
+          title: "Belastingdienst: Expat Scheme conditions and salary thresholds",
+          authority_name: "Belastingdienst",
+          country_code: "NL",
+          jurisdiction: "Netherlands",
+          source_type: "guidance",
+          tax_year: 2025,
+          url: "https://www.belastingdienst.nl/wps/wcm/connect/nl/buitenland/content/ik-kom-in-nederland-werken-30-procent-regeling-aanvragen"
+        },
+        "nl_2025_expat_scheme_cap" => {
+          title: "Belastingdienst: Expat Scheme maximum tax-free reimbursement 2025",
+          authority_name: "Belastingdienst",
+          country_code: "NL",
+          jurisdiction: "Netherlands",
+          source_type: "guidance",
+          tax_year: 2025,
+          url: "https://www.belastingdienst.nl/wps/wcm/connect/bldcontenten/belastingdienst/business/payroll_taxes/you_are_not_established_in_the_netherlands_are_you_required_to_withhold_payroll_taxes/when_you_are_going_to_withhold_payroll_taxes/etraterritorial_costs_and_the_30percent-facility/content_of_the_facility/content_of_the_facility"
         }
       }.freeze
 
@@ -268,7 +318,11 @@ module Taxerase
         )
 
         replace_parameters!(regime, {
-          "calculation_method" => Taxerase::Netherlands::EmployeeCalculator::CALCULATION_METHOD
+          "calculation_method" => Taxerase::Netherlands::EmployeeCalculator::CALCULATION_METHOD,
+          "thirty_percent_ruling_rate" => THIRTY_PERCENT_RULING_RULES.fetch(tax_year).fetch(:rate),
+          "thirty_percent_ruling_standard_threshold" => THIRTY_PERCENT_RULING_RULES.fetch(tax_year).fetch(:standard_threshold),
+          "thirty_percent_ruling_under_30_master_threshold" => THIRTY_PERCENT_RULING_RULES.fetch(tax_year).fetch(:under_30_master_threshold),
+          "thirty_percent_ruling_salary_cap" => THIRTY_PERCENT_RULING_RULES.fetch(tax_year).fetch(:salary_cap)
         })
         replace_brackets!(regime, "box_1_under_aow", BOX_1_RATES.fetch(tax_year).fetch(:under_aow))
         replace_brackets!(regime, "box_1_aow", BOX_1_RATES.fetch(tax_year).fetch(:aow))
@@ -317,6 +371,8 @@ module Taxerase
             { source_key: "nl_2024_box_1_rates", usage_type: "box_1_rates", label: "Belastingdienst: Box 1 rates 2024" },
             { source_key: "nl_2024_general_tax_credit", usage_type: "general_tax_credit", label: "Belastingdienst: general tax credit 2024" },
             { source_key: "nl_2024_labour_tax_credit", usage_type: "labour_tax_credit", label: "Belastingdienst: labour tax credit 2024" },
+            { source_key: "nl_2024_expat_scheme_conditions", usage_type: "thirty_percent_ruling_conditions", label: "Belastingdienst: 30% ruling thresholds 2024" },
+            { source_key: "nl_2024_expat_scheme_cap", usage_type: "thirty_percent_ruling_cap", label: "Belastingdienst: 30% ruling salary cap 2024" },
             { source_key: "nl_2024_zvw_rates", usage_type: "zvw", label: "Belastingdienst: Zvw contribution table 2024" }
           ]
         when 2025
@@ -324,6 +380,8 @@ module Taxerase
             { source_key: "nl_2025_box_1_rates", usage_type: "box_1_rates", label: "Belastingdienst: Box 1 rates 2025" },
             { source_key: "nl_2025_general_tax_credit", usage_type: "general_tax_credit", label: "Belastingdienst: general tax credit 2025" },
             { source_key: "nl_2025_labour_tax_credit", usage_type: "labour_tax_credit", label: "Belastingdienst: labour tax credit 2025" },
+            { source_key: "nl_2025_expat_scheme_conditions", usage_type: "thirty_percent_ruling_conditions", label: "Belastingdienst: 30% ruling thresholds 2025" },
+            { source_key: "nl_2025_expat_scheme_cap", usage_type: "thirty_percent_ruling_cap", label: "Belastingdienst: 30% ruling salary cap 2025" },
             { source_key: "nl_2025_zvw_rates", usage_type: "zvw", label: "Belastingdienst: Zvw contribution table 2025" }
           ]
         else

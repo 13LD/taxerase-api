@@ -251,6 +251,28 @@ a {
   cursor: not-allowed;
 }
 
+.checkbox-shell {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 64px;
+  padding: 0 18px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.56);
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  color: var(--ink);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.checkbox-shell input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
 .currency-input span {
   font-size: 1.5rem;
   font-weight: 600;
@@ -497,20 +519,25 @@ a {
   background: rgba(14, 27, 53, 0.08);
 }
 
+.comparison-graphic__bar-summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: rgba(14, 27, 53, 0.74);
+}
+
 .comparison-graphic__segment {
   display: flex;
   align-items: center;
   justify-content: center;
   min-width: 0;
-  padding: 0 14px;
-  font-size: 0.86rem;
+  min-height: 54px;
+  padding: 0 10px;
+  font-size: 0.8rem;
   font-weight: 700;
   white-space: nowrap;
-}
-
-.comparison-graphic__segment span {
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .comparison-graphic__segment--net {
@@ -521,6 +548,11 @@ a {
 .comparison-graphic__segment--tax {
   color: #7a1021;
   background: linear-gradient(90deg, rgba(255, 164, 180, 0.9), rgba(255, 214, 221, 0.72));
+}
+
+.comparison-graphic__segment span {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .comparison-graphic__stats {
@@ -540,14 +572,25 @@ a {
 }
 
 .comparison-table {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 4px;
+}
+
+.comparison-table__track {
   display: grid;
   gap: 10px;
+  min-width: max(640px, 100%);
+  padding: 14px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.58);
 }
 
 .comparison-table__head,
 .comparison-table__row {
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(180px, 1.15fr) repeat(3, minmax(120px, 1fr));
   gap: 14px;
   align-items: center;
 }
@@ -712,9 +755,7 @@ a {
   .comparison-controls,
   .comparison-shared-controls,
   .comparison-graphic__grid,
-  .comparison-graphic__stats,
-  .comparison-table__head,
-  .comparison-table__row {
+  .comparison-graphic__stats {
     grid-template-columns: 1fr;
   }
 

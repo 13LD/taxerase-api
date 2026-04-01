@@ -6,6 +6,7 @@ export function pendingOutputValue(selectedRegime, isSupportedRegime) {
 }
 
 export function buildPlaceholderDetailCards({
+  applyThirtyPercentRuling,
   selectedCategory,
   selectedRegion,
   pendingValue,
@@ -29,7 +30,7 @@ export function buildPlaceholderDetailCards({
     ];
   }
 
-  return [
+  const employeeCards = [
     { label: "Income tax", value: pendingValue },
     { label: "Employee social security", value: pendingValue },
     { label: "Total tax", value: pendingValue },
@@ -42,6 +43,13 @@ export function buildPlaceholderDetailCards({
     { label: "State minimum relief", value: pendingValue },
     { label: `${selectedRegion || "Regional"} minimum relief`, value: pendingValue }
   ];
+
+  return applyThirtyPercentRuling
+    ? [
+        { label: "30% ruling untaxed allowance", value: pendingValue },
+        ...employeeCards
+      ]
+    : employeeCards;
 }
 
 export function buildHeadlineMetrics({ pendingValue, result, resultMatchesSelection }) {
@@ -73,6 +81,7 @@ export function buildHeadlineMetrics({ pendingValue, result, resultMatchesSelect
 }
 
 export function buildDetailCards({
+  applyThirtyPercentRuling,
   result,
   resultMatchesSelection,
   selectedCategory,
@@ -95,6 +104,7 @@ export function buildDetailCards({
   }
 
   return buildPlaceholderDetailCards({
+    applyThirtyPercentRuling,
     selectedCategory,
     selectedRegion,
     pendingValue,

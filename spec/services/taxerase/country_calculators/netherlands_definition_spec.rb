@@ -26,7 +26,9 @@ RSpec.describe Taxerase::CountryCalculators::NetherlandsDefinition do
         salary_period: "YEAR",
         tax_year: 2025,
         deductible_expenses: 0,
-        age_bracket: "under_aow_age"
+        age_bracket: "under_aow_age",
+        apply_thirty_percent_ruling: false,
+        thirty_percent_ruling_basis: "standard_threshold"
       )
       expect(props[:initial_result].dig(:metadata, :country_code)).to eq("NL")
       expect(props[:initial_result].dig(:metadata, :tax_year)).to eq(2025)

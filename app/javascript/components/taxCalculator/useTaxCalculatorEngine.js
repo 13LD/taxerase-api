@@ -29,6 +29,7 @@ export default function useTaxCalculatorEngine({
   defaultTaxRegimeKey,
   initialResult,
   regimeOptions,
+  supportsThirtyPercentRuling = false,
   taxYearOptions
 }) {
   const initialRegime = findInitialRegime({
@@ -54,6 +55,12 @@ export default function useTaxCalculatorEngine({
     String(defaultInput.children_under_three_count || 0)
   );
   const [disabilityLevel, setDisabilityLevel] = useState(defaultInput.disability_level || "none");
+  const [applyThirtyPercentRuling, setApplyThirtyPercentRuling] = useState(
+    Boolean(defaultInput.apply_thirty_percent_ruling)
+  );
+  const [thirtyPercentRulingBasis, setThirtyPercentRulingBasis] = useState(
+    defaultInput.thirty_percent_ruling_basis || "standard_threshold"
+  );
   const [salaryPeriod, setSalaryPeriod] = useState(defaultInput.salary_period);
   const [result, setResult] = useState(initialResult);
   const [status, setStatus] = useState("ready");
@@ -88,6 +95,13 @@ export default function useTaxCalculatorEngine({
   const selectedRegimeKey = selectedRegime?.key || null;
   const childrenCountNumber = Number(childrenCount || 0);
   const showDeductibleExpenses = selectedCategory === "self_employed";
+  const effectiveApplyThirtyPercentRuling =
+    supportsThirtyPercentRuling &&
+    selectedCategory === "employee" &&
+    applyThirtyPercentRuling;
+  const effectiveThirtyPercentRulingBasis = effectiveApplyThirtyPercentRuling
+    ? thirtyPercentRulingBasis
+    : "";
   const incomeLabel =
     selectedCategory === "self_employed" ? "Revenue before expenses" : "Gross income";
   const periodLabel =
@@ -101,10 +115,14 @@ export default function useTaxCalculatorEngine({
         ageBracket,
         childrenCount,
         childrenUnderThreeCount,
-        disabilityLevel
+        disabilityLevel,
+        applyThirtyPercentRuling: effectiveApplyThirtyPercentRuling,
+        thirtyPercentRulingBasis: effectiveThirtyPercentRulingBasis
       }),
     [
       ageBracket,
+      effectiveApplyThirtyPercentRuling,
+      effectiveThirtyPercentRulingBasis,
       childrenCount,
       childrenUnderThreeCount,
       disabilityLevel,
@@ -149,9 +167,11 @@ export default function useTaxCalculatorEngine({
         selectedCategory,
         selectedRegion,
         pendingValue,
+        applyThirtyPercentRuling: effectiveApplyThirtyPercentRuling,
         deductibleExpenses: Number(deductibleExpenses || 0)
       }),
     [
+      effectiveApplyThirtyPercentRuling,
       deductibleExpenses,
       pendingValue,
       result,
@@ -236,6 +256,16 @@ export default function useTaxCalculatorEngine({
     prepareAutoRefresh();
   }
 
+  function handleApplyThirtyPercentRulingChange(event) {
+    setApplyThirtyPercentRuling(event.target.checked);
+    prepareAutoRefresh();
+  }
+
+  function handleThirtyPercentRulingBasisChange(event) {
+    setThirtyPercentRulingBasis(event.target.value);
+    prepareAutoRefresh();
+  }
+
   const submitCalculation = useCallback(async () => {
     if (!selectedRegime || !isSupportedRegime) return;
 
@@ -251,6 +281,7 @@ export default function useTaxCalculatorEngine({
       const response = await requestCalculation({
         endpoint: calculationEndpoint,
         payload: buildCalculationPayload({
+          applyThirtyPercentRuling: effectiveApplyThirtyPercentRuling,
           grossIncome,
           deductibleExpenses: showDeductibleExpenses ? deductibleExpenses : 0,
           salaryPeriod,
@@ -259,7 +290,8 @@ export default function useTaxCalculatorEngine({
           ageBracket,
           childrenCount,
           childrenUnderThreeCount,
-          disabilityLevel
+          disabilityLevel,
+          thirtyPercentRulingBasis: effectiveThirtyPercentRulingBasis
         }),
         signal: abortController.signal
       });
@@ -290,6 +322,8 @@ export default function useTaxCalculatorEngine({
     childrenUnderThreeCount,
     deductibleExpenses,
     disabilityLevel,
+    effectiveApplyThirtyPercentRuling,
+    effectiveThirtyPercentRulingBasis,
     grossIncome,
     isSupportedRegime,
     salaryPeriod,
@@ -334,6 +368,7 @@ export default function useTaxCalculatorEngine({
     displayedSources,
     formProps: {
       ageBracket,
+      applyThirtyPercentRuling,
       childrenCount,
       childrenCountNumber,
       childrenCountOptions,
@@ -347,6 +382,7 @@ export default function useTaxCalculatorEngine({
       isCalculating,
       isSupportedRegime,
       onAgeBracketChange: handleAgeBracketChange,
+      onApplyThirtyPercentRulingChange: handleApplyThirtyPercentRulingChange,
       onCategoryChange: handleCategoryChange,
       onChildrenCountChange: handleChildrenCountChange,
       onChildrenUnderThreeChange: handleChildrenUnderThreeChange,
@@ -366,6 +402,7 @@ export default function useTaxCalculatorEngine({
       },
       onSubmit: handleSubmit,
       onTaxYearChange: handleTaxYearChange,
+      onThirtyPercentRulingBasisChange: handleThirtyPercentRulingBasisChange,
       periodLabel,
       profileOptions,
       regionOptions,
@@ -375,6 +412,7 @@ export default function useTaxCalculatorEngine({
       selectedRegion,
       selectedTaxYear,
       showDeductibleExpenses,
+      thirtyPercentRulingBasis,
       taxYearOptions
     },
     headlineMetrics,

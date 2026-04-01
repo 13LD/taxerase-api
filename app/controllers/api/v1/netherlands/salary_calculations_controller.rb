@@ -14,6 +14,8 @@ module Api
             tax_regime_key: calculation_params[:tax_regime_key],
             deductible_expenses: calculation_params[:deductible_expenses],
             age_bracket: calculation_params[:age_bracket],
+            apply_thirty_percent_ruling: calculation_params[:apply_thirty_percent_ruling],
+            thirty_percent_ruling_basis: calculation_params[:thirty_percent_ruling_basis],
             children_count: calculation_params[:children_count],
             children_under_three_count: calculation_params[:children_under_three_count],
             disability_level: calculation_params[:disability_level]
@@ -30,6 +32,8 @@ module Api
             :tax_regime_key,
             :deductible_expenses,
             :age_bracket,
+            :apply_thirty_percent_ruling,
+            :thirty_percent_ruling_basis,
             :children_count,
             :children_under_three_count,
             :disability_level

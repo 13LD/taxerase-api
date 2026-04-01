@@ -18,6 +18,17 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
         options: [ "Below AOW age (under 67)", "AOW age or older (67+)" ]
       )
       expect(page).to have_text("For the supported Netherlands tax years 2024 and 2025, AOW age is 67.")
+      expect(page).to have_unchecked_field("Apply 30% ruling")
+      check "Apply 30% ruling"
+      expect(page).to have_select(
+        "30% ruling basis",
+        options: [
+          "Standard salary threshold",
+          "Under 30 with master's degree",
+          "Scientific research or doctor specialist training"
+        ]
+      )
+      expect(page).to have_text("2025 thresholds: €46,660 standard or €35,468 if you are under 30 with a master's degree.")
       expect(page).not_to have_select("Region")
       expect(page).not_to have_field("Children")
       expect(page).not_to have_field("Children under 3")
@@ -25,6 +36,7 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
     end
 
     within(".results-card") do
+      expect(page).to have_text("30% ruling untaxed allowance")
       expect(page).to have_text("Box 1 tax before credits")
       expect(page).to have_text("General tax credit")
       expect(page).to have_text("Labour tax credit")
@@ -37,6 +49,7 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
     within(".calculator-card") do
       click_button "Self-employed"
       fill_in "Deductible expenses", with: "10000"
+      expect(page).not_to have_field("Apply 30% ruling")
       click_button "Recalculate"
     end
 

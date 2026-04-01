@@ -19,6 +19,8 @@ module Taxerase
           tax_year: 2025,
           deductible_expenses: 0,
           age_bracket: "under_aow_age",
+          apply_thirty_percent_ruling: false,
+          thirty_percent_ruling_basis: "standard_threshold",
           children_count: 0,
           children_under_three_count: 0,
           disability_level: "none"
