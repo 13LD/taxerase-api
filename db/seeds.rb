@@ -1,1 +1,1 @@
-Taxerase::Seeds::SpainTaxRules.call
+Taxerase::Seeds::TaxData.call

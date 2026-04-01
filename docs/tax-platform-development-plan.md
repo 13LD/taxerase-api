@@ -256,6 +256,57 @@ For every country-year release:
 4. review with tax/legal domain expert
 5. publish as a versioned rule release
 
+### Reusable Country Rollout Standard
+
+Every new country must follow the same implementation track so the platform stays maintainable as coverage expands.
+
+Required rollout units per country:
+
+- one `Country` record in the database
+- one dedicated country seed service under `lib/taxerase/seeds`
+- one country calculator definition in the registry used by the web app
+- one country calculation router under `app/services/taxerase/<country>`
+- one or more country-specific calculator services, split by tax profile or regime
+- official source records mapped to each live tax year and regime
+- a web config for labels, visible inputs, and API endpoint selection
+- request, service, and browser coverage for the live public flows
+
+Required rollout checks per country:
+
+- all `tax_regimes` must belong to the correct `countries` row
+- all `official_tax_sources` linked to a regime must match the regime country
+- all public selectors must expose only supported years and regimes
+- all results must return the same output contract: annual net income, monthly net income, effective tax rate, detailed breakdown, assumptions, and official sources
+- country switching in the web monolith must load the correct country definition and API endpoint
+
+### Current Multi-Country Implementation Track
+
+The current monolith should be treated as the reference pattern for future countries:
+
+- Spain remains the first full reference country with multi-year resident employee and self-employed coverage
+- Netherlands is the second live country and validates that the same shared tables, page shell, and internal API contract can support a different tax model
+- future countries such as Portugal should reuse the same delivery steps:
+  1. source research
+  2. database seed service
+  3. country router and calculators
+  4. country definition registration
+  5. country-specific web config
+  6. API endpoint
+  7. regression coverage
+
+### Seed Data Architecture
+
+Seed data should be orchestrated through one shared seed runner that invokes country-specific seed services.
+
+This runner must:
+
+- load all live country seed services
+- re-seed idempotently
+- verify country-to-regime integrity after seeding
+- verify source-to-country integrity after seeding
+
+This is important because once multiple countries share the same `tax_regimes`, `tax_parameters`, `tax_brackets`, and `official_tax_sources` tables, any missing country scoping creates silent cross-country bugs.
+
 ### Data Storage
 
 Store:

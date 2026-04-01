@@ -1,21 +1,27 @@
 import React from "react";
-import { ageBracketOptions, disabilityLevelOptions, salaryPeriodOptions } from "./options";
+import { disabilityLevelOptions, salaryPeriodOptions } from "./options";
 import CurrencyField from "./fields/CurrencyField";
 import SegmentedControl from "./fields/SegmentedControl";
 import SelectField from "./fields/SelectField";
 
 export default function TaxCalculatorForm({
+  ageBracket,
+  ageBracketOptions,
+  ageFieldHint,
   childrenCount,
   childrenCountNumber,
   childrenCountOptions,
   childrenUnderThreeCount,
   childrenUnderThreeOptions,
+  countryOptions,
   deductibleExpenses,
+  disabilityLevel,
   errors,
   grossIncome,
   incomeLabel,
   isCalculating,
   isSupportedRegime,
+  onCountryChange,
   onAgeBracketChange,
   onCategoryChange,
   onChildrenCountChange,
@@ -30,19 +36,35 @@ export default function TaxCalculatorForm({
   periodLabel,
   profileOptions,
   salaryPeriod,
+  selectedCountryCode,
   selectedCategory,
   selectedRegime,
   selectedRegion,
   selectedTaxYear,
+  showAgeField,
+  showChildrenFields,
   showDeductibleExpenses,
+  showDisabilityField,
   taxYearOptions,
-  regionOptions,
-  ageBracket,
-  disabilityLevel
+  regionOptions
 }) {
+  const showRegionField = regionOptions.length > 1;
+
   return (
     <form className="calculator-form" onSubmit={onSubmit}>
-      <div className="field-row">
+      {countryOptions.length > 1 ? (
+        <SelectField
+          label="Country"
+          onChange={onCountryChange}
+          options={countryOptions.map((countryOption) => ({
+            value: countryOption.code,
+            label: countryOption.name
+          }))}
+          value={selectedCountryCode}
+        />
+      ) : null}
+
+      <div className={`field-row ${showRegionField ? "" : "field-row--single"}`.trim()}>
         <SelectField
           label="Tax year"
           onChange={onTaxYearChange}
@@ -50,15 +72,17 @@ export default function TaxCalculatorForm({
           value={String(selectedTaxYear)}
         />
 
-        <SelectField
-          label="Region"
-          onChange={onRegionChange}
-          options={regionOptions.map((region) => ({
-            value: region.region,
-            label: region.region
-          }))}
-          value={selectedRegion}
-        />
+        {showRegionField ? (
+          <SelectField
+            label="Region"
+            onChange={onRegionChange}
+            options={regionOptions.map((region) => ({
+              value: region.region,
+              label: region.region
+            }))}
+            value={selectedRegion}
+          />
+        ) : null}
       </div>
 
       <SegmentedControl
@@ -68,36 +92,47 @@ export default function TaxCalculatorForm({
         value={selectedCategory}
       />
 
-      <div className="field-row field-row--three">
-        <SelectField
-          label="Taxpayer age"
-          onChange={onAgeBracketChange}
-          options={ageBracketOptions}
-          value={ageBracket}
-        />
+      {showAgeField || showChildrenFields ? (
+        <div className={`field-row ${showAgeField && showChildrenFields ? "field-row--three" : ""}`.trim()}>
+          {showAgeField ? (
+            <SelectField
+              hint={ageFieldHint}
+              label="Taxpayer age"
+              onChange={onAgeBracketChange}
+              options={ageBracketOptions}
+              value={ageBracket}
+            />
+          ) : null}
 
-        <SelectField
-          label="Children"
-          onChange={onChildrenCountChange}
-          options={childrenCountOptions}
-          value={childrenCount}
-        />
+          {showChildrenFields ? (
+            <SelectField
+              label="Children"
+              onChange={onChildrenCountChange}
+              options={childrenCountOptions}
+              value={childrenCount}
+            />
+          ) : null}
 
-        <SelectField
-          disabled={childrenCountNumber === 0}
-          label="Children under 3"
-          onChange={onChildrenUnderThreeChange}
-          options={childrenUnderThreeOptions}
-          value={childrenUnderThreeCount}
-        />
-      </div>
+          {showChildrenFields ? (
+            <SelectField
+              disabled={childrenCountNumber === 0}
+              label="Children under 3"
+              onChange={onChildrenUnderThreeChange}
+              options={childrenUnderThreeOptions}
+              value={childrenUnderThreeCount}
+            />
+          ) : null}
+        </div>
+      ) : null}
 
-      <SelectField
-        label="Taxpayer disability"
-        onChange={onDisabilityLevelChange}
-        options={disabilityLevelOptions}
-        value={disabilityLevel}
-      />
+      {showDisabilityField ? (
+        <SelectField
+          label="Taxpayer disability"
+          onChange={onDisabilityLevelChange}
+          options={disabilityLevelOptions}
+          value={disabilityLevel}
+        />
+      ) : null}
 
       <CurrencyField
         label={incomeLabel}

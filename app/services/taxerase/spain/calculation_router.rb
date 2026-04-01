@@ -14,6 +14,7 @@ module Taxerase
         CommonRegimeEmployeeCalculator::CALCULATION_METHOD => CommonRegimeEmployeeCalculator,
         CommonRegimeSelfEmployedCalculator::CALCULATION_METHOD => CommonRegimeSelfEmployedCalculator
       }.freeze
+      COUNTRY_CODE = "ES".freeze
 
       def self.call(
         gross_income:,
@@ -65,7 +66,7 @@ module Taxerase
         preferred_method_keys = SUPPORTED_METHODS.keys
         regimes = TaxRegime
           .includes(:tax_parameters)
-          .where(country: Country.find_by!(code: "ES"), tax_year:, category: "employee", active: true)
+          .where(country:, tax_year:, category: "employee", active: true)
           .order(:region, :name)
 
         preferred = regimes.find do |regime|
@@ -76,8 +77,6 @@ module Taxerase
       end
 
       def self.regime_options
-        country = Country.find_by!(code: "ES")
-
         country.tax_regimes
           .includes(tax_source_usages: :official_tax_source)
           .order(:tax_year, :category, :region, :name)
@@ -106,12 +105,18 @@ module Taxerase
       end
 
       def self.supported?(regime_or_key, tax_year = nil)
-        regime = regime_or_key.is_a?(TaxRegime) ? regime_or_key : TaxRegime.find_by(key: regime_or_key, tax_year:)
-        regime.present? && SUPPORTED_METHODS.key?(regime.parameter_text("calculation_method"))
+        regime = if regime_or_key.is_a?(TaxRegime)
+          regime_or_key
+        else
+          TaxRegime.find_by(country:, key: regime_or_key, tax_year:)
+        end
+
+        regime.present? && regime.country_id == country.id && SUPPORTED_METHODS.key?(regime.parameter_text("calculation_method"))
       end
 
       def self.regime_for!(regime_key, tax_year)
         TaxRegime.includes(:country, :tax_brackets, :tax_parameters, tax_source_usages: :official_tax_source).find_by!(
+          country:,
           key: regime_key,
           tax_year:
         )
@@ -125,6 +130,10 @@ module Taxerase
         else
           "#{regime.name} is stored in the rules database, but its calculator flow is not implemented yet."
         end
+      end
+
+      def self.country
+        @country ||= Country.find_by!(code: COUNTRY_CODE)
       end
     end
   end

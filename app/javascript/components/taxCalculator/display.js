@@ -87,6 +87,13 @@ export function buildDetailCards({
     }));
   }
 
+  if (result?.detail_cards?.length) {
+    return result.detail_cards.map((card) => ({
+      label: card.label,
+      value: card.label === "Deductible expenses" ? formatCurrency(deductibleExpenses) : pendingValue
+    }));
+  }
+
   return buildPlaceholderDetailCards({
     selectedCategory,
     selectedRegion,

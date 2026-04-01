@@ -46,7 +46,7 @@ RSpec.configure do |config|
   # instead of true.
   config.use_transactional_fixtures = true
   config.before(:suite) do
-    Taxerase::Seeds::SpainTaxRules.call
+    Taxerase::Seeds::TaxData.call
   end
 
   # You can uncomment this line to turn off ActiveRecord support entirely.

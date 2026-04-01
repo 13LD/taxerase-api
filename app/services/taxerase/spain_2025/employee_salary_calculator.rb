@@ -11,6 +11,7 @@ module Taxerase
       end
 
       TAX_YEAR = 2025
+      COUNTRY_CODE = "ES".freeze
 
       def self.call(gross_income:, salary_period:, tax_regime_key:)
         new(gross_income:, salary_period:, tax_regime_key:).call
@@ -93,10 +94,15 @@ module Taxerase
 
       def regime
         @regime ||= TaxRegime.includes(:country, :tax_brackets, :tax_parameters).find_by(
+          country:,
           key: tax_regime_key,
           tax_year: TAX_YEAR,
           category: "employee"
         )
+      end
+
+      def country
+        @country ||= Country.find_by!(code: COUNTRY_CODE)
       end
 
       def metadata

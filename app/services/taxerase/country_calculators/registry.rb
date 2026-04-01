@@ -4,7 +4,8 @@ module Taxerase
       DEFAULT_COUNTRY_CODE = "ES".freeze
 
       DEFINITIONS = {
-        "ES" => SpainDefinition.new
+        "ES" => SpainDefinition.new,
+        "NL" => NetherlandsDefinition.new
       }.freeze
 
       def self.default
@@ -15,6 +16,14 @@ module Taxerase
         DEFINITIONS.fetch(country_code.to_s.upcase)
       rescue KeyError
         raise KeyError, "No country calculator is registered for #{country_code.inspect}."
+      end
+
+      def self.country_options
+        DEFINITIONS.values.map(&:country)
+      end
+
+      def self.comparison_catalog
+        DEFINITIONS.values.map(&:public_catalog)
       end
     end
   end

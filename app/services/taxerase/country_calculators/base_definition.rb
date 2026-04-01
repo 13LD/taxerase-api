@@ -16,12 +16,41 @@ module Taxerase
 
         {
           country: country,
+          country_options: Registry.country_options,
+          comparison_catalog: Registry.comparison_catalog,
           tax_year_options: tax_year_options,
           default_tax_regime_key: default_tax_regime_key,
           regime_options: calculation_router.public_regime_options,
           default_input: resolved_default_input,
           initial_result: calculation_router.call(**resolved_default_input, tax_regime_key: default_tax_regime_key)
         }
+      end
+
+      def public_catalog
+        {
+          country: country,
+          tax_year_options: calculation_router.public_tax_year_options,
+          regime_options: calculation_router.public_regime_options.map do |regime|
+            regime.slice(:key, :name, :region, :category, :tax_year)
+          end
+        }
+      end
+
+      def normalize_comparison_input(input)
+        comparison_defaults = default_input
+
+        {
+          age_bracket: normalize_comparison_age_bracket(
+            input[:age_bracket].presence || comparison_defaults[:age_bracket]
+          ),
+          children_count: input[:children_count].presence || comparison_defaults[:children_count] || 0,
+          children_under_three_count: input[:children_under_three_count].presence || comparison_defaults[:children_under_three_count] || 0,
+          disability_level: input[:disability_level].presence || comparison_defaults[:disability_level] || "none"
+        }
+      end
+
+      def normalize_comparison_age_bracket(age_bracket)
+        age_bracket
       end
     end
   end

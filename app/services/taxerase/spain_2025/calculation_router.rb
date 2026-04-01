@@ -14,6 +14,7 @@ module Taxerase
         "employee" => EmployeeSalaryCalculator,
         "self_employed" => SelfEmployedCalculator
       }.freeze
+      COUNTRY_CODE = "ES".freeze
 
       def self.call(gross_income:, salary_period:, tax_regime_key: nil, deductible_expenses: 0)
         regime = regime_for!(tax_regime_key.presence || default_regime_key)
@@ -36,8 +37,6 @@ module Taxerase
       end
 
       def self.regime_options
-        country = Country.find_by!(code: "ES")
-
         country.tax_regimes.where(tax_year: EmployeeSalaryCalculator::TAX_YEAR).order(:category, :region, :name).map do |regime|
           {
             key: regime.key,
@@ -52,23 +51,38 @@ module Taxerase
       end
 
       def self.supported?(regime_or_key)
-        regime = regime_or_key.is_a?(TaxRegime) ? regime_or_key : TaxRegime.find_by(key: regime_or_key, tax_year: EmployeeSalaryCalculator::TAX_YEAR)
+        regime = if regime_or_key.is_a?(TaxRegime)
+          regime_or_key
+        else
+          TaxRegime.find_by(country:, key: regime_or_key, tax_year: EmployeeSalaryCalculator::TAX_YEAR)
+        end
+
         regime.present? && SUPPORTED_CATEGORIES.key?(regime.category)
       end
 
       def self.unsupported_message_for(regime_or_key)
-        regime = regime_or_key.is_a?(TaxRegime) ? regime_or_key : TaxRegime.find_by(key: regime_or_key, tax_year: EmployeeSalaryCalculator::TAX_YEAR)
+        regime = if regime_or_key.is_a?(TaxRegime)
+          regime_or_key
+        else
+          TaxRegime.find_by(country:, key: regime_or_key, tax_year: EmployeeSalaryCalculator::TAX_YEAR)
+        end
+
         regime_name = regime&.name || regime_or_key
         "#{regime_name} is stored in the rules database, but its calculator flow is not implemented yet."
       end
 
       def self.regime_for!(regime_key)
         TaxRegime.includes(:country, :tax_brackets, :tax_parameters).find_by!(
+          country:,
           key: regime_key,
           tax_year: EmployeeSalaryCalculator::TAX_YEAR
         )
       rescue ActiveRecord::RecordNotFound
         raise UnsupportedRegimeError.new([ "#{regime_key} is not available for Spain 2025." ])
+      end
+
+      def self.country
+        @country ||= Country.find_by!(code: COUNTRY_CODE)
       end
     end
   end

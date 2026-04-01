@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function SelectField({ disabled = false, label, onChange, options, value }) {
+export default function SelectField({ disabled = false, hint = null, label, onChange, options, value }) {
   return (
     <label className="field">
       <span className="field-label">{label}</span>
@@ -13,6 +13,7 @@ export default function SelectField({ disabled = false, label, onChange, options
           ))}
         </select>
       </div>
+      {hint ? <span className="field-hint">{hint}</span> : null}
     </label>
   );
 }

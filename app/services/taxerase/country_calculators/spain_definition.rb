@@ -24,6 +24,17 @@ module Taxerase
           disability_level: "none"
         }
       end
+
+      def normalize_comparison_age_bracket(age_bracket)
+        case age_bracket
+        when "under_aow_age"
+          "under_65"
+        when "aow_age_or_older"
+          "from_65_to_74"
+        else
+          age_bracket
+        end
+      end
     end
   end
 end

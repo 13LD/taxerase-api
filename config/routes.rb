@@ -5,7 +5,13 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
+      resources :comparisons, only: :create
+
       namespace :spain do
+        resource :salary_calculation, only: :create
+      end
+
+      namespace :netherlands do
         resource :salary_calculation, only: :create
       end
     end

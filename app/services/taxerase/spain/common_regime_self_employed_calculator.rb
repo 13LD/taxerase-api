@@ -11,6 +11,7 @@ module Taxerase
       end
 
       CALCULATION_METHOD = "common_regime_self_employed_v1".freeze
+      COUNTRY_CODE = "ES".freeze
 
       def self.call(
         gross_income:,
@@ -170,10 +171,15 @@ module Taxerase
 
       def regime
         @regime ||= TaxRegime.includes(:country, :tax_brackets, :tax_parameters, tax_source_usages: :official_tax_source).find_by(
+          country:,
           key: tax_regime_key,
           tax_year: tax_year,
           category: "self_employed"
         )
+      end
+
+      def country
+        @country ||= Country.find_by!(code: COUNTRY_CODE)
       end
 
       def metadata

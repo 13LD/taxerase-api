@@ -36,4 +36,22 @@ RSpec.describe Taxerase::CountryCalculators::SpainDefinition do
       expect(props[:initial_result].dig(:metadata, :tax_regime_key)).to eq(expected_default_regime_key)
     end
   end
+
+  describe "#normalize_comparison_input" do
+    it "fills the hidden comparison defaults for Spain" do
+      expect(
+        definition.normalize_comparison_input(
+          age_bracket: nil,
+          children_count: nil,
+          children_under_three_count: nil,
+          disability_level: nil
+        )
+      ).to eq(
+        age_bracket: "under_65",
+        children_count: 0,
+        children_under_three_count: 0,
+        disability_level: "none"
+      )
+    end
+  end
 end

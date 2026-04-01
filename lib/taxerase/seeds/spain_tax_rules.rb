@@ -1,6 +1,6 @@
 module Taxerase
   module Seeds
-    class SpainTaxRules
+    class SpainTaxRules < BaseCountryTaxRules
       FORAL_RESEARCH_REGIONS = [
         { key: "alava", name: "Alava" },
         { key: "bizkaia", name: "Bizkaia" },
@@ -257,24 +257,35 @@ module Taxerase
         [ nil, 0.25 ]
       ].freeze
 
-      def self.call
-        new.call
-      end
-
-      def call
-        ActiveRecord::Base.transaction do
-          spain = Country.find_or_initialize_by(code: "ES")
-          spain.update!(name: "Spain", currency_code: "EUR")
-
-          purge_obsolete_regimes!(spain)
-          seed_live_regimes(spain)
-          seed_foral_research_regimes(spain)
-          seed_company_regime(spain)
-          seed_inbound_workers_regime(spain)
-        end
-      end
-
       private
+
+      def country_code
+        "ES"
+      end
+
+      def country_name
+        "Spain"
+      end
+
+      def source_definitions
+        SOURCE_DEFINITIONS
+      end
+
+      def expected_regime_keys_by_year
+        {
+          2024 => expected_regime_keys_for(2024),
+          2025 => expected_regime_keys_for(2025),
+          2026 => expected_regime_keys_for(2026)
+        }
+      end
+
+      def seed_country(country)
+        purge_obsolete_regimes!(country)
+        seed_live_regimes(country)
+        seed_foral_research_regimes(country)
+        seed_company_regime(country)
+        seed_inbound_workers_regime(country)
+      end
 
       def purge_obsolete_regimes!(country)
         expected_keys_by_year = RESEARCH_YEARS.index_with do
@@ -404,80 +415,6 @@ module Taxerase
         replace_parameters!(regime, { "calculation_method" => "research_pending" })
         replace_brackets!(regime, "employment_income", SPECIAL_INBOUND_WORKER_BRACKETS)
         replace_source_usages!(regime, [])
-      end
-
-      def build_regime(country:, key:, name:, tax_year:, category:, region:, description:)
-        regime = TaxRegime.find_or_initialize_by(country:, key:, tax_year:)
-        regime.update!(
-          name:,
-          category:,
-          region:,
-          active: true,
-          description:
-        )
-        regime
-      end
-
-      def replace_brackets!(regime, group, rows)
-        regime.tax_brackets.where(bracket_group: group).delete_all
-
-        rows.each_with_index do |(upper_bound, rate), index|
-          regime.tax_brackets.create!(
-            bracket_group: group,
-            position: index + 1,
-            upper_bound:,
-            rate:
-          )
-        end
-      end
-
-      def replace_range_brackets!(regime, group, rows)
-        regime.tax_brackets.where(bracket_group: group).delete_all
-
-        rows.each_with_index do |row, index|
-          regime.tax_brackets.create!(
-            bracket_group: group,
-            position: index + 1,
-            lower_bound: row[:lower_bound],
-            upper_bound: row[:upper_bound],
-            base_min: row[:base_min],
-            base_max: row[:base_max],
-            label: row[:label]
-          )
-        end
-      end
-
-      def replace_parameters!(regime, values)
-        regime.tax_parameters.delete_all
-
-        values.each do |key, value|
-          if value.is_a?(String)
-            regime.tax_parameters.create!(key:, value_text: value)
-          else
-            regime.tax_parameters.create!(key:, value_decimal: value)
-          end
-        end
-      end
-
-      def replace_source_usages!(regime, usages)
-        regime.tax_source_usages.delete_all
-
-        usages.each_with_index do |usage, index|
-          regime.tax_source_usages.create!(
-            official_tax_source: source_for!(usage[:source_key]),
-            usage_type: usage[:usage_type],
-            label: usage[:label],
-            notes: usage[:notes],
-            position: index + 1
-          )
-        end
-      end
-
-      def source_for!(key)
-        definition = SOURCE_DEFINITIONS.fetch(key)
-        source = OfficialTaxSource.find_or_initialize_by(key: key)
-        source.update!(definition)
-        source
       end
 
       def regime_key_for(category, region_key)
@@ -692,6 +629,21 @@ module Taxerase
           ]
         else
           []
+        end
+      end
+
+      def expected_regime_keys_for(tax_year)
+        keys = all_region_catalog.flat_map do |region|
+          [
+            regime_key_for("employee", region[:key]),
+            regime_key_for("self_employed", region[:key])
+          ]
+        end
+
+        if tax_year == 2025
+          keys + %w[corporate_income_general inbound_workers_article_93]
+        else
+          keys
         end
       end
     end

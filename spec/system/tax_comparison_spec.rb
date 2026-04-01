@@ -1,0 +1,98 @@
+require "rails_helper"
+
+RSpec.describe "Tax comparison", type: :system, js: true do
+  it "shows comparison metrics for Spain vs Netherlands" do
+    visit root_path
+
+    expect(first(".liquid-card")[:class]).to include("comparison-card")
+
+    within(".comparison-card") do
+      expect(page).to have_text("Compare two jurisdictions")
+      expect(page).to have_text("Tax profile")
+      expect(page).to have_field("Annual income", with: "60000")
+      expect(page).to have_text("Gross income vs tax load")
+      expect(page).to have_text("Based on annual income €60,000.00.")
+      expect(page).to have_text("Annual net income")
+      expect(page).to have_text("Monthly net income")
+      expect(page).to have_text("Effective tax rate")
+      expect(page).to have_text("Total tax")
+      expect(page).to have_text(/Spain · Andalusia/i)
+      expect(page).to have_text("Netherlands")
+      expect(page).to have_text("-3.60%")
+    end
+
+    comparison_sides = all(".comparison-side")
+
+    within(comparison_sides[1]) do
+      expect(page).to have_select("Country", selected: "Netherlands")
+      expect(page).to have_select("Region", selected: "Netherlands", disabled: true)
+    end
+
+    annual_net_income_row = find(".comparison-table__row", text: "Annual net income")
+    effective_tax_rate_row = find(".comparison-table__row", text: "Effective tax rate")
+    total_tax_row = find(".comparison-table__row", text: "Total tax")
+
+    expect(annual_net_income_row.find(".comparison-delta")[:class]).to include("comparison-delta--positive")
+    expect(effective_tax_rate_row.find(".comparison-delta")[:class]).to include("comparison-delta--positive")
+    expect(total_tax_row.find(".comparison-delta")[:class]).to include("comparison-delta--positive")
+  end
+
+  it "allows comparing Spain against Spain with different regions" do
+    visit root_path
+
+    comparison_sides = all(".comparison-side")
+
+    within(comparison_sides[1]) do
+      select "Spain", from: "Country"
+      select "Madrid", from: "Region"
+    end
+
+    within(".comparison-card") do
+      expect(page).to have_text(/Spain · Andalusia/i)
+      expect(page).to have_text(/Spain · Madrid/i)
+      expect(page).to have_text("Annual net income")
+      expect(page).to have_text("Total tax")
+    end
+  end
+
+  it "keeps the comparison on the same profile when switching to self-employed" do
+    visit root_path
+
+    within(".comparison-card") do
+      click_button "Self-employed"
+      fill_in "Annual revenue before expenses", with: "70000"
+      fill_in "Annual deductible expenses", with: "12000"
+      expect(page).to have_text("Comparing self-employed tax outcomes using the latest shared supported tax year: 2025.")
+      expect(page).to have_text("Revenue vs tax load")
+      expect(page).to have_text(
+        "Based on annual revenue before expenses €70,000.00 and annual deductible expenses €12,000.00."
+      )
+      expect(page).to have_text("Total tax")
+      expect(page).to have_text("Annual net income")
+    end
+  end
+
+  it "marks unfavorable deltas in red" do
+    visit root_path
+
+    comparison_sides = all(".comparison-side")
+
+    within(comparison_sides[0]) do
+      select "Spain", from: "Country"
+      select "Madrid", from: "Region"
+    end
+
+    within(comparison_sides[1]) do
+      select "Spain", from: "Country"
+      select "Andalusia", from: "Region"
+    end
+
+    annual_net_income_row = find(".comparison-table__row", text: "Annual net income")
+    total_tax_row = find(".comparison-table__row", text: "Total tax")
+
+    expect(annual_net_income_row).to have_text("-")
+    expect(total_tax_row).to have_text("+")
+    expect(annual_net_income_row.find(".comparison-delta")[:class]).to include("comparison-delta--negative")
+    expect(total_tax_row.find(".comparison-delta")[:class]).to include("comparison-delta--negative")
+  end
+end
