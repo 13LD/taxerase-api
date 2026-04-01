@@ -1,8 +1,16 @@
 require "rails_helper"
 
 RSpec.describe "Tax comparison", type: :system, js: true do
+  def wait_for_comparison_results
+    within(".comparison-card") do
+      expect(page).to have_no_text("Refreshing comparison...", wait: 10)
+      expect(page).to have_css(".comparison-table__row", text: "Annual net income", wait: 10)
+    end
+  end
+
   it "shows comparison metrics for Spain vs Netherlands" do
     visit root_path
+    wait_for_comparison_results
 
     expect(first(".liquid-card")[:class]).to include("comparison-card")
 
@@ -47,6 +55,8 @@ RSpec.describe "Tax comparison", type: :system, js: true do
       select "Madrid", from: "Region"
     end
 
+    wait_for_comparison_results
+
     within(".comparison-card") do
       expect(page).to have_text(/Spain · Andalusia/i)
       expect(page).to have_text(/Spain · Madrid/i)
@@ -62,6 +72,11 @@ RSpec.describe "Tax comparison", type: :system, js: true do
       click_button "Self-employed"
       fill_in "Annual revenue before expenses", with: "70000"
       fill_in "Annual deductible expenses", with: "12000"
+    end
+
+    wait_for_comparison_results
+
+    within(".comparison-card") do
       expect(page).to have_text("Comparing self-employed tax outcomes using the latest shared supported tax year: 2025.")
       expect(page).to have_text("Revenue vs tax load")
       expect(page).to have_text(
@@ -86,6 +101,8 @@ RSpec.describe "Tax comparison", type: :system, js: true do
       select "Spain", from: "Country"
       select "Andalusia", from: "Region"
     end
+
+    wait_for_comparison_results
 
     annual_net_income_row = find(".comparison-table__row", text: "Annual net income")
     total_tax_row = find(".comparison-table__row", text: "Total tax")
