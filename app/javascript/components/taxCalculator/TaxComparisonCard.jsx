@@ -7,7 +7,7 @@ import { formatCurrency, formatPercentage } from "./formatters";
 
 function formatMetricValue(metric, value) {
   if (metric.value_type === "percentage_points") return formatPercentage(value);
-  return formatCurrency(value);
+  return formatCurrency(value, metric.display_currency_code);
 }
 
 function formatDeltaValue(metric, value) {
@@ -17,7 +17,7 @@ function formatDeltaValue(metric, value) {
     return `${sign}${Number(value || 0).toFixed(2)}%`;
   }
 
-  return `${sign}${formatCurrency(value)}`;
+  return `${sign}${formatCurrency(value, metric.display_currency_code)}`;
 }
 
 function deltaTone(metric, value) {
@@ -32,11 +32,37 @@ function sideLabel(countryOptions, countryCode, region) {
   return !region || region === countryName ? countryName : `${countryName} · ${region}`;
 }
 
+function ComparisonMetricCell({ localCurrencyCode, localValue, metric, value }) {
+  const showLocalValue =
+    metric.value_type === "currency" &&
+    metric.converted_from_local &&
+    localCurrencyCode &&
+    localCurrencyCode !== metric.display_currency_code;
+
+  return (
+    <div className="comparison-table__value">
+      <strong>{formatMetricValue(metric, value)}</strong>
+      {showLocalValue ? (
+        <span className="comparison-table__local">
+          Local {formatCurrency(localValue, localCurrencyCode)}
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
 export default function TaxComparisonCard({
+  comparisonContextLabel,
+  countryDefaultsNote,
   deductibleExpenses,
+  deductibleExpensesLabel,
   errors,
+  fxReference,
+  graphicCopy,
   grossIncome,
   incomeLabel,
+  inputCurrencyCode,
+  inputCurrencyOptions,
   leftCountryCode,
   leftCountryOptions,
   leftRegion,
@@ -44,6 +70,7 @@ export default function TaxComparisonCard({
   onCategoryChange,
   onDeductibleExpensesChange,
   onGrossIncomeChange,
+  onInputCurrencyChange,
   onLeftCountryChange,
   onLeftRegionChange,
   onRightCountryChange,
@@ -58,7 +85,8 @@ export default function TaxComparisonCard({
   status,
   summaryMetrics,
   taxYear,
-  unavailableMessage
+  unavailableMessage,
+  usesEuroNormalization
 }) {
   const leftLabel = sideLabel(leftCountryOptions, leftCountryCode, leftRegion);
   const rightLabel = sideLabel(rightCountryOptions, rightCountryCode, rightRegion);
@@ -81,14 +109,28 @@ export default function TaxComparisonCard({
         />
 
         <CurrencyField
+          currencyCode={inputCurrencyCode}
           label={incomeLabel}
           onChange={onGrossIncomeChange}
           value={grossIncome}
         />
 
+        {inputCurrencyOptions.length > 1 ? (
+          <SelectField
+            label="Input currency"
+            onChange={onInputCurrencyChange}
+            options={inputCurrencyOptions.map((currencyOption) => ({
+              value: currencyOption.code,
+              label: currencyOption.name
+            }))}
+            value={inputCurrencyCode}
+          />
+        ) : null}
+
         {showDeductibleExpenses ? (
           <CurrencyField
-            label="Annual deductible expenses"
+            currencyCode={inputCurrencyCode}
+            label={deductibleExpensesLabel}
             onChange={onDeductibleExpensesChange}
             value={deductibleExpenses}
           />
@@ -150,9 +192,16 @@ export default function TaxComparisonCard({
       </div>
 
       <div className="comparison-context">
-        Comparing {selectedCategory === "self_employed" ? "self-employed" : "employed"} tax
-        outcomes using the latest shared supported tax year{taxYear ? `: ${taxYear}.` : "."} Other
-        personal relief inputs stay on the standard default profile for each country.
+        Comparing {comparisonContextLabel} tax outcomes using the latest shared supported tax year
+        {taxYear ? `: ${taxYear}.` : "."} Other personal relief inputs stay on the standard default
+        profile for each country.
+        {countryDefaultsNote ? ` ${countryDefaultsNote}` : null}
+        {usesEuroNormalization && fxReference ? (
+          <>
+            {" "}Shared income inputs are interpreted in {inputCurrencyCode}. Mixed-currency
+            comparison table metrics are normalized to EUR using ECB reference rates from {fxReference.rate_date}.
+          </>
+        ) : null}
       </div>
 
       {status === "loading" ? <div className="availability-note"><p>Refreshing comparison...</p></div> : null}
@@ -167,12 +216,10 @@ export default function TaxComparisonCard({
 
       {summaryMetrics.length > 0 ? (
         <TaxComparisonGraphic
-          deductibleExpenses={deductibleExpenses}
-          grossIncome={grossIncome}
-          incomeLabel={incomeLabel}
+          comparisonCurrencyCode={summaryMetrics.find((metric) => metric.value_type === "currency")?.display_currency_code || inputCurrencyCode}
+          graphicCopy={graphicCopy}
           leftLabel={leftLabel}
           rightLabel={rightLabel}
-          showDeductibleExpenses={showDeductibleExpenses}
           summaryMetrics={summaryMetrics}
         />
       ) : null}
@@ -190,8 +237,18 @@ export default function TaxComparisonCard({
             {summaryMetrics.map((metric) => (
               <div className="comparison-table__row" key={metric.key}>
                 <span className="comparison-table__metric">{metric.label}</span>
-                <strong>{formatMetricValue(metric, metric.left_value)}</strong>
-                <strong>{formatMetricValue(metric, metric.right_value)}</strong>
+                <ComparisonMetricCell
+                  localCurrencyCode={metric.left_local_currency_code}
+                  localValue={metric.left_local_value}
+                  metric={metric}
+                  value={metric.left_value}
+                />
+                <ComparisonMetricCell
+                  localCurrencyCode={metric.right_local_currency_code}
+                  localValue={metric.right_local_value}
+                  metric={metric}
+                  value={metric.right_value}
+                />
                 <span className={`comparison-delta comparison-delta--${deltaTone(metric, metric.delta_value)}`}>
                   {formatDeltaValue(metric, metric.delta_value)}
                 </span>

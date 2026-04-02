@@ -26,6 +26,20 @@ export function findSelectedRegime(regimesForYear, selectedCategory, selectedReg
   );
 }
 
+export function resolveSelectedRegime({
+  regimesForYear,
+  selectedCategory,
+  selectedRegion,
+  regimeCategoryOverride = null
+}) {
+  const effectiveCategory = regimeCategoryOverride || selectedCategory;
+
+  return (
+    findSelectedRegime(regimesForYear, effectiveCategory, selectedRegion) ||
+    findSelectedRegime(regimesForYear, selectedCategory, selectedRegion)
+  );
+}
+
 export function buildCalculationSignature({
   selectedTaxYear,
   selectedRegimeKey,
@@ -33,8 +47,7 @@ export function buildCalculationSignature({
   childrenCount,
   childrenUnderThreeCount,
   disabilityLevel,
-  applyThirtyPercentRuling,
-  thirtyPercentRulingBasis
+  extraSignatureParts = []
 }) {
   if (!selectedRegimeKey) return null;
 
@@ -45,12 +58,11 @@ export function buildCalculationSignature({
     childrenCount,
     childrenUnderThreeCount,
     disabilityLevel,
-    applyThirtyPercentRuling ? "1" : "0",
-    thirtyPercentRulingBasis || ""
+    ...extraSignatureParts
   ].join(":");
 }
 
-export function buildResultCalculationSignature(result) {
+export function buildResultCalculationSignature(result, extraSignatureParts = []) {
   if (
     !result?.metadata?.tax_regime_key ||
     !result?.metadata?.tax_year ||
@@ -69,7 +81,6 @@ export function buildResultCalculationSignature(result) {
     result.input.children_count,
     result.input.children_under_three_count,
     result.input.disability_level,
-    result.input.apply_thirty_percent_ruling ? "1" : "0",
-    result.input.thirty_percent_ruling_basis || ""
+    ...extraSignatureParts
   ].join(":");
 }

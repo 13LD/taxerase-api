@@ -3,14 +3,14 @@ const defaultCountryCalculatorConfig = {
   fallbackTitle: "Tax estimate",
   sectionKicker: "EU tax calculator",
   formConfig: {
+    regimeControls: [],
     showAgeField: false,
     ageFieldHint: null,
-    showChildrenFields: false,
+    showChildrenCountField: false,
+    showChildrenUnderThreeField: false,
     showDisabilityField: false,
     ageBracketOptions: [],
-    showThirtyPercentRulingField: false,
-    thirtyPercentRulingHint: null,
-    thirtyPercentRulingBasisOptions: []
+    disabilityOptions: []
   }
 };
 

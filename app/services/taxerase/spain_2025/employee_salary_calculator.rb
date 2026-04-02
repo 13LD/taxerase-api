@@ -86,7 +86,7 @@ module Taxerase
       def validate!
         errors = []
         errors << "gross_income must be a number greater than 0" if parsed_gross_income <= 0
-        errors << "gross_income is too large for the current calculator" if parsed_gross_income > 2_000_000
+        errors << "gross_income is too large for the current calculator" if parsed_gross_income > 50_000_000
         errors << "salary_period must be YEAR or MONTH" unless %w[YEAR MONTH].include?(normalized_salary_period)
         errors << "tax_regime_key must point to a supported employee regime" if regime.blank?
         raise ValidationError.new(errors) if errors.any?

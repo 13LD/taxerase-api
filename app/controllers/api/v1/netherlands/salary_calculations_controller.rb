@@ -5,10 +5,12 @@ module Api
         rescue_from Taxerase::Netherlands::EmployeeCalculator::ValidationError, with: :render_validation_error
         rescue_from Taxerase::Netherlands::SelfEmployedCalculator::ValidationError, with: :render_validation_error
         rescue_from Taxerase::Netherlands::CalculationRouter::UnsupportedRegimeError, with: :render_validation_error
+        rescue_from Taxerase::InputCurrencyHandler::ValidationError, with: :render_validation_error
 
         def create
           render json: Taxerase::Netherlands::CalculationRouter.call(
             gross_income: calculation_params[:gross_income],
+            input_currency_code: calculation_params[:input_currency_code],
             salary_period: calculation_params[:salary_period],
             tax_year: calculation_params[:tax_year].to_i,
             tax_regime_key: calculation_params[:tax_regime_key],
@@ -27,6 +29,7 @@ module Api
         def calculation_params
           params.require(:calculation).permit(
             :gross_income,
+            :input_currency_code,
             :salary_period,
             :tax_year,
             :tax_regime_key,

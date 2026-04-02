@@ -8,25 +8,20 @@ import {
   useState
 } from "react";
 import { buildComparisonPayload, requestComparison } from "./api";
-import { profileLabels } from "./options";
+import {
+  buildComparisonGraphicCopy,
+  buildComparisonProfileOptions,
+  resolveComparisonProfile
+} from "./comparisonProfiles";
 import {
   buildComparisonCountryOptions,
+  buildComparisonInputCurrencyOptions,
   buildComparisonRegimesForCountry,
   findComparisonCountryEntry,
   resolveComparisonCountryCode,
   resolveComparisonRegionSelection,
   resolveComparisonTaxYear
 } from "./comparisonSelection";
-
-function buildComparisonProfileOptions(comparisonCatalog) {
-  return Object.entries(profileLabels)
-    .filter(([category]) =>
-      comparisonCatalog.some((entry) =>
-        entry.regime_options.some((regime) => regime.category === category)
-      )
-    )
-    .map(([value, label]) => ({ value, label }));
-}
 
 export default function useTaxComparisonEngine({
   comparisonCatalog,
@@ -42,6 +37,7 @@ export default function useTaxComparisonEngine({
     profileOptions[0]?.value || "employee"
   );
   const [grossIncome, setGrossIncome] = useState(String(defaultGrossIncome || 60_000));
+  const [inputCurrencyPreference, setInputCurrencyPreference] = useState("");
   const [deductibleExpenses, setDeductibleExpenses] = useState("0");
   const [leftCountryPreference, setLeftCountryPreference] = useState(currentCountryCode);
   const [leftRegionPreference, setLeftRegionPreference] = useState("");
@@ -51,11 +47,25 @@ export default function useTaxComparisonEngine({
   const [status, setStatus] = useState("idle");
   const [errors, setErrors] = useState([]);
   const deferredGrossIncome = useDeferredValue(grossIncome);
-  const selectedCategory = profileOptions.some(
-    (profile) => profile.value === selectedCategoryPreference
-  )
-    ? selectedCategoryPreference
-    : (profileOptions[0]?.value || "employee");
+  const selectedProfile = useMemo(
+    () => resolveComparisonProfile(selectedCategoryPreference, profileOptions),
+    [profileOptions, selectedCategoryPreference]
+  );
+  const selectedCategory = selectedProfile.key;
+
+  useEffect(() => {
+    if (
+      selectedCategoryPreference &&
+      profileOptions.some((profile) => profile.value === selectedCategoryPreference)
+    ) {
+      return;
+    }
+
+    if (profileOptions[0]?.value) {
+      setSelectedCategoryPreference(profileOptions[0].value);
+    }
+  }, [profileOptions, selectedCategoryPreference]);
+
   const availableCountryOptions = useMemo(
     () => buildComparisonCountryOptions(comparisonCatalog, selectedCategory),
     [comparisonCatalog, selectedCategory]
@@ -77,6 +87,19 @@ export default function useTaxComparisonEngine({
 
   const leftCountryEntry = findComparisonCountryEntry(availableCountryOptions, leftCountryCode);
   const rightCountryEntry = findComparisonCountryEntry(availableCountryOptions, rightCountryCode);
+  const leftCurrencyCode = leftCountryEntry?.country?.currency_code || "EUR";
+  const rightCurrencyCode = rightCountryEntry?.country?.currency_code || "EUR";
+  const usesEuroNormalization = leftCurrencyCode !== rightCurrencyCode;
+  const comparisonCurrencyCode = usesEuroNormalization ? "EUR" : leftCurrencyCode;
+  const inputCurrencyOptions = useMemo(
+    () => buildComparisonInputCurrencyOptions(leftCountryEntry, rightCountryEntry),
+    [leftCountryEntry, rightCountryEntry]
+  );
+  const inputCurrencyCode = inputCurrencyOptions.some(
+    (option) => option.code === inputCurrencyPreference
+  )
+    ? inputCurrencyPreference
+    : (inputCurrencyOptions[0]?.code || comparisonCurrencyCode);
   const selectedTaxYear = resolveComparisonTaxYear({
     leftCountryEntry,
     rightCountryEntry,
@@ -108,9 +131,8 @@ export default function useTaxComparisonEngine({
   const rightRegionOptions = rightComparisonSelection.regionOptions;
   const normalizedGrossIncome = deferredGrossIncome.trim();
   const normalizedDeductibleExpenses = deductibleExpenses.trim();
-  const incomeLabel =
-    selectedCategory === "self_employed" ? "Annual revenue before expenses" : "Annual income";
-  const showDeductibleExpenses = selectedCategory === "self_employed";
+  const incomeLabel = selectedProfile.incomeLabel;
+  const showDeductibleExpenses = selectedProfile.showDeductibleExpenses;
   const canCompare = Boolean(
     selectedTaxYear &&
       leftRegime &&
@@ -128,11 +150,13 @@ export default function useTaxComparisonEngine({
         selectedTaxYear || "",
         selectedCategory,
         normalizedGrossIncome,
+        inputCurrencyCode,
         showDeductibleExpenses ? normalizedDeductibleExpenses : "0"
       ].join(":"),
     [
       leftCountryCode,
       leftRegime,
+      inputCurrencyCode,
       normalizedDeductibleExpenses,
       normalizedGrossIncome,
       rightCountryCode,
@@ -158,6 +182,23 @@ export default function useTaxComparisonEngine({
 
     return "Comparison is not available for the current selection.";
   }, [leftRegime, normalizedGrossIncome, rightRegime, selectedTaxYear]);
+  const graphicCopy = useMemo(
+    () =>
+      buildComparisonGraphicCopy({
+        inputCurrencyCode,
+        deductibleExpenses: normalizedDeductibleExpenses || "0",
+        grossIncome: normalizedGrossIncome || "0",
+        incomeLabel,
+        profile: selectedProfile
+      }),
+    [
+      incomeLabel,
+      inputCurrencyCode,
+      normalizedDeductibleExpenses,
+      normalizedGrossIncome,
+      selectedProfile
+    ]
+  );
 
   const runComparison = useCallback(async () => {
     if (!canCompare) {
@@ -181,6 +222,7 @@ export default function useTaxComparisonEngine({
         payload: buildComparisonPayload({
           deductibleExpenses: showDeductibleExpenses ? normalizedDeductibleExpenses || "0" : "0",
           grossIncome: normalizedGrossIncome,
+          inputCurrencyCode,
           leftCountryCode,
           leftTaxRegimeKey: leftRegime.key,
           rightCountryCode,
@@ -216,6 +258,7 @@ export default function useTaxComparisonEngine({
     canCompare,
     leftCountryCode,
     leftRegime,
+    inputCurrencyCode,
     normalizedDeductibleExpenses,
     normalizedGrossIncome,
     rightCountryCode,
@@ -238,10 +281,17 @@ export default function useTaxComparisonEngine({
 
   return {
     comparisonProps: {
+      comparisonContextLabel: selectedProfile.comparisonContextLabel,
+      countryDefaultsNote: selectedProfile.countryDefaultsNote,
       deductibleExpenses,
+      deductibleExpensesLabel: selectedProfile.deductibleExpensesLabel,
       errors,
+      fxReference: comparisonResult?.metadata?.fx_reference || null,
+      graphicCopy,
       grossIncome,
       incomeLabel,
+      inputCurrencyCode,
+      inputCurrencyOptions,
       leftCountryCode,
       leftCountryOptions: availableCountryOptions.map((entry) => entry.country),
       leftRegion: leftComparisonSelection.selectedRegion,
@@ -252,6 +302,10 @@ export default function useTaxComparisonEngine({
       },
       onGrossIncomeChange: (event) => {
         setGrossIncome(event.target.value);
+        setStatus("loading");
+      },
+      onInputCurrencyChange: (event) => {
+        setInputCurrencyPreference(event.target.value);
         setStatus("loading");
       },
       onDeductibleExpensesChange: (event) => {
@@ -279,12 +333,14 @@ export default function useTaxComparisonEngine({
       rightCountryOptions: availableCountryOptions.map((entry) => entry.country),
       rightRegion: rightComparisonSelection.selectedRegion,
       rightRegionOptions,
-      selectedCategory,
+      selectedCategory: selectedProfile.key,
       showDeductibleExpenses,
       status,
       summaryMetrics: comparisonResult?.summary_metrics || [],
       taxYear: selectedTaxYear,
-      unavailableMessage
+      unavailableMessage,
+      usesEuroNormalization:
+        comparisonResult?.metadata?.mixed_currency_comparison ?? usesEuroNormalization
     }
   };
 }

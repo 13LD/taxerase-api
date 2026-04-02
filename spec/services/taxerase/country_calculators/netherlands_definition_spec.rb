@@ -14,15 +14,19 @@ RSpec.describe Taxerase::CountryCalculators::NetherlandsDefinition do
       props = definition.build_props
       expected_default_regime_key = Taxerase::Netherlands::CalculationRouter.default_regime_key(2025)
 
-      expect(props[:country]).to eq(code: "NL", name: "Netherlands")
-      expect(props[:country_options]).to include(code: "ES", name: "Spain")
-      expect(props[:country_options]).to include(code: "NL", name: "Netherlands")
+      expect(props[:country]).to eq(code: "NL", name: "Netherlands", currency_code: "EUR")
+      expect(props[:input_currency_options]).to eq([
+        { code: "EUR", name: "EUR" }
+      ])
+      expect(props[:country_options]).to include(include(code: "ES", name: "Spain", currency_code: "EUR"))
+      expect(props[:country_options]).to include(include(code: "NL", name: "Netherlands", currency_code: "EUR"))
       expect(props[:tax_year_options]).to eq([ 2024, 2025 ])
       expect(props[:default_tax_regime_key]).to eq(expected_default_regime_key)
       expect(props[:regime_options].map { |regime| regime[:key] })
         .to include("employee_netherlands", "self_employed_netherlands")
       expect(props[:default_input]).to include(
         gross_income: 60_000,
+        input_currency_code: "EUR",
         salary_period: "YEAR",
         tax_year: 2025,
         deductible_expenses: 0,
@@ -51,6 +55,20 @@ RSpec.describe Taxerase::CountryCalculators::NetherlandsDefinition do
         children_under_three_count: 0,
         disability_level: "none"
       )
+    end
+  end
+
+  describe "#comparison_profile" do
+    it "exposes the supported comparison profiles for the Netherlands" do
+      expect(definition.comparison_profile("employee")).to include(
+        key: "employee",
+        uses_deductible_expenses: false
+      )
+      expect(definition.comparison_profile("self_employed")).to include(
+        key: "self_employed",
+        uses_deductible_expenses: true
+      )
+      expect(definition.comparison_profile("special_regime")).to be_nil
     end
   end
 end

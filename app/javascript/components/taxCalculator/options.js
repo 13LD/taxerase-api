@@ -9,7 +9,7 @@ export const ageBracketOptions = [
   { value: "age_75_plus", label: "75+" }
 ];
 
-export const disabilityLevelOptions = [
+export const defaultDisabilityLevelOptions = [
   { value: "none", label: "None" },
   { value: "level_33_to_64", label: "33% to 64%" },
   { value: "level_33_to_64_with_support", label: "33% to 64% + support" },
@@ -21,8 +21,8 @@ export const salaryPeriodOptions = [
   { value: "MONTH", label: "Monthly" }
 ];
 
-export function buildProfileOptions(regimesForYear) {
-  return Object.entries(profileLabels)
+export function buildProfileOptions(regimesForYear, customProfileLabels = {}) {
+  return Object.entries({ ...profileLabels, ...customProfileLabels })
     .filter(([category]) => regimesForYear.some((regime) => regime.category === category))
     .map(([value, label]) => ({ value, label }));
 }

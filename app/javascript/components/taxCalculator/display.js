@@ -10,11 +10,12 @@ export function buildPlaceholderDetailCards({
   selectedCategory,
   selectedRegion,
   pendingValue,
-  deductibleExpenses
+  deductibleExpenses,
+  currencyCode
 }) {
   if (selectedCategory === "self_employed") {
     return [
-      { label: "Deductible expenses", value: formatCurrency(deductibleExpenses) },
+      { label: "Deductible expenses", value: formatCurrency(deductibleExpenses, currencyCode) },
       { label: "Net income before social security", value: pendingValue },
       { label: "Self-employed social security", value: pendingValue },
       { label: "5% difficult-to-justify deduction", value: pendingValue },
@@ -27,6 +28,16 @@ export function buildPlaceholderDetailCards({
       { label: "Income tax", value: pendingValue },
       { label: "Total tax", value: pendingValue },
       { label: "Estimated monthly RETA base", value: pendingValue }
+    ];
+  }
+
+  if (selectedCategory === "special_regime") {
+    return [
+      { label: "Beckham Law income tax", value: pendingValue },
+      { label: "Employee social security", value: pendingValue },
+      { label: "Total tax", value: pendingValue },
+      { label: "Taxable employment income", value: pendingValue },
+      { label: "Monthly Social Security contribution base", value: pendingValue }
     ];
   }
 
@@ -52,17 +63,17 @@ export function buildPlaceholderDetailCards({
     : employeeCards;
 }
 
-export function buildHeadlineMetrics({ pendingValue, result, resultMatchesSelection }) {
+export function buildHeadlineMetrics({ pendingValue, result, resultMatchesSelection, currencyCode }) {
   if (resultMatchesSelection) {
     return [
       {
         label: "Annual net income",
-        value: formatCurrency(result.breakdown.annual_net_income),
+        value: formatCurrency(result.breakdown.annual_net_income, currencyCode),
         tone: "primary"
       },
       {
         label: "Monthly net income",
-        value: formatCurrency(result.breakdown.monthly_net_income),
+        value: formatCurrency(result.breakdown.monthly_net_income, currencyCode),
         tone: "secondary"
       },
       {
@@ -87,19 +98,23 @@ export function buildDetailCards({
   selectedCategory,
   selectedRegion,
   pendingValue,
-  deductibleExpenses
+  deductibleExpenses,
+  currencyCode
 }) {
   if (resultMatchesSelection) {
     return result.detail_cards.map((card) => ({
       label: card.label,
-      value: formatCurrency(card.value)
+      value: formatCurrency(card.value, currencyCode)
     }));
   }
 
   if (result?.detail_cards?.length) {
     return result.detail_cards.map((card) => ({
       label: card.label,
-      value: card.label === "Deductible expenses" ? formatCurrency(deductibleExpenses) : pendingValue
+      value:
+        card.label === "Deductible expenses"
+          ? formatCurrency(deductibleExpenses, currencyCode)
+          : pendingValue
     }));
   }
 
@@ -108,7 +123,8 @@ export function buildDetailCards({
     selectedCategory,
     selectedRegion,
     pendingValue,
-    deductibleExpenses
+    deductibleExpenses,
+    currencyCode
   });
 }
 

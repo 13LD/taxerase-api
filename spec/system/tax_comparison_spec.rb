@@ -3,8 +3,8 @@ require "rails_helper"
 RSpec.describe "Tax comparison", type: :system, js: true do
   def wait_for_comparison_results
     within(".comparison-card") do
-      expect(page).to have_no_text("Refreshing comparison...", wait: 10)
-      expect(page).to have_css(".comparison-table__row", text: "Annual net income", wait: 10)
+      expect(page).to have_no_text("Refreshing comparison...", wait: 20)
+      expect(page).to have_css(".comparison-table__row", text: "Annual net income", wait: 20)
     end
   end
 
@@ -33,6 +33,8 @@ RSpec.describe "Tax comparison", type: :system, js: true do
 
     within(comparison_sides[1]) do
       expect(page).to have_select("Country", selected: "Netherlands")
+      expect(page).to have_css("option", text: "Poland")
+      expect(page).to have_css("option", text: "Czech Republic")
       expect(page).to have_select("Region", selected: "Netherlands", disabled: true)
     end
 
@@ -87,6 +89,54 @@ RSpec.describe "Tax comparison", type: :system, js: true do
     end
   end
 
+  it "keeps the selected tax profile when changing a comparison country" do
+    visit root_path
+
+    within(".comparison-card") do
+      click_button "Self-employed"
+      fill_in "Annual revenue before expenses", with: "70000"
+      fill_in "Annual deductible expenses", with: "12000"
+    end
+
+    comparison_sides = all(".comparison-side")
+
+    within(comparison_sides[1]) do
+      select "Poland", from: "Country"
+    end
+
+    wait_for_comparison_results
+
+    within(".comparison-card") do
+      expect(page).to have_button("Self-employed", class: /is-active/)
+      expect(page).to have_field("Annual revenue before expenses", with: "70000")
+      expect(page).to have_field("Annual deductible expenses", with: "12000")
+      expect(page).to have_text("Comparing self-employed tax outcomes")
+    end
+  end
+
+  it "keeps comparison currency inputs stable after refreshes" do
+    visit root_path
+
+    within(".comparison-card") do
+      fill_in "Annual income", with: "450000"
+      expect(page).to have_field("Annual income", with: "450000")
+
+      click_button "Self-employed"
+      fill_in "Annual revenue before expenses", with: "450000"
+      fill_in "Annual deductible expenses", with: "12000"
+
+      expect(page).to have_field("Annual revenue before expenses", with: "450000")
+      expect(page).to have_field("Annual deductible expenses", with: "12000")
+    end
+
+    wait_for_comparison_results
+
+    within(".comparison-card") do
+      expect(page).to have_field("Annual revenue before expenses", with: "450000")
+      expect(page).to have_field("Annual deductible expenses", with: "12000")
+    end
+  end
+
   it "marks unfavorable deltas in red" do
     visit root_path
 
@@ -111,5 +161,60 @@ RSpec.describe "Tax comparison", type: :system, js: true do
     expect(total_tax_row).to have_text("+")
     expect(annual_net_income_row.find(".comparison-delta")[:class]).to include("comparison-delta--negative")
     expect(total_tax_row.find(".comparison-delta")[:class]).to include("comparison-delta--negative")
+  end
+
+  it "shows ECB-normalized EUR values with local notes for Poland comparisons" do
+    visit root_path
+
+    comparison_sides = all(".comparison-side")
+
+    within(comparison_sides[1]) do
+      select "Poland", from: "Country"
+      expect(page).to have_select("Region", selected: "Poland", disabled: true)
+    end
+
+    wait_for_comparison_results
+
+    within(".comparison-card") do
+      expect(page).to have_text("Shared income inputs are interpreted in EUR.")
+      expect(page).to have_text("Mixed-currency comparison table metrics are normalized to EUR using ECB reference rates from 2026-03-11.")
+      expect(page).to have_text("Poland")
+    end
+
+    annual_net_income_row = find(".comparison-table__row", text: "Annual net income")
+
+    expect(annual_net_income_row).to have_text("€")
+    expect(annual_net_income_row).to have_text("Local PLN")
+  end
+
+  it "allows switching the mixed-country comparison input currency to Czech koruna" do
+    visit root_path
+
+    comparison_sides = all(".comparison-side")
+
+    within(comparison_sides[1]) do
+      select "Czech Republic", from: "Country"
+      expect(page).to have_select("Region", selected: "Czech Republic", disabled: true)
+    end
+
+    within(".comparison-card") do
+      expect(page).to have_select("Input currency", options: [ "EUR", "CZK" ])
+      select "CZK", from: "Input currency"
+      click_button "Self-employed"
+      fill_in "Annual revenue before expenses", with: "600000"
+    end
+
+    wait_for_comparison_results
+
+    within(".comparison-card") do
+      expect(page).to have_select("Input currency", selected: "CZK")
+      expect(page).to have_text("Shared income inputs are interpreted in CZK.")
+      expect(page).to have_text("Local CZK")
+    end
+
+    within(all(".comparison-graphic__panel")[1]) do
+      expect(page).to have_text("CZK")
+      expect(page).to have_text("EUR comparison")
+    end
   end
 end

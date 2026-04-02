@@ -285,7 +285,7 @@ The current monolith should be treated as the reference pattern for future count
 
 - Spain remains the first full reference country with multi-year resident employee and self-employed coverage
 - Netherlands is the second live country and validates that the same shared tables, page shell, and internal API contract can support a different tax model
-- future countries such as Portugal should reuse the same delivery steps:
+- future countries should reuse the same delivery steps:
   1. source research
   2. database seed service
   3. country router and calculators
@@ -293,6 +293,21 @@ The current monolith should be treated as the reference pattern for future count
   5. country-specific web config
   6. API endpoint
   7. regression coverage
+
+Use [country-rollout-playbook.md](/Users/dmytrolysohor/Dev/taxera-api/docs/country-rollout-playbook.md) as the implementation standard for that process. It now includes the reusable rollout checklist plus the next country-start research tracks for Poland first and Czech Republic second.
+
+### Next Country Queue
+
+Recommended next live country order:
+
+1. Poland
+2. Czech Republic
+
+Recommended priority within each new country:
+
+1. resident employee
+2. resident self-employed under the simplest source-backed standard regime
+3. additional self-employed variants and special regimes only after the base path is live
 
 ### Seed Data Architecture
 

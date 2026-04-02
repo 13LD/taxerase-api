@@ -3,9 +3,26 @@ const spainCalculatorConfig = {
   fallbackTitle: "Spain tax estimate",
   sectionKicker: "EU tax calculator",
   formConfig: {
+    regimeControls: [
+      {
+        key: "apply_beckham_law",
+        type: "checkbox",
+        label: "Apply Beckham Law",
+        hint:
+          "Article 93 special regime for eligible inbound workers. Employment income is taxed at national special-regime rates instead of the ordinary regional IRPF scale, generally for the arrival year plus five more years.",
+        categories: [ "employee" ],
+        defaultValue: false,
+        effects: {
+          regimeCategoryOverride: "special_regime",
+          incomeLabel: "Gross employment income",
+          hidePersonalReliefFields: true
+        }
+      }
+    ],
     showAgeField: true,
     ageFieldHint: null,
-    showChildrenFields: true,
+    showChildrenCountField: true,
+    showChildrenUnderThreeField: true,
     showDisabilityField: true,
     ageBracketOptions: [
       { value: "under_65", label: "Under 65" },

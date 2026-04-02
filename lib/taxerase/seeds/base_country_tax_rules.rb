@@ -73,74 +73,109 @@ module Taxerase
       end
 
       def replace_brackets!(regime, group, rows)
-        regime.tax_brackets.where(bracket_group: group).delete_all
+        TaxBracket.where(tax_regime_id: regime.id, bracket_group: group).delete_all
+        regime.association(:tax_brackets).reset
+        timestamp = Time.current
 
-        rows.each_with_index do |(upper_bound, rate), index|
-          regime.tax_brackets.create!(
-            bracket_group: group,
-            position: index + 1,
-            upper_bound:,
-            rate:
-          )
-        end
+        TaxBracket.insert_all!(
+          rows.each_with_index.map do |(upper_bound, rate), index|
+            {
+              tax_regime_id: regime.id,
+              bracket_group: group,
+              position: index + 1,
+              upper_bound:,
+              rate:,
+              created_at: timestamp,
+              updated_at: timestamp
+            }
+          end
+        )
       end
 
       def replace_formula_brackets!(regime, group, rows)
-        regime.tax_brackets.where(bracket_group: group).delete_all
+        TaxBracket.where(tax_regime_id: regime.id, bracket_group: group).delete_all
+        regime.association(:tax_brackets).reset
+        timestamp = Time.current
 
-        rows.each_with_index do |row, index|
-          regime.tax_brackets.create!(
-            bracket_group: group,
-            position: index + 1,
-            lower_bound: row[:lower_bound],
-            upper_bound: row[:upper_bound],
-            base_min: row[:base_min],
-            rate: row[:rate],
-            label: row[:label]
-          )
-        end
+        TaxBracket.insert_all!(
+          rows.each_with_index.map do |row, index|
+            {
+              tax_regime_id: regime.id,
+              bracket_group: group,
+              position: index + 1,
+              lower_bound: row[:lower_bound],
+              upper_bound: row[:upper_bound],
+              base_min: row[:base_min],
+              rate: row[:rate],
+              label: row[:label],
+              created_at: timestamp,
+              updated_at: timestamp
+            }
+          end
+        )
       end
 
       def replace_range_brackets!(regime, group, rows)
-        regime.tax_brackets.where(bracket_group: group).delete_all
+        TaxBracket.where(tax_regime_id: regime.id, bracket_group: group).delete_all
+        regime.association(:tax_brackets).reset
+        timestamp = Time.current
 
-        rows.each_with_index do |row, index|
-          regime.tax_brackets.create!(
-            bracket_group: group,
-            position: index + 1,
-            lower_bound: row[:lower_bound],
-            upper_bound: row[:upper_bound],
-            base_min: row[:base_min],
-            base_max: row[:base_max],
-            label: row[:label]
-          )
-        end
+        TaxBracket.insert_all!(
+          rows.each_with_index.map do |row, index|
+            {
+              tax_regime_id: regime.id,
+              bracket_group: group,
+              position: index + 1,
+              lower_bound: row[:lower_bound],
+              upper_bound: row[:upper_bound],
+              base_min: row[:base_min],
+              base_max: row[:base_max],
+              label: row[:label],
+              created_at: timestamp,
+              updated_at: timestamp
+            }
+          end
+        )
       end
 
       def replace_parameters!(regime, values)
-        regime.tax_parameters.delete_all
+        TaxParameter.where(tax_regime_id: regime.id).delete_all
+        regime.association(:tax_parameters).reset
+        timestamp = Time.current
 
-        values.each do |key, value|
-          if value.is_a?(String)
-            regime.tax_parameters.create!(key:, value_text: value)
-          else
-            regime.tax_parameters.create!(key:, value_decimal: value)
+        TaxParameter.insert_all!(
+          values.map do |key, value|
+            {
+              tax_regime_id: regime.id,
+              key:,
+              value_decimal: value.is_a?(String) ? nil : value,
+              value_text: value.is_a?(String) ? value : nil,
+              created_at: timestamp,
+              updated_at: timestamp
+            }
           end
-        end
+        )
       end
 
       def replace_source_usages!(regime, usages)
-        regime.tax_source_usages.delete_all
+        TaxSourceUsage.where(tax_regime_id: regime.id).delete_all
+        regime.association(:tax_source_usages).reset
+        timestamp = Time.current
 
-        usages.each_with_index do |usage, index|
-          regime.tax_source_usages.create!(
-            official_tax_source: source_for!(usage[:source_key]),
-            usage_type: usage[:usage_type],
-            label: usage[:label],
-            notes: usage[:notes],
-            position: index + 1
-          )
-        end
+        TaxSourceUsage.insert_all!(
+          usages.each_with_index.map do |usage, index|
+            {
+              tax_regime_id: regime.id,
+              official_tax_source_id: source_for!(usage[:source_key]).id,
+              usage_type: usage[:usage_type],
+              label: usage[:label],
+              notes: usage[:notes],
+              position: index + 1,
+              created_at: timestamp,
+              updated_at: timestamp
+            }
+          end
+        )
       end
 
       def source_for!(key)

@@ -4,7 +4,8 @@ module Taxerase
       def country
         {
           code: "ES",
-          name: "Spain"
+          name: "Spain",
+          currency_code: "EUR"
         }
       end
 
@@ -15,9 +16,11 @@ module Taxerase
       def default_input
         {
           gross_income: 60_000,
+          input_currency_code: "EUR",
           salary_period: "YEAR",
           tax_year: 2025,
           deductible_expenses: 0,
+          apply_beckham_law: false,
           age_bracket: "under_65",
           children_count: 0,
           children_under_three_count: 0,

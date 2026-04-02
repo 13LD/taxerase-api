@@ -16,20 +16,33 @@ import {
 } from "./display";
 import { buildCountOptions, buildProfileOptions } from "./options";
 import {
+  buildInitialRegimeControlValues,
+  buildRegimeControlPayload,
+  buildResultControlSignatureParts,
+  buildSelectedControlSignatureParts,
+  buildVisibleRegimeControls,
+  resolveRegimeControlEffects
+} from "./regimeControls";
+import {
   buildCalculationSignature,
   buildRegionOptions,
   buildResultCalculationSignature,
   findInitialRegime,
-  findSelectedRegime
+  resolveSelectedRegime
 } from "./selection";
 
 export default function useTaxCalculatorEngine({
   calculationEndpoint,
+  countryCurrencyCode = "EUR",
   defaultInput,
   defaultTaxRegimeKey,
+  inputCurrencyOptions = [],
   initialResult,
+  incomeLabels = {},
+  periodLabels = {},
+  profileLabels = {},
+  regimeControls = [],
   regimeOptions,
-  supportsThirtyPercentRuling = false,
   taxYearOptions
 }) {
   const initialRegime = findInitialRegime({
@@ -46,6 +59,9 @@ export default function useTaxCalculatorEngine({
     initialRegime?.region || ""
   );
   const [grossIncome, setGrossIncome] = useState(String(defaultInput.gross_income));
+  const [selectedInputCurrencyCode, setSelectedInputCurrencyCode] = useState(
+    defaultInput.input_currency_code || inputCurrencyOptions[0]?.code || countryCurrencyCode
+  );
   const [deductibleExpenses, setDeductibleExpenses] = useState(
     String(defaultInput.deductible_expenses || 0)
   );
@@ -55,11 +71,11 @@ export default function useTaxCalculatorEngine({
     String(defaultInput.children_under_three_count || 0)
   );
   const [disabilityLevel, setDisabilityLevel] = useState(defaultInput.disability_level || "none");
-  const [applyThirtyPercentRuling, setApplyThirtyPercentRuling] = useState(
-    Boolean(defaultInput.apply_thirty_percent_ruling)
-  );
-  const [thirtyPercentRulingBasis, setThirtyPercentRulingBasis] = useState(
-    defaultInput.thirty_percent_ruling_basis || "standard_threshold"
+  const [regimeControlValues, setRegimeControlValues] = useState(
+    buildInitialRegimeControlValues({
+      defaultInput,
+      regimeControls
+    })
   );
   const [salaryPeriod, setSalaryPeriod] = useState(defaultInput.salary_period);
   const [result, setResult] = useState(initialResult);
@@ -71,7 +87,10 @@ export default function useTaxCalculatorEngine({
     () => regimeOptions.filter((regime) => regime.tax_year === selectedTaxYear),
     [regimeOptions, selectedTaxYear]
   );
-  const profileOptions = useMemo(() => buildProfileOptions(regimesForYear), [regimesForYear]);
+  const profileOptions = useMemo(
+    () => buildProfileOptions(regimesForYear, profileLabels),
+    [profileLabels, regimesForYear]
+  );
   const selectedCategory = profileOptions.some(
     (profile) => profile.value === selectedCategoryPreference
   )
@@ -87,25 +106,57 @@ export default function useTaxCalculatorEngine({
   )
     ? selectedRegionPreference
     : (regionOptions[0]?.region || "");
+  const visibleRegimeControls = useMemo(
+    () =>
+      buildVisibleRegimeControls({
+        regimeControls,
+        selectedCategory,
+        controlValues: regimeControlValues
+      }),
+    [regimeControlValues, regimeControls, selectedCategory]
+  );
+  const regimeControlEffects = useMemo(
+    () =>
+      resolveRegimeControlEffects({
+        regimeControls,
+        selectedCategory,
+        controlValues: regimeControlValues
+      }),
+    [regimeControlValues, regimeControls, selectedCategory]
+  );
+  const regimeCategoryOverride = regimeControlEffects.regimeCategoryOverride || null;
 
   const selectedRegime = useMemo(
-    () => findSelectedRegime(regimesForYear, selectedCategory, selectedRegion),
-    [regimesForYear, selectedCategory, selectedRegion]
+    () =>
+      resolveSelectedRegime({
+        regimesForYear,
+        selectedCategory,
+        selectedRegion,
+        regimeCategoryOverride
+      }),
+    [regimeCategoryOverride, regimesForYear, selectedCategory, selectedRegion]
   );
   const selectedRegimeKey = selectedRegime?.key || null;
   const childrenCountNumber = Number(childrenCount || 0);
-  const showDeductibleExpenses = selectedCategory === "self_employed";
-  const effectiveApplyThirtyPercentRuling =
-    supportsThirtyPercentRuling &&
-    selectedCategory === "employee" &&
-    applyThirtyPercentRuling;
-  const effectiveThirtyPercentRulingBasis = effectiveApplyThirtyPercentRuling
-    ? thirtyPercentRulingBasis
-    : "";
+  const showDeductibleExpenses =
+    selectedCategory === "self_employed" && !regimeControlEffects.hideDeductibleExpenses;
+  const showPersonalReliefFields = !regimeControlEffects.hidePersonalReliefFields;
   const incomeLabel =
-    selectedCategory === "self_employed" ? "Revenue before expenses" : "Gross income";
+    regimeControlEffects.incomeLabel ||
+    incomeLabels[selectedCategory] ||
+    (selectedCategory === "self_employed" ? "Revenue before expenses" : "Gross income");
   const periodLabel =
-    selectedCategory === "self_employed" ? "Income period" : "Salary period";
+    periodLabels[selectedCategory] ||
+    (selectedCategory === "self_employed" ? "Income period" : "Salary period");
+  const selectedControlSignatureParts = useMemo(
+    () =>
+      buildSelectedControlSignatureParts({
+        regimeControls,
+        selectedCategory,
+        controlValues: regimeControlValues
+      }),
+    [regimeControlValues, regimeControls, selectedCategory]
+  );
 
   const selectedCalculationSignature = useMemo(
     () =>
@@ -116,24 +167,37 @@ export default function useTaxCalculatorEngine({
         childrenCount,
         childrenUnderThreeCount,
         disabilityLevel,
-        applyThirtyPercentRuling: effectiveApplyThirtyPercentRuling,
-        thirtyPercentRulingBasis: effectiveThirtyPercentRulingBasis
+        extraSignatureParts: [ selectedInputCurrencyCode, ...selectedControlSignatureParts ]
       }),
     [
       ageBracket,
-      effectiveApplyThirtyPercentRuling,
-      effectiveThirtyPercentRulingBasis,
       childrenCount,
       childrenUnderThreeCount,
       disabilityLevel,
+      selectedInputCurrencyCode,
+      selectedControlSignatureParts,
       selectedRegimeKey,
       selectedTaxYear
     ]
   );
-  const resultCalculationSignature = useMemo(
-    () => buildResultCalculationSignature(result),
-    [result]
+  const resultControlSignatureParts = useMemo(
+    () =>
+      buildResultControlSignatureParts({
+        result,
+        regimeControls,
+        selectedCategory,
+        controlValues: regimeControlValues
+      }),
+    [regimeControlValues, regimeControls, result, selectedCategory]
   );
+  const resultCalculationSignature = useMemo(() => {
+    const resultInputCurrencyCode = result?.input?.input_currency_code || countryCurrencyCode;
+
+    return buildResultCalculationSignature(result, [
+      resultInputCurrencyCode,
+      ...resultControlSignatureParts
+    ]);
+  }, [countryCurrencyCode, result, resultControlSignatureParts]);
   const isSupportedRegime = Boolean(selectedRegime?.supported);
   const resultMatchesSelection =
     selectedCalculationSignature !== null &&
@@ -147,35 +211,42 @@ export default function useTaxCalculatorEngine({
         : resultMatchesSelection
           ? status
           : "loading";
+  const displayCurrencyCode = resultMatchesSelection
+    ? (result?.metadata?.display_currency_code || countryCurrencyCode)
+    : (selectedInputCurrencyCode || countryCurrencyCode);
   const isCalculating = status === "loading" && Boolean(selectedRegime) && isSupportedRegime;
   const pendingValue = pendingOutputValue(selectedRegime, isSupportedRegime);
 
   const headlineMetrics = useMemo(
     () =>
       buildHeadlineMetrics({
+        currencyCode: displayCurrencyCode,
         pendingValue,
         result,
         resultMatchesSelection
       }),
-    [pendingValue, result, resultMatchesSelection]
+    [displayCurrencyCode, pendingValue, result, resultMatchesSelection]
   );
   const detailCards = useMemo(
     () =>
       buildDetailCards({
+        currencyCode: displayCurrencyCode,
         result,
         resultMatchesSelection,
-        selectedCategory,
+        selectedCategory: selectedRegime?.category || selectedCategory,
         selectedRegion,
         pendingValue,
-        applyThirtyPercentRuling: effectiveApplyThirtyPercentRuling,
+        applyThirtyPercentRuling: Boolean(regimeControlValues.apply_thirty_percent_ruling),
         deductibleExpenses: Number(deductibleExpenses || 0)
       }),
     [
-      effectiveApplyThirtyPercentRuling,
       deductibleExpenses,
+      displayCurrencyCode,
       pendingValue,
+      regimeControlValues,
       result,
       resultMatchesSelection,
+      selectedRegime,
       selectedCategory,
       selectedRegion
     ]
@@ -256,13 +327,11 @@ export default function useTaxCalculatorEngine({
     prepareAutoRefresh();
   }
 
-  function handleApplyThirtyPercentRulingChange(event) {
-    setApplyThirtyPercentRuling(event.target.checked);
-    prepareAutoRefresh();
-  }
-
-  function handleThirtyPercentRulingBasisChange(event) {
-    setThirtyPercentRulingBasis(event.target.value);
+  function handleRegimeControlChange(controlKey, nextValue) {
+    setRegimeControlValues((currentValues) => ({
+      ...currentValues,
+      [controlKey]: nextValue
+    }));
     prepareAutoRefresh();
   }
 
@@ -281,8 +350,8 @@ export default function useTaxCalculatorEngine({
       const response = await requestCalculation({
         endpoint: calculationEndpoint,
         payload: buildCalculationPayload({
-          applyThirtyPercentRuling: effectiveApplyThirtyPercentRuling,
           grossIncome,
+          inputCurrencyCode: selectedInputCurrencyCode,
           deductibleExpenses: showDeductibleExpenses ? deductibleExpenses : 0,
           salaryPeriod,
           selectedTaxYear,
@@ -291,7 +360,10 @@ export default function useTaxCalculatorEngine({
           childrenCount,
           childrenUnderThreeCount,
           disabilityLevel,
-          thirtyPercentRulingBasis: effectiveThirtyPercentRulingBasis
+          regimeControlPayload: buildRegimeControlPayload({
+            regimeControls,
+            controlValues: regimeControlValues
+          })
         }),
         signal: abortController.signal
       });
@@ -322,11 +394,12 @@ export default function useTaxCalculatorEngine({
     childrenUnderThreeCount,
     deductibleExpenses,
     disabilityLevel,
-    effectiveApplyThirtyPercentRuling,
-    effectiveThirtyPercentRulingBasis,
     grossIncome,
     isSupportedRegime,
+    regimeControlValues,
+    regimeControls,
     salaryPeriod,
+    selectedInputCurrencyCode,
     selectedRegime,
     selectedTaxYear,
     showDeductibleExpenses
@@ -364,25 +437,26 @@ export default function useTaxCalculatorEngine({
   return {
     assumptionItems,
     detailCards,
-    displayStatus,
-    displayedSources,
+      displayStatus,
+      displayedSources,
     formProps: {
       ageBracket,
-      applyThirtyPercentRuling,
       childrenCount,
       childrenCountNumber,
       childrenCountOptions,
       childrenUnderThreeCount,
       childrenUnderThreeOptions,
+      currencyCode: countryCurrencyCode,
       deductibleExpenses,
       disabilityLevel,
       errors,
       grossIncome,
       incomeLabel,
+      inputCurrencyCode: selectedInputCurrencyCode,
+      inputCurrencyOptions,
       isCalculating,
       isSupportedRegime,
       onAgeBracketChange: handleAgeBracketChange,
-      onApplyThirtyPercentRulingChange: handleApplyThirtyPercentRulingChange,
       onCategoryChange: handleCategoryChange,
       onChildrenCountChange: handleChildrenCountChange,
       onChildrenUnderThreeChange: handleChildrenUnderThreeChange,
@@ -395,16 +469,22 @@ export default function useTaxCalculatorEngine({
         setGrossIncome(event.target.value);
         resetFormState();
       },
+      onInputCurrencyChange: (event) => {
+        setSelectedInputCurrencyCode(event.target.value);
+        prepareAutoRefresh();
+      },
       onRegionChange: handleRegionChange,
+      onRegimeControlChange: handleRegimeControlChange,
       onSalaryPeriodChange: (nextSalaryPeriod) => {
         setSalaryPeriod(nextSalaryPeriod);
         resetFormState();
       },
       onSubmit: handleSubmit,
       onTaxYearChange: handleTaxYearChange,
-      onThirtyPercentRulingBasisChange: handleThirtyPercentRulingBasisChange,
       periodLabel,
       profileOptions,
+      regimeControls: visibleRegimeControls,
+      regimeControlValues,
       regionOptions,
       salaryPeriod,
       selectedCategory,
@@ -412,7 +492,9 @@ export default function useTaxCalculatorEngine({
       selectedRegion,
       selectedTaxYear,
       showDeductibleExpenses,
-      thirtyPercentRulingBasis,
+      showPersonalReliefFields,
+      showChildrenCountField: false,
+      showChildrenUnderThreeField: false,
       taxYearOptions
     },
     headlineMetrics,

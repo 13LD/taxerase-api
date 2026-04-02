@@ -5,46 +5,76 @@ function metricValue(summaryMetrics, metricKey, valueKey) {
   return summaryMetrics.find((metric) => metric.key === metricKey)?.[valueKey] || 0;
 }
 
+function currencyMetric(summaryMetrics, metricKey, sidePrefix, comparisonCurrencyCode) {
+  const metric = summaryMetrics.find((entry) => entry.key === metricKey);
+  if (!metric) {
+    return {
+      comparisonValue: 0,
+      comparisonCurrencyCode,
+      localCurrencyCode: comparisonCurrencyCode,
+      localValue: 0,
+      usesLocalDisplay: false
+    };
+  }
+
+  const localCurrencyCode = metric[`${sidePrefix}_local_currency_code`] || comparisonCurrencyCode;
+  const localValue = metric[`${sidePrefix}_local_value`];
+  const comparisonValue = metric[`${sidePrefix}_value`];
+  const usesLocalDisplay =
+    metric.converted_from_local &&
+    localCurrencyCode &&
+    localCurrencyCode !== metric.display_currency_code;
+
+  return {
+    comparisonValue,
+    comparisonCurrencyCode: metric.display_currency_code || comparisonCurrencyCode,
+    localCurrencyCode,
+    localValue,
+    usesLocalDisplay
+  };
+}
+
 function clampPercentage(value) {
   return Math.max(0, Math.min(100, Number(value || 0)));
 }
 
-function comparisonCopy({ deductibleExpenses, grossIncome, incomeLabel, showDeductibleExpenses }) {
-  const normalizedIncomeLabel = incomeLabel.charAt(0).toLowerCase() + incomeLabel.slice(1);
-
-  if (!showDeductibleExpenses) {
-    return {
-      introTitle: "Gross income vs tax load",
-      introSummary: `Based on ${normalizedIncomeLabel} ${formatCurrency(grossIncome)}.`,
-      panelSummary: `${incomeLabel} ${formatCurrency(grossIncome)}`
-    };
-  }
-
-  return {
-    introTitle: "Revenue vs tax load",
-    introSummary:
-      `Based on ${normalizedIncomeLabel} ${formatCurrency(grossIncome)} and annual deductible expenses ` +
-      `${formatCurrency(deductibleExpenses)}.`,
-    panelSummary:
-      `Revenue ${formatCurrency(grossIncome)} · deductible expenses ${formatCurrency(deductibleExpenses)}`
-  };
-}
-
-function barData(summaryMetrics, sidePrefix) {
+function barData(summaryMetrics, sidePrefix, comparisonCurrencyCode) {
   const taxRate = clampPercentage(
     metricValue(summaryMetrics, "effective_tax_rate", `${sidePrefix}_value`)
+  );
+  const totalTax = currencyMetric(
+    summaryMetrics,
+    "total_tax",
+    sidePrefix,
+    comparisonCurrencyCode
+  );
+  const netIncome = currencyMetric(
+    summaryMetrics,
+    "annual_net_income",
+    sidePrefix,
+    comparisonCurrencyCode
   );
 
   return {
     taxRate,
     netRate: Math.max(0, 100 - taxRate),
-    totalTax: metricValue(summaryMetrics, "total_tax", `${sidePrefix}_value`),
-    netIncome: metricValue(summaryMetrics, "annual_net_income", `${sidePrefix}_value`)
+    totalTax,
+    netIncome
   };
 }
 
-function JurisdictionGraphic({ label, panelSummary, sidePrefix, summaryMetrics }) {
-  const { taxRate, netRate, totalTax, netIncome } = barData(summaryMetrics, sidePrefix);
+function JurisdictionGraphic({ comparisonCurrencyCode, label, panelSummary, sidePrefix, summaryMetrics }) {
+  const { taxRate, netRate, totalTax, netIncome } = barData(
+    summaryMetrics,
+    sidePrefix,
+    comparisonCurrencyCode
+  );
+  const netIncomeNote = netIncome.usesLocalDisplay
+    ? `EUR comparison ${formatCurrency(netIncome.comparisonValue, netIncome.comparisonCurrencyCode)}`
+    : null;
+  const totalTaxNote = totalTax.usesLocalDisplay
+    ? `EUR comparison ${formatCurrency(totalTax.comparisonValue, totalTax.comparisonCurrencyCode)}`
+    : null;
 
   return (
     <article className="comparison-graphic__panel">
@@ -80,11 +110,23 @@ function JurisdictionGraphic({ label, panelSummary, sidePrefix, summaryMetrics }
       <div className="comparison-graphic__stats">
         <div>
           <span className="mini-label">Annual Net Income</span>
-          <strong>{formatCurrency(netIncome)}</strong>
+          <strong>{formatCurrency(netIncome.localValue, netIncome.localCurrencyCode)}</strong>
+          <span
+            aria-hidden={netIncomeNote ? undefined : true}
+            className={`comparison-graphic__stat-note${netIncomeNote ? "" : " comparison-graphic__stat-note--placeholder"}`}
+          >
+            {netIncomeNote || "\u00A0"}
+          </span>
         </div>
         <div>
           <span className="mini-label">Total Tax</span>
-          <strong>{formatCurrency(totalTax)}</strong>
+          <strong>{formatCurrency(totalTax.localValue, totalTax.localCurrencyCode)}</strong>
+          <span
+            aria-hidden={totalTaxNote ? undefined : true}
+            className={`comparison-graphic__stat-note${totalTaxNote ? "" : " comparison-graphic__stat-note--placeholder"}`}
+          >
+            {totalTaxNote || "\u00A0"}
+          </span>
         </div>
       </div>
     </article>
@@ -92,39 +134,32 @@ function JurisdictionGraphic({ label, panelSummary, sidePrefix, summaryMetrics }
 }
 
 export default function TaxComparisonGraphic({
-  deductibleExpenses,
-  grossIncome,
-  incomeLabel,
+  comparisonCurrencyCode,
+  graphicCopy,
   leftLabel,
   rightLabel,
-  showDeductibleExpenses,
   summaryMetrics
 }) {
-  const comparisonDetails = comparisonCopy({
-    deductibleExpenses,
-    grossIncome,
-    incomeLabel,
-    showDeductibleExpenses
-  });
-
   return (
     <section className="comparison-graphic">
       <div className="comparison-graphic__intro">
         <p className="section-kicker">Visual comparison</p>
-        <h3>{comparisonDetails.introTitle}</h3>
-        <p>{comparisonDetails.introSummary}</p>
+        <h3>{graphicCopy.introTitle}</h3>
+        <p>{graphicCopy.introSummary}</p>
       </div>
 
       <div className="comparison-graphic__grid">
         <JurisdictionGraphic
+          comparisonCurrencyCode={comparisonCurrencyCode}
           label={leftLabel}
-          panelSummary={comparisonDetails.panelSummary}
+          panelSummary={graphicCopy.panelSummary}
           sidePrefix="left"
           summaryMetrics={summaryMetrics}
         />
         <JurisdictionGraphic
+          comparisonCurrencyCode={comparisonCurrencyCode}
           label={rightLabel}
-          panelSummary={comparisonDetails.panelSummary}
+          panelSummary={graphicCopy.panelSummary}
           sidePrefix="right"
           summaryMetrics={summaryMetrics}
         />

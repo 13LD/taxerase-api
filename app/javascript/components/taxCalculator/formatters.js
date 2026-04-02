@@ -1,16 +1,49 @@
-const currencyFormatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "EUR",
-  maximumFractionDigits: 2
-});
+const currencyFormatters = {};
+const currencySymbols = {};
+const fallbackCurrencySymbols = {
+  EUR: "€",
+  PLN: "zł",
+  CZK: "Kč"
+};
 
 const percentageFormatter = new Intl.NumberFormat("en-US", {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2
 });
 
-export function formatCurrency(value) {
-  return currencyFormatter.format(Number(value || 0));
+export function formatCurrency(value, currencyCode = "EUR") {
+  const resolvedCurrencyCode = currencyCode || "EUR";
+
+  if (!currencyFormatters[resolvedCurrencyCode]) {
+    currencyFormatters[resolvedCurrencyCode] = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: resolvedCurrencyCode,
+      maximumFractionDigits: 2
+    });
+  }
+
+  return currencyFormatters[resolvedCurrencyCode].format(Number(value || 0));
+}
+
+export function currencySymbol(currencyCode = "EUR") {
+  const resolvedCurrencyCode = currencyCode || "EUR";
+
+  if (fallbackCurrencySymbols[resolvedCurrencyCode]) {
+    return fallbackCurrencySymbols[resolvedCurrencyCode];
+  }
+
+  if (!currencySymbols[resolvedCurrencyCode]) {
+    const currencyPart = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: resolvedCurrencyCode,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).formatToParts(1).find((part) => part.type === "currency");
+
+    currencySymbols[resolvedCurrencyCode] = currencyPart?.value || resolvedCurrencyCode;
+  }
+
+  return currencySymbols[resolvedCurrencyCode];
 }
 
 export function formatPercentage(value) {

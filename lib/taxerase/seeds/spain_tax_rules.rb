@@ -192,6 +192,69 @@ module Taxerase
           tax_year: 2024,
           url: "https://sede.agenciatributaria.gob.es/Sede/ayuda/manuales-videos-folletos/manuales-practicos/irpf-2024/c07-rendimientos-actividades-economicas-estimacion-directa/fase-1-determinacion-rendimiento-neto/gastos-fiscalmente-deducibles/provisiones.html"
         },
+        "es_2024_beckham_overview" => {
+          title: "AEAT: Article 93 special regime overview 2024",
+          authority_name: "Agencia Tributaria",
+          country_code: "ES",
+          jurisdiction: "Spain",
+          source_type: "guidance",
+          tax_year: 2024,
+          url: "https://sede.agenciatributaria.gob.es/Sede/ayuda/manuales-videos-folletos/manuales-practicos/irpf-2024/c02-irpf-cuestiones-generales/sujecion-irpf-aspectos-personales/regimen-fiscal-especial-aplicable-trabajadores-desplazados/regimen-aplicable-trabajadores-desplazados.html"
+        },
+        "es_2024_beckham_tax_scale" => {
+          title: "AEAT: Article 93 special regime tax scale 2024",
+          authority_name: "Agencia Tributaria",
+          country_code: "ES",
+          jurisdiction: "Spain",
+          source_type: "guidance",
+          tax_year: 2024,
+          url: "https://sede.agenciatributaria.gob.es/Sede/ayuda/manuales-videos-folletos/manuales-practicos/irpf-2024/c15-calculo-impuesto-determinacion-cuotas-integras/regimen-fiscal-especial-aplicable-trabajadores.html"
+        },
+        "es_2024_beckham_model_151" => {
+          title: "AEAT: Modelo 151 for displaced workers special regime",
+          authority_name: "Agencia Tributaria",
+          country_code: "ES",
+          jurisdiction: "Spain",
+          source_type: "procedure",
+          tax_year: 2024,
+          url: "https://sede.agenciatributaria.gob.es/Sede/procedimientoini/G615.shtml"
+        },
+        "es_2025_beckham_overview" => {
+          title: "AEAT: Article 93 special regime overview",
+          authority_name: "Agencia Tributaria",
+          country_code: "ES",
+          jurisdiction: "Spain",
+          source_type: "guidance",
+          tax_year: 2025,
+          url: "https://sede.agenciatributaria.gob.es/Sede/irpf/tengo-que-presentar-declaracion/regimen-fiscal-aplicable-trabajadores-desplazados/regimen-especial.html"
+        },
+        "es_2025_beckham_tax_scale" => {
+          title: "AEAT: Article 93 special regime tax scale 2025",
+          authority_name: "Agencia Tributaria",
+          country_code: "ES",
+          jurisdiction: "Spain",
+          source_type: "guidance",
+          tax_year: 2025,
+          url: "https://sede.agenciatributaria.gob.es/Sede/ayuda/manuales-videos-folletos/manuales-practicos/irpf-2025/c15-calculo-impuesto-determinacion-cuotas-integras/regimen-fiscal-especial-aplicable-trabajadores.html"
+        },
+        "es_2025_beckham_model_149" => {
+          title: "AEAT: Modelo 149 option for displaced workers special regime",
+          authority_name: "Agencia Tributaria",
+          country_code: "ES",
+          jurisdiction: "Spain",
+          source_type: "procedure",
+          tax_year: 2025,
+          url: "https://sede.agenciatributaria.gob.es/Sede/procedimientos/G606.shtml"
+        },
+        "es_2025_beckham_model_151" => {
+          title: "AEAT: Modelo 151 for displaced workers special regime",
+          authority_name: "Agencia Tributaria",
+          country_code: "ES",
+          jurisdiction: "Spain",
+          source_type: "procedure",
+          tax_year: 2025,
+          url: "https://sede.agenciatributaria.gob.es/Sede/procedimientoini/G615.shtml"
+        },
         "alava_2024_renta_faq" => {
           title: "Araba: renta 2024 frequently asked questions",
           authority_name: "Diputación Foral de Álava",
@@ -283,22 +346,14 @@ module Taxerase
         purge_obsolete_regimes!(country)
         seed_live_regimes(country)
         seed_foral_research_regimes(country)
+        seed_beckham_regimes(country)
         seed_company_regime(country)
-        seed_inbound_workers_regime(country)
       end
 
       def purge_obsolete_regimes!(country)
-        expected_keys_by_year = RESEARCH_YEARS.index_with do
-          all_region_catalog.flat_map do |region|
-            [
-              regime_key_for("employee", region[:key]),
-              regime_key_for("self_employed", region[:key])
-            ]
-          end
-        end
+        expected_keys_by_year = expected_regime_keys_by_year
 
         country.tax_regimes
-          .where(category: %w[employee self_employed])
           .where.not(
             "(tax_year = ? AND key IN (?)) OR (tax_year = ? AND key IN (?)) OR (tax_year = ? AND key IN (?))",
             2024,
@@ -316,6 +371,14 @@ module Taxerase
           region_catalog_for(tax_year)::COMMON_REGIME_REGIONS.each do |region|
             seed_employee_regime(country, tax_year, region)
             seed_self_employed_regime(country, tax_year, region)
+          end
+        end
+      end
+
+      def seed_beckham_regimes(country)
+        LIVE_COMMON_REGIME_YEARS.each do |tax_year|
+          region_catalog_for(tax_year)::COMMON_REGIME_REGIONS.each do |region|
+            seed_beckham_regime(country, tax_year, region)
           end
         end
       end
@@ -401,24 +464,28 @@ module Taxerase
         replace_source_usages!(regime, [])
       end
 
-      def seed_inbound_workers_regime(country)
+      def seed_beckham_regime(country, tax_year, region_config)
         regime = build_regime(
           country:,
-          key: "inbound_workers_article_93",
-          name: "Inbound workers regime - article 93",
-          tax_year: 2025,
+          key: beckham_key_for(region_config[:key]),
+          name: "Beckham Law - #{region_config[:name]}",
+          tax_year: tax_year,
           category: "special_regime",
-          region: "Spain",
-          description: "Special regime applicable to workers displaced to Spain."
+          region: region_config[:name],
+          description: "Beckham Law / Article 93 for eligible inbound workers. Employment income is taxed at national non-resident rates instead of the ordinary resident regional IRPF scale, generally for the arrival year plus five more years."
         )
 
-        replace_parameters!(regime, { "calculation_method" => "research_pending" })
+        replace_parameters!(regime, beckham_parameters_for(tax_year))
         replace_brackets!(regime, "employment_income", SPECIAL_INBOUND_WORKER_BRACKETS)
-        replace_source_usages!(regime, [])
+        replace_source_usages!(regime, beckham_source_usages_for(tax_year))
       end
 
       def regime_key_for(category, region_key)
         Taxerase::Spain2025::RegionCatalog.regime_key(category:, region_key:)
+      end
+
+      def beckham_key_for(region_key)
+        Taxerase::Spain2025::RegionCatalog.regime_key(category: "beckham", region_key: region_key)
       end
 
       def common_region_catalog
@@ -523,6 +590,27 @@ module Taxerase
         end
       end
 
+      def beckham_parameters_for(tax_year)
+        case tax_year
+        when 2024
+          {
+            "calculation_method" => Taxerase::Spain::BeckhamLawCalculator::CALCULATION_METHOD,
+            "monthly_min_contribution_base" => 1323.00,
+            "monthly_max_contribution_base" => 4720.50,
+            "employee_social_security_rate" => 0.0647
+          }
+        when 2025
+          {
+            "calculation_method" => Taxerase::Spain::BeckhamLawCalculator::CALCULATION_METHOD,
+            "monthly_min_contribution_base" => 1381.20,
+            "monthly_max_contribution_base" => 4909.50,
+            "employee_social_security_rate" => 0.0648
+          }
+        else
+          raise ArgumentError, "Unsupported Beckham Law seed year #{tax_year}"
+        end
+      end
+
       def self_employed_social_security_bands_for(tax_year)
         case tax_year
         when 2024
@@ -601,6 +689,31 @@ module Taxerase
         end
       end
 
+      def beckham_source_usages_for(tax_year)
+        case tax_year
+        when 2024
+          [
+            { source_key: "es_2024_beckham_overview", usage_type: "overview", label: "AEAT: Article 93 overview 2024" },
+            { source_key: "es_2024_beckham_tax_scale", usage_type: "employment_income", label: "AEAT: Article 93 employment tax scale 2024" },
+            { source_key: "es_2024_beckham_model_151", usage_type: "filing", label: "AEAT: Modelo 151 special regime filing" },
+            { source_key: "es_2024_ss_employee_rates", usage_type: "employee_social_security_rates", label: "Seguridad Social: 2024 employee rates" },
+            { source_key: "es_2024_ss_order", usage_type: "employee_social_security_mei", label: "BOE: 2024 Social Security order and MEI rate" },
+            { source_key: "es_2024_ss_employee_bases", usage_type: "employee_social_security_bases", label: "Seguridad Social: 2024 contribution bases" }
+          ]
+        when 2025
+          [
+            { source_key: "es_2025_beckham_overview", usage_type: "overview", label: "AEAT: Article 93 overview" },
+            { source_key: "es_2025_beckham_tax_scale", usage_type: "employment_income", label: "AEAT: Article 93 employment tax scale 2025" },
+            { source_key: "es_2025_beckham_model_149", usage_type: "option", label: "AEAT: Modelo 149 option for the special regime" },
+            { source_key: "es_2025_beckham_model_151", usage_type: "filing", label: "AEAT: Modelo 151 special regime filing" },
+            { source_key: "es_2025_ss_employee_rates", usage_type: "employee_social_security_rates", label: "Seguridad Social: employee rates" },
+            { source_key: "es_2025_ss_employee_bases", usage_type: "employee_social_security_bases", label: "Seguridad Social: contribution bases" }
+          ]
+        else
+          raise ArgumentError, "Unsupported Beckham Law source year #{tax_year}"
+        end
+      end
+
       def foral_region_key?(region_key)
         FORAL_RESEARCH_REGIONS.any? { |region| region[:key] == region_key }
       end
@@ -640,11 +753,9 @@ module Taxerase
           ]
         end
 
-        if tax_year == 2025
-          keys + %w[corporate_income_general inbound_workers_article_93]
-        else
-          keys
-        end
+        keys += common_region_catalog.map { |region| beckham_key_for(region[:key]) } if LIVE_COMMON_REGIME_YEARS.include?(tax_year)
+        keys += %w[corporate_income_general] if tax_year == 2025
+        keys
       end
     end
   end

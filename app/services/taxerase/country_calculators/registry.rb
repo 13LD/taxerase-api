@@ -5,7 +5,9 @@ module Taxerase
 
       DEFINITIONS = {
         "ES" => SpainDefinition.new,
-        "NL" => NetherlandsDefinition.new
+        "NL" => NetherlandsDefinition.new,
+        "PL" => PolandDefinition.new,
+        "CZ" => CzechRepublicDefinition.new
       }.freeze
 
       def self.default
@@ -24,6 +26,17 @@ module Taxerase
 
       def self.comparison_catalog
         DEFINITIONS.values.map(&:public_catalog)
+      end
+
+      def self.comparison_profile_catalog
+        DEFINITIONS.values
+          .flat_map(&:public_comparison_profiles)
+          .uniq { |profile| profile.fetch(:key) }
+      end
+
+      def self.fetch_comparison_profile(profile_key)
+        comparison_profile_catalog.find { |profile| profile.fetch(:key) == profile_key.to_s } ||
+          raise(KeyError, "No comparison profile is registered for #{profile_key.inspect}.")
       end
     end
   end

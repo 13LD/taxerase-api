@@ -4,7 +4,8 @@ module Taxerase
       def country
         {
           code: "NL",
-          name: "Netherlands"
+          name: "Netherlands",
+          currency_code: "EUR"
         }
       end
 
@@ -15,6 +16,7 @@ module Taxerase
       def default_input
         {
           gross_income: 60_000,
+          input_currency_code: "EUR",
           salary_period: "YEAR",
           tax_year: 2025,
           deductible_expenses: 0,

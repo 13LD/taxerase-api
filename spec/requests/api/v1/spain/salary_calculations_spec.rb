@@ -113,6 +113,72 @@ RSpec.describe "Api::V1::Spain::SalaryCalculations", type: :request do
       expect(json.dig("breakdown", "annual_net_income")).to be_within(0.01).of(34_405.84)
     end
 
+    it "returns a Beckham Law breakdown for Madrid" do
+      post api_v1_spain_salary_calculation_path,
+        params: {
+          calculation: {
+            gross_income: 60_000,
+            tax_year: 2025,
+            salary_period: "YEAR",
+            tax_regime_key: "beckham_madrid",
+            age_bracket: "age_75_plus",
+            children_count: 2,
+            children_under_three_count: 1,
+            disability_level: "level_65_plus"
+          }
+        },
+        as: :json
+
+      expect(response).to have_http_status(:ok)
+
+      json = JSON.parse(response.body)
+
+      expect(json.dig("metadata", "tax_regime_key")).to eq("beckham_madrid")
+      expect(json.dig("metadata", "region")).to eq("Madrid")
+      expect(json.dig("breakdown", "annual_income_tax")).to eq(14_400.0)
+      expect(json.dig("breakdown", "annual_social_security")).to eq(3817.63)
+      expect(json.dig("breakdown", "annual_net_income")).to eq(41_782.37)
+      expect(json.dig("input", "age_bracket")).to eq("age_75_plus")
+      expect(json.dig("input", "children_count")).to eq(2)
+      expect(json.dig("detail_cards", 0, "label")).to eq("Beckham Law income tax")
+      expect(json["sources"]).not_to be_empty
+    end
+
+    it "returns the same Beckham Law tax outcome across supported Spain regions" do
+      post api_v1_spain_salary_calculation_path,
+        params: {
+          calculation: {
+            gross_income: 60_000,
+            tax_year: 2025,
+            salary_period: "YEAR",
+            tax_regime_key: "beckham_andalusia"
+          }
+        },
+        as: :json
+
+      expect(response).to have_http_status(:ok)
+      andalusia = JSON.parse(response.body)
+
+      post api_v1_spain_salary_calculation_path,
+        params: {
+          calculation: {
+            gross_income: 60_000,
+            tax_year: 2025,
+            salary_period: "YEAR",
+            tax_regime_key: "beckham_madrid"
+          }
+        },
+        as: :json
+
+      expect(response).to have_http_status(:ok)
+      madrid = JSON.parse(response.body)
+
+      expect(andalusia.dig("metadata", "region")).to eq("Andalusia")
+      expect(madrid.dig("metadata", "region")).to eq("Madrid")
+      expect(andalusia.dig("breakdown", "annual_net_income")).to eq(madrid.dig("breakdown", "annual_net_income"))
+      expect(andalusia.dig("breakdown", "annual_income_tax")).to eq(madrid.dig("breakdown", "annual_income_tax"))
+    end
+
     it "returns a 2024 self-employed breakdown" do
       post api_v1_spain_salary_calculation_path,
         params: {

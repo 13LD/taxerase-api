@@ -3,8 +3,8 @@ function csrfToken() {
 }
 
 export function buildCalculationPayload({
-  applyThirtyPercentRuling,
   grossIncome,
+  inputCurrencyCode,
   deductibleExpenses,
   salaryPeriod,
   selectedTaxYear,
@@ -13,12 +13,12 @@ export function buildCalculationPayload({
   childrenCount,
   childrenUnderThreeCount,
   disabilityLevel,
-  thirtyPercentRulingBasis
+  regimeControlPayload
 }) {
   return {
     calculation: {
-      apply_thirty_percent_ruling: applyThirtyPercentRuling,
       gross_income: grossIncome,
+      input_currency_code: inputCurrencyCode,
       deductible_expenses: deductibleExpenses,
       salary_period: salaryPeriod,
       tax_year: selectedTaxYear,
@@ -27,7 +27,7 @@ export function buildCalculationPayload({
       children_count: childrenCount,
       children_under_three_count: childrenUnderThreeCount,
       disability_level: disabilityLevel,
-      thirty_percent_ruling_basis: thirtyPercentRulingBasis
+      ...regimeControlPayload
     }
   };
 }
@@ -35,6 +35,7 @@ export function buildCalculationPayload({
 export function buildComparisonPayload({
   deductibleExpenses,
   grossIncome,
+  inputCurrencyCode,
   leftCountryCode,
   leftTaxRegimeKey,
   rightCountryCode,
@@ -46,6 +47,7 @@ export function buildComparisonPayload({
     comparison: {
       deductible_expenses: deductibleExpenses,
       gross_income: grossIncome,
+      input_currency_code: inputCurrencyCode,
       left_country_code: leftCountryCode,
       left_tax_regime_key: leftTaxRegimeKey,
       right_country_code: rightCountryCode,
@@ -80,5 +82,16 @@ export async function requestComparison({ payload, signal }) {
       "X-CSRF-Token": csrfToken()
     },
     body: JSON.stringify(payload)
+  });
+}
+
+export async function requestCountryCalculator({ countryCode, signal }) {
+  return fetch(`/api/v1/countries/${encodeURIComponent(countryCode)}/calculator`, {
+    method: "GET",
+    signal,
+    headers: {
+      Accept: "application/json",
+      "X-CSRF-Token": csrfToken()
+    }
   });
 }

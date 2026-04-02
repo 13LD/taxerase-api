@@ -4,15 +4,19 @@ module Api
       class SalaryCalculationsController < ApplicationController
         rescue_from Taxerase::Spain::CommonRegimeEmployeeCalculator::ValidationError, with: :render_validation_error
         rescue_from Taxerase::Spain::CommonRegimeSelfEmployedCalculator::ValidationError, with: :render_validation_error
+        rescue_from Taxerase::Spain::BeckhamLawCalculator::ValidationError, with: :render_validation_error
         rescue_from Taxerase::Spain::CalculationRouter::UnsupportedRegimeError, with: :render_validation_error
+        rescue_from Taxerase::InputCurrencyHandler::ValidationError, with: :render_validation_error
 
         def create
           render json: Taxerase::Spain::CalculationRouter.call(
             gross_income: calculation_params[:gross_income],
+            input_currency_code: calculation_params[:input_currency_code],
             salary_period: calculation_params[:salary_period],
             tax_year: calculation_params[:tax_year].to_i,
             tax_regime_key: calculation_params[:tax_regime_key],
             deductible_expenses: calculation_params[:deductible_expenses],
+            apply_beckham_law: calculation_params[:apply_beckham_law],
             age_bracket: calculation_params[:age_bracket],
             children_count: calculation_params[:children_count],
             children_under_three_count: calculation_params[:children_under_three_count],
@@ -25,10 +29,12 @@ module Api
         def calculation_params
           params.require(:calculation).permit(
             :gross_income,
+            :input_currency_code,
             :salary_period,
             :tax_year,
             :tax_regime_key,
             :deductible_expenses,
+            :apply_beckham_law,
             :age_bracket,
             :children_count,
             :children_under_three_count,

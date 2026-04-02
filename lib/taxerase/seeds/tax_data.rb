@@ -3,7 +3,9 @@ module Taxerase
     class TaxData
       SEEDERS = [
         SpainTaxRules,
-        NetherlandsTaxRules
+        NetherlandsTaxRules,
+        PolandTaxRules,
+        CzechRepublicTaxRules
       ].freeze
 
       def self.call

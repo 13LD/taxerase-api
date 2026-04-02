@@ -38,6 +38,20 @@ export function buildComparisonRegimesForCountry(countryEntry, selectedTaxYear, 
   );
 }
 
+export function buildComparisonInputCurrencyOptions(leftCountryEntry, rightCountryEntry) {
+  const seenCodes = new Set();
+
+  return [
+    ...(leftCountryEntry?.input_currency_options || []),
+    ...(rightCountryEntry?.input_currency_options || [])
+  ].filter((option) => {
+    if (seenCodes.has(option.code)) return false;
+
+    seenCodes.add(option.code);
+    return true;
+  });
+}
+
 export function resolveComparisonCountryCode({
   availableCountryOptions,
   preferredCountryCode,

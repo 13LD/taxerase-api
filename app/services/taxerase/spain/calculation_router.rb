@@ -12,16 +12,21 @@ module Taxerase
 
       SUPPORTED_METHODS = {
         CommonRegimeEmployeeCalculator::CALCULATION_METHOD => CommonRegimeEmployeeCalculator,
-        CommonRegimeSelfEmployedCalculator::CALCULATION_METHOD => CommonRegimeSelfEmployedCalculator
+        CommonRegimeSelfEmployedCalculator::CALCULATION_METHOD => CommonRegimeSelfEmployedCalculator,
+        BeckhamLawCalculator::CALCULATION_METHOD => BeckhamLawCalculator
       }.freeze
       COUNTRY_CODE = "ES".freeze
+      NATIVE_CURRENCY_CODE = "EUR".freeze
+      SUPPORTED_INPUT_CURRENCY_CODES = %w[EUR].freeze
 
       def self.call(
         gross_income:,
         salary_period:,
         tax_year:,
         tax_regime_key: nil,
+        input_currency_code: NATIVE_CURRENCY_CODE,
         deductible_expenses: 0,
+        apply_beckham_law: false,
         age_bracket: "under_65",
         children_count: 0,
         children_under_three_count: 0,
@@ -31,12 +36,13 @@ module Taxerase
         children_count = children_count.nil? ? 0 : children_count
         children_under_three_count = children_under_three_count.nil? ? 0 : children_under_three_count
         disability_level = disability_level.presence || "none"
+        resolved_input_currency_code = input_currency_handler.resolve_input_currency_code(input_currency_code)
         regime = regime_for!(tax_regime_key.presence || default_regime_key(tax_year), tax_year)
         calculator = SUPPORTED_METHODS[regime.parameter_text("calculation_method")]
 
         raise UnsupportedRegimeError.new([ unsupported_message_for(regime) ]) unless calculator
 
-        if calculator == CommonRegimeSelfEmployedCalculator
+        result = if calculator == CommonRegimeSelfEmployedCalculator
           calculator.call(
             gross_income:,
             salary_period:,
@@ -60,6 +66,8 @@ module Taxerase
             disability_level:
           )
         end
+
+        input_currency_handler.apply_to_result(result, input_currency_code: resolved_input_currency_code)
       end
 
       def self.default_regime_key(tax_year)
@@ -134,6 +142,13 @@ module Taxerase
 
       def self.country
         @country ||= Country.find_by!(code: COUNTRY_CODE)
+      end
+
+      def self.input_currency_handler
+        @input_currency_handler ||= Taxerase::InputCurrencyHandler.new(
+          native_currency_code: NATIVE_CURRENCY_CODE,
+          supported_currency_codes: SUPPORTED_INPUT_CURRENCY_CODES
+        )
       end
     end
   end
