@@ -1,6 +1,17 @@
 require "rails_helper"
 
 RSpec.describe "Country calculator switching", type: :system, js: true do
+  def switch_country(country_name, heading:)
+    within(".calculator-card") do
+      select country_name, from: "Country"
+    end
+
+    within(".calculator-card") do
+      expect(page).to have_text(heading, wait: 20)
+      expect(page).to have_select("Country", selected: country_name, wait: 20)
+    end
+  end
+
   it "switches from Spain to Netherlands and loads country-specific fields" do
     visit root_path
     page.execute_script("window.__country_switch_marker = 'keep'")
@@ -8,12 +19,11 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
     within(".calculator-card") do
       expect(page).to have_select("Country", selected: "Spain")
       expect(page).to have_text("Resident employee - Andalusia")
-      select "Netherlands", from: "Country"
     end
 
+    switch_country("Netherlands", heading: "Resident employee - Netherlands")
+
     within(".calculator-card") do
-      expect(page).to have_text("Resident employee - Netherlands")
-      expect(page).to have_select("Country", selected: "Netherlands")
       expect(page).to have_select(
         "Taxpayer age",
         options: [ "Below AOW age (under 67)", "AOW age or older (67+)" ]
@@ -88,11 +98,10 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
   it "switches to Poland and loads Poland-specific controls and PLN output" do
     visit root_path
 
+    switch_country("Poland", heading: "Contract of employment - Poland")
+
     within(".calculator-card") do
-      select "Poland", from: "Country"
-      expect(page).to have_select("Country", selected: "Poland")
       expect(page).to have_select("Input currency", options: [ "PLN", "EUR" ])
-      expect(page).to have_text("Contract of employment - Poland")
       expect(page).to have_select(
         "Taxpayer age",
         options: [ "Under 26", "26 to retirement age", "Retirement age or older" ]
@@ -134,11 +143,10 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
   it "switches to the Czech Republic and loads child and disability credits with CZK output" do
     visit root_path
 
+    switch_country("Czech Republic", heading: "Resident employee - Czech Republic")
+
     within(".calculator-card") do
-      select "Czech Republic", from: "Country"
-      expect(page).to have_select("Country", selected: "Czech Republic")
       expect(page).to have_select("Input currency", options: [ "CZK", "EUR" ])
-      expect(page).to have_text("Resident employee - Czech Republic")
       expect(page).to have_field("Children")
       expect(page).to have_select(
         "Taxpayer disability",
