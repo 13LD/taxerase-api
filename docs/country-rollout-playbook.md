@@ -17,6 +17,10 @@ As of April 2, 2026, the next recommended rollout order is:
 1. Poland
 2. Czech Republic
 
+Follow-up notes for completed rollouts should live in dedicated docs. The current Andorra deferred-work tracker is:
+
+- [Andorra calculator follow-ups](./andorra-calculator-followups.md)
+
 ## Current Reference Pattern
 
 The current live countries define the reference architecture:

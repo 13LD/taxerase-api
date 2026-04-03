@@ -184,4 +184,72 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
       expect(page).to have_no_text("Kč", wait: 10)
     end
   end
+
+  it "switches to Portugal and loads Portugal-specific deduction controls" do
+    visit root_path
+
+    within(".calculator-card") do
+      select "Portugal", from: "Country"
+      expect(page).to have_select("Country", selected: "Portugal")
+      expect(page).not_to have_select("Input currency")
+      expect(page).to have_text("Resident employee - Portugal")
+      expect(page).to have_field("Children")
+      expect(page).to have_select("Children under 3", selected: "0", disabled: true)
+      expect(page).to have_select(
+        "Taxpayer disability",
+        options: [ "None", "60% disability or more" ]
+      )
+      expect(page).to have_select("Ascendants in household")
+      expect(page).to have_field("General family expenses")
+      expect(page).to have_field("Health expenses")
+      expect(page).to have_field("Education expenses")
+      expect(page).to have_field("Eligible housing rent")
+      expect(page).to have_field("Court-ordered alimony paid")
+      expect(page).to have_field("Care home expenses")
+      expect(page).to have_field("Domestic work remuneration")
+
+      click_button "Simplified self-employed"
+
+      expect(page).to have_text("Simplified self-employed - Portugal")
+      expect(page).to have_select("Activity type")
+      expect(page).to have_field("Deductible expenses")
+    end
+
+    within(".results-card") do
+      expect(page).to have_text("Documented business expenses")
+      expect(page).to have_text("Social security contribution")
+      expect(page).to have_text("Portuguese IRS")
+    end
+  end
+
+  it "switches to Andorra and loads Andorra-specific deduction controls" do
+    visit root_path
+
+    within(".calculator-card") do
+      select "Andorra", from: "Country"
+      expect(page).to have_select("Country", selected: "Andorra")
+      expect(page).not_to have_select("Input currency")
+      expect(page).to have_text("Resident employee - Andorra")
+      expect(page).to have_field("Children")
+      expect(page).to have_select(
+        "Taxpayer disability",
+        options: [ "None", "Recognized disability" ]
+      )
+      expect(page).to have_select("Dependent ascendants")
+      expect(page).not_to have_field("Children under 3")
+      expect(page).not_to have_field("Taxpayer age")
+
+      click_button "Self-employed activity"
+
+      expect(page).to have_text("Standard self-employed - Andorra")
+      expect(page).to have_field("Deductible expenses")
+    end
+
+    within(".results-card") do
+      expect(page).to have_text(/Documented business expenses|Deductible expenses/)
+      expect(page).to have_text("Earned-income bonus")
+      expect(page).to have_text("Andorran IRPF")
+      expect(page).to have_text("Total tax")
+    end
+  end
 end

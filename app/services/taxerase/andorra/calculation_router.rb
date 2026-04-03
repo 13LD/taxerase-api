@@ -1,0 +1,134 @@
+module Taxerase
+  module Andorra
+    class CalculationRouter
+      class UnsupportedRegimeError < StandardError
+        attr_reader :errors
+
+        def initialize(errors)
+          @errors = errors
+          super(errors.join(", "))
+        end
+      end
+
+      COUNTRY_CODE = "AD".freeze
+      NATIVE_CURRENCY_CODE = "EUR".freeze
+      SUPPORTED_INPUT_CURRENCY_CODES = %w[EUR].freeze
+      SUPPORTED_METHODS = {
+        EmployeeCalculator::CALCULATION_METHOD => EmployeeCalculator,
+        SelfEmployedCalculator::CALCULATION_METHOD => SelfEmployedCalculator
+      }.freeze
+
+      def self.call(
+        gross_income:,
+        salary_period:,
+        tax_year:,
+        tax_regime_key: nil,
+        input_currency_code: NATIVE_CURRENCY_CODE,
+        deductible_expenses: 0,
+        age_bracket: "standard",
+        children_count: 0,
+        children_under_three_count: 0,
+        disability_level: "none",
+        ascendants_count: 0,
+        disabled_dependents_count: 0,
+        spouse_without_income: false,
+        mortgage_interest: 0,
+        pension_contributions: 0,
+        alimony_paid: 0
+      )
+        age_bracket
+        resolved_input_currency_code = input_currency_handler.resolve_input_currency_code(input_currency_code)
+        normalized_gross_income = input_currency_handler.convert_amount(gross_income, input_currency_code: resolved_input_currency_code)
+        normalized_deductible_expenses = input_currency_handler.convert_amount(deductible_expenses, input_currency_code: resolved_input_currency_code)
+        normalized_mortgage_interest = input_currency_handler.convert_amount(mortgage_interest, input_currency_code: resolved_input_currency_code)
+        normalized_pension_contributions = input_currency_handler.convert_amount(pension_contributions, input_currency_code: resolved_input_currency_code)
+        normalized_alimony_paid = input_currency_handler.convert_amount(alimony_paid, input_currency_code: resolved_input_currency_code)
+
+        regime = lookup_regime(tax_regime_key.presence || default_regime_key(tax_year), tax_year)
+        raise UnsupportedRegimeError.new([ "#{tax_regime_key} is not available for Andorra #{tax_year}." ]) if regime.nil?
+
+        calculator = SUPPORTED_METHODS[regime.parameter_text("calculation_method")]
+        raise UnsupportedRegimeError.new([ unsupported_message_for(regime) ]) if calculator.nil?
+
+        kwargs = {
+          gross_income: normalized_gross_income,
+          salary_period: salary_period,
+          tax_regime_key: regime.key,
+          tax_year: tax_year,
+          children_count: children_count.presence || 0,
+          children_under_three_count: children_under_three_count.presence || 0,
+          disability_level: disability_level.presence || "none",
+          ascendants_count: ascendants_count.presence || 0,
+          disabled_dependents_count: disabled_dependents_count.presence || 0,
+          spouse_without_income: spouse_without_income,
+          mortgage_interest: normalized_mortgage_interest,
+          pension_contributions: normalized_pension_contributions,
+          alimony_paid: normalized_alimony_paid
+        }
+        kwargs[:deductible_expenses] = normalized_deductible_expenses if calculator == SelfEmployedCalculator
+
+        result = calculator.call(**kwargs)
+        input_currency_handler.apply_to_result(result, input_currency_code: resolved_input_currency_code)
+      end
+
+      def self.default_regime_key(tax_year)
+        regimes = country.tax_regimes.includes(:tax_parameters).where(tax_year: tax_year, category: "employee", active: true).order(:region, :name)
+        preferred = regimes.find { |regime| SUPPORTED_METHODS.key?(regime.parameter_text("calculation_method")) }
+        preferred&.key || regimes.first&.key
+      end
+
+      def self.regime_options
+        country.tax_regimes.includes(:tax_parameters, tax_source_usages: :official_tax_source).order(:tax_year, :category, :region, :name).map do |regime|
+          supported = supported?(regime)
+          {
+            key: regime.key,
+            name: regime.name,
+            region: regime.region,
+            category: regime.category,
+            tax_year: regime.tax_year,
+            description: regime.description,
+            supported: supported,
+            status: supported ? "Live" : "Research",
+            sources: regime.source_links
+          }
+        end
+      end
+
+      def self.public_regime_options
+        regime_options.select { |regime| regime[:supported] }
+      end
+
+      def self.public_tax_year_options
+        public_regime_options.map { |regime| regime[:tax_year] }.uniq.sort
+      end
+
+      def self.supported?(regime_or_key, tax_year = nil)
+        regime = regime_or_key.is_a?(TaxRegime) ? regime_or_key : lookup_regime(regime_or_key, tax_year)
+        regime.present? && regime.country_id == country.id && SUPPORTED_METHODS.key?(regime.parameter_text("calculation_method"))
+      end
+
+      def self.lookup_regime(regime_key, tax_year)
+        TaxRegime.includes(:country, :tax_brackets, :tax_parameters, tax_source_usages: :official_tax_source).find_by(
+          country: country,
+          key: regime_key,
+          tax_year: tax_year
+        )
+      end
+
+      def self.unsupported_message_for(regime)
+        "#{regime.name} is stored in the rules database, but its calculator flow is not implemented yet."
+      end
+
+      def self.country
+        @country ||= Country.find_by(code: COUNTRY_CODE)
+      end
+
+      def self.input_currency_handler
+        @input_currency_handler ||= Taxerase::InputCurrencyHandler.new(
+          native_currency_code: NATIVE_CURRENCY_CODE,
+          supported_currency_codes: SUPPORTED_INPUT_CURRENCY_CODES
+        )
+      end
+    end
+  end
+end

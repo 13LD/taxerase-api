@@ -1,0 +1,194 @@
+module Taxerase
+  module Andorra
+    class SelfEmployedCalculator
+      include CalculatorSupport
+
+      class ValidationError < StandardError
+        attr_reader :errors
+
+        def initialize(errors)
+          @errors = errors
+          super(errors.join(", "))
+        end
+      end
+
+      CALCULATION_METHOD = "andorra_self_employed_v1".freeze
+      COUNTRY_CODE = "AD".freeze
+
+      def self.call(
+        gross_income:,
+        salary_period:,
+        tax_regime_key:,
+        tax_year:,
+        deductible_expenses: 0,
+        children_count: 0,
+        children_under_three_count: 0,
+        disability_level: "none",
+        ascendants_count: 0,
+        disabled_dependents_count: 0,
+        spouse_without_income: false,
+        mortgage_interest: 0,
+        pension_contributions: 0,
+        alimony_paid: 0,
+        **_unused
+      )
+        new(
+          gross_income: gross_income,
+          salary_period: salary_period,
+          tax_regime_key: tax_regime_key,
+          tax_year: tax_year,
+          deductible_expenses: deductible_expenses,
+          children_count: children_count,
+          children_under_three_count: children_under_three_count,
+          disability_level: disability_level,
+          ascendants_count: ascendants_count,
+          disabled_dependents_count: disabled_dependents_count,
+          spouse_without_income: spouse_without_income,
+          mortgage_interest: mortgage_interest,
+          pension_contributions: pension_contributions,
+          alimony_paid: alimony_paid
+        ).call
+      end
+
+      def initialize(
+        gross_income:,
+        salary_period:,
+        tax_regime_key:,
+        tax_year:,
+        deductible_expenses:,
+        children_count:,
+        children_under_three_count:,
+        disability_level:,
+        ascendants_count:,
+        disabled_dependents_count:,
+        spouse_without_income:,
+        mortgage_interest:,
+        pension_contributions:,
+        alimony_paid:,
+        **_unused
+      )
+        @gross_income = gross_income
+        @salary_period = salary_period
+        @tax_regime_key = tax_regime_key
+        @tax_year = tax_year
+        @deductible_expenses = deductible_expenses
+        @children_count = children_count
+        @children_under_three_count = children_under_three_count
+        @disability_level = disability_level
+        @ascendants_count = ascendants_count
+        @disabled_dependents_count = disabled_dependents_count
+        @spouse_without_income = spouse_without_income
+        @mortgage_interest = mortgage_interest
+        @pension_contributions = pension_contributions
+        @alimony_paid = alimony_paid
+      end
+
+      def call
+        run_validation
+
+        annual_gross_income = normalize_annual_gross_income
+        annual_deductible_expenses = parsed_deductible_expenses
+        annual_social_security = parameter_decimal("self_employed_social_security_standard_base_annual") *
+          parameter_decimal("self_employed_social_security_rate")
+        net_general_income = [ annual_gross_income - annual_deductible_expenses - annual_social_security, BigDecimal("0") ].max
+        reductions = andorra_tax_relief(net_general_income: net_general_income)
+        taxable_income = [ net_general_income - reductions[:total_base_reductions], BigDecimal("0") ].max
+        base_income_tax = taxable_income * parameter_decimal("income_tax_rate")
+        earned_income_bonus = [
+          base_income_tax * parameter_decimal("earned_income_bonus_rate"),
+          parameter_decimal("earned_income_bonus_cap")
+        ].min
+        annual_income_tax = [ base_income_tax - reductions[:mortgage_interest_credit] - earned_income_bonus, BigDecimal("0") ].max
+        total_tax = annual_social_security + annual_income_tax
+        annual_net_income = annual_gross_income - annual_deductible_expenses - total_tax
+
+        {
+          metadata: metadata,
+          input: build_common_input_payload(annual_gross_income: annual_gross_income).merge(
+            deductible_expenses: round_currency(annual_deductible_expenses)
+          ),
+          breakdown: {
+            annual_deductible_expenses: round_currency(annual_deductible_expenses),
+            annual_social_security: round_currency(annual_social_security),
+            net_general_income: round_currency(net_general_income),
+            taxpayer_reduction: round_currency(reductions[:taxpayer_reduction]),
+            dependent_reduction: round_currency(reductions[:dependent_reduction]),
+            pension_contribution_reduction: round_currency(reductions[:pension_reduction]),
+            alimony_reduction: round_currency(reductions[:alimony_reduction]),
+            total_base_reductions: round_currency(reductions[:total_base_reductions]),
+            taxable_income: round_currency(taxable_income),
+            annual_income_tax_before_credits: round_currency(base_income_tax),
+            earned_income_bonus: round_currency(earned_income_bonus),
+            mortgage_interest_credit: round_currency(reductions[:mortgage_interest_credit]),
+            annual_income_tax: round_currency(annual_income_tax),
+            total_tax: round_currency(total_tax),
+            annual_net_income: round_currency(annual_net_income),
+            monthly_net_income: round_currency(annual_net_income / 12),
+            effective_tax_rate: round_percentage(total_tax / annual_gross_income)
+          },
+          detail_cards: [
+            { label: "Documented business expenses", value: round_currency(annual_deductible_expenses) },
+            { label: "Self-employed CASS contribution", value: round_currency(annual_social_security) },
+            { label: "Base reductions", value: round_currency(reductions[:total_base_reductions]) },
+            { label: "Taxable activity income", value: round_currency(taxable_income) },
+            { label: "Andorran IRPF before credits", value: round_currency(base_income_tax) },
+            { label: "Earned-income bonus", value: round_currency(earned_income_bonus) },
+            { label: "Mortgage-interest credit", value: round_currency(reductions[:mortgage_interest_credit]) },
+            { label: "Andorran IRPF", value: round_currency(annual_income_tax) },
+            { label: "Total tax", value: round_currency(total_tax) }
+          ],
+          assumptions: assumptions,
+          sources: regime.source_links
+        }
+      end
+
+      private
+
+      attr_reader :gross_income, :salary_period, :tax_regime_key, :tax_year, :deductible_expenses,
+        :children_count, :children_under_three_count, :disability_level, :ascendants_count, :disabled_dependents_count, :spouse_without_income,
+        :mortgage_interest, :pension_contributions, :alimony_paid
+
+      def run_validation
+        errors = []
+        errors << "gross_income must be a number greater than 0" if parsed_gross_income <= 0
+        errors << "gross_income is too large for the current calculator" if parsed_gross_income > 50_000_000
+        errors << "deductible_expenses must be 0 or greater" if parsed_deductible_expenses.negative?
+        errors << "deductible_expenses is too large for the current calculator" if parsed_deductible_expenses > 50_000_000
+        errors << "salary_period must be YEAR or MONTH" unless %w[YEAR MONTH].include?(normalized_salary_period)
+        errors << "tax_regime_key must point to a supported Andorra self-employed regime" if regime.nil?
+        errors.concat(common_andorra_validation_errors)
+        raise ValidationError.new(errors.uniq) if errors.any?
+      end
+
+      def regime
+        @regime ||= TaxRegime.includes(:country, :tax_brackets, :tax_parameters, tax_source_usages: :official_tax_source).find_by(
+          country: country_record,
+          key: tax_regime_key,
+          tax_year: tax_year,
+          category: "self_employed"
+        )
+      end
+
+      def metadata
+        {
+          country_code: regime.country.code,
+          country_name: regime.country.name,
+          region: regime.region,
+          tax_year: regime.tax_year,
+          tax_regime_key: regime.key,
+          tax_regime_name: regime.name,
+          calculator_version: "andorra-self-employed-v1"
+        }
+      end
+
+      def assumptions
+        [
+          "Andorra resident self-employed person, tax year #{tax_year}.",
+          "Self-employed income is treated as economic-activity income under IRPF with a flat 10% rate after supported reductions and credits.",
+          "The calculator uses the seeded standard CASS own-account base at 100% of the prior-year average salaried monthly wage.",
+          "Reduced own-account bases, startup or under-35 special regimes, turnover-threshold-driven base changes, and other advanced social-security options are not included."
+        ]
+      end
+    end
+  end
+end

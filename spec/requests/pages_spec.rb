@@ -1,6 +1,15 @@
 require "rails_helper"
 
 RSpec.describe "Pages", type: :request do
+  CALCULATION_ROUTERS = [
+    Taxerase::Andorra::CalculationRouter,
+    Taxerase::Spain::CalculationRouter,
+    Taxerase::Netherlands::CalculationRouter,
+    Taxerase::Poland::CalculationRouter,
+    Taxerase::CzechRepublic::CalculationRouter,
+    Taxerase::Portugal::CalculationRouter
+  ].freeze
+
   describe "GET /" do
     it "renders the home page" do
       get root_path
@@ -8,17 +17,33 @@ RSpec.describe "Pages", type: :request do
       expect(response).to have_http_status(:ok)
       expect(response.body).to include("Taxerase")
       expect(response.body).to include("country-calculator-app")
+      expect(response.body).to include("Andorra")
       expect(response.body).to include("Spain")
       expect(response.body).to include("Netherlands")
       expect(response.body).to include("Poland")
       expect(response.body).to include("Czech Republic")
+      expect(response.body).to include("Portugal")
+      expect(response.body).to include("employee_andorra")
+      expect(response.body).to include("self_employed_andorra")
       expect(response.body).to include("employee_madrid")
       expect(response.body).to include("self_employed_madrid")
       expect(response.body).to include("beckham_madrid")
+      expect(response.body).to include("employee_portugal")
+      expect(response.body).to include("self_employed_portugal")
       expect(response.body).to include("2024")
       expect(response.body).to include("2025")
       expect(response.body).to include("2026")
       expect(response.body).not_to include("employee_navarre")
+    end
+
+    it "renders the Andorra calculator page when requested" do
+      get root_path, params: { country: "AD" }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("Taxerase | Andorra Tax Calculator")
+      expect(response.body).to include("employee_andorra")
+      expect(response.body).to include("self_employed_andorra")
+      expect(response.body).to include("&quot;code&quot;:&quot;AD&quot;")
     end
 
     it "renders the Netherlands calculator page when requested" do
@@ -50,6 +75,29 @@ RSpec.describe "Pages", type: :request do
       expect(response.body).to include("&quot;code&quot;:&quot;CZ&quot;")
       expect(response.body).to include("&quot;currency_code&quot;:&quot;CZK&quot;")
     end
+
+    it "renders the Portugal calculator page when requested" do
+      get root_path, params: { country: "PT" }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("Taxerase | Portugal Tax Calculator")
+      expect(response.body).to include("employee_portugal")
+      expect(response.body).to include("self_employed_portugal")
+      expect(response.body).to include("&quot;code&quot;:&quot;PT&quot;")
+    end
+
+    it "falls back to the first available seeded calculator when a registered country is missing" do
+      reset_country_cache!
+      Country.find_by!(code: "PT").destroy!
+      reset_country_cache!
+
+      get root_path, params: { country: "PT" }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("Taxerase | Spain Tax Calculator")
+      expect(response.body).not_to include("Portugal")
+      expect(response.body).to include("&quot;code&quot;:&quot;ES&quot;")
+    end
   end
 
   describe "GET /api/v1/countries/:country_code/calculator" do
@@ -66,11 +114,41 @@ RSpec.describe "Pages", type: :request do
         .to include("employee_netherlands", "self_employed_netherlands")
     end
 
+    it "returns Andorra calculator props" do
+      get api_v1_country_calculator_path(country_code: "AD")
+
+      expect(response).to have_http_status(:ok)
+
+      json = JSON.parse(response.body)
+
+      expect(json["page_title"]).to eq("Taxerase | Andorra Tax Calculator")
+      expect(json.dig("calculator_props", "country", "code")).to eq("AD")
+      expect(json.dig("calculator_props", "regime_options").map { |entry| entry["key"] })
+        .to include("employee_andorra", "self_employed_andorra")
+    end
+
     it "returns not found for an unknown country code" do
+      get api_v1_country_calculator_path(country_code: "IT")
+
+      expect(response).to have_http_status(:not_found)
+      expect(JSON.parse(response.body)["errors"]).to include('No country calculator is registered for "IT".')
+    end
+
+    it "returns not found for a registered country without seed data" do
+      reset_country_cache!
+      Country.find_by!(code: "PT").destroy!
+      reset_country_cache!
+
       get api_v1_country_calculator_path(country_code: "PT")
 
       expect(response).to have_http_status(:not_found)
-      expect(JSON.parse(response.body)["errors"]).to include('No country calculator is registered for "PT".')
+      expect(JSON.parse(response.body)["errors"]).to include("Portugal calculator data is not available. Run db:seed.")
+    end
+  end
+
+  def reset_country_cache!
+    CALCULATION_ROUTERS.each do |router|
+      router.remove_instance_variable(:@country) if router.instance_variable_defined?(:@country)
     end
   end
 end

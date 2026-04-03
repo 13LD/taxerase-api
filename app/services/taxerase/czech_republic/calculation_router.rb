@@ -84,7 +84,7 @@ module Taxerase
 
       def self.regime_options
         country.tax_regimes
-          .includes(tax_source_usages: :official_tax_source)
+          .includes(:tax_parameters, tax_source_usages: :official_tax_source)
           .order(:tax_year, :category, :region, :name)
           .map do |regime|
             supported = supported?(regime)

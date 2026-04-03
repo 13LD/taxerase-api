@@ -46,7 +46,13 @@ class TaxRegime < ApplicationRecord
   end
 
   def source_links
-    tax_source_usages.includes(:official_tax_source).sort_by(&:position).map do |usage|
+    usages = if association(:tax_source_usages).loaded?
+      tax_source_usages
+    else
+      tax_source_usages.includes(:official_tax_source)
+    end
+
+    usages.sort_by(&:position).map do |usage|
       {
         label: usage.label,
         href: usage.official_tax_source.url,

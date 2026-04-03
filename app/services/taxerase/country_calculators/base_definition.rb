@@ -16,6 +16,15 @@ module Taxerase
         "Taxerase | #{country.fetch(:name)} Tax Calculator"
       end
 
+      def available?
+        tax_year_options = calculation_router.public_tax_year_options
+        return false if tax_year_options.empty?
+
+        calculation_router.default_regime_key(tax_year_options.last).present?
+      rescue ActiveRecord::RecordNotFound
+        false
+      end
+
       def build_props
         tax_year_options = calculation_router.public_tax_year_options
         default_tax_year = tax_year_options.last || default_input.fetch(:tax_year)

@@ -31,6 +31,31 @@ RSpec.describe "Api::V1::Comparisons", type: :request do
       )
     end
 
+    it "compares Spain and Andorra for an employee profile" do
+      post api_v1_comparisons_path,
+        params: {
+          comparison: {
+            left_country_code: "ES",
+            left_tax_regime_key: "employee_madrid",
+            right_country_code: "AD",
+            right_tax_regime_key: "employee_andorra",
+            tax_year: 2025,
+            selected_category: "employee",
+            gross_income: 60_000,
+            salary_period: "YEAR"
+          }
+        },
+        as: :json
+
+      expect(response).to have_http_status(:ok)
+
+      json = JSON.parse(response.body)
+
+      expect(json.dig("right", "country_code")).to eq("AD")
+      expect(json.dig("metadata", "comparison_currency_code")).to eq("EUR")
+      expect(json["summary_metrics"].map { |metric| metric["key"] }).to include("annual_net_income", "total_tax")
+    end
+
     it "compares two Spain regions under the same employee profile" do
       post api_v1_comparisons_path,
         params: {

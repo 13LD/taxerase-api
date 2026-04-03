@@ -9,10 +9,12 @@ RSpec.describe Taxerase::CountryCalculators::Registry do
 
   describe ".country_options" do
     it "lists the registered public country calculators" do
+      expect(described_class.country_options).to include(include(code: "AD", name: "Andorra", currency_code: "EUR"))
       expect(described_class.country_options).to include(include(code: "ES", name: "Spain", currency_code: "EUR"))
       expect(described_class.country_options).to include(include(code: "NL", name: "Netherlands", currency_code: "EUR"))
       expect(described_class.country_options).to include(include(code: "PL", name: "Poland", currency_code: "PLN"))
       expect(described_class.country_options).to include(include(code: "CZ", name: "Czech Republic", currency_code: "CZK"))
+      expect(described_class.country_options).to include(include(code: "PT", name: "Portugal", currency_code: "EUR"))
     end
   end
 
@@ -38,6 +40,13 @@ RSpec.describe Taxerase::CountryCalculators::Registry do
   end
 
   describe ".fetch" do
+    it "resolves the Andorra country calculator" do
+      definition = described_class.fetch("ad")
+
+      expect(definition).to be_a(Taxerase::CountryCalculators::AndorraDefinition)
+      expect(definition.country).to eq(code: "AD", name: "Andorra", currency_code: "EUR")
+    end
+
     it "resolves a registered country calculator" do
       definition = described_class.fetch("es")
 
@@ -46,8 +55,8 @@ RSpec.describe Taxerase::CountryCalculators::Registry do
     end
 
     it "raises a clear error for unknown countries" do
-      expect { described_class.fetch("PT") }
-        .to raise_error(KeyError, 'No country calculator is registered for "PT".')
+      expect { described_class.fetch("IT") }
+        .to raise_error(KeyError, 'No country calculator is registered for "IT".')
     end
 
     it "resolves the Netherlands country calculator" do
@@ -70,5 +79,58 @@ RSpec.describe Taxerase::CountryCalculators::Registry do
       expect(definition).to be_a(Taxerase::CountryCalculators::CzechRepublicDefinition)
       expect(definition.country).to eq(code: "CZ", name: "Czech Republic", currency_code: "CZK")
     end
+
+    it "resolves the Portugal country calculator" do
+      definition = described_class.fetch("pt")
+
+      expect(definition).to be_a(Taxerase::CountryCalculators::PortugalDefinition)
+      expect(definition.country).to eq(code: "PT", name: "Portugal", currency_code: "EUR")
+    end
+  end
+
+  describe "calculator payload building" do
+    it "builds props without an N+1 query cascade" do
+      reset_country_cache!
+
+      query_count = count_application_queries do
+        described_class.fetch("pt").build_props
+      end
+
+      expect(query_count).to be < 200
+    end
+  end
+
+  def reset_country_cache!
+    calculation_routers.each do |router|
+      router.remove_instance_variable(:@country) if router.instance_variable_defined?(:@country)
+    end
+  end
+
+  def calculation_routers
+    [
+      Taxerase::Andorra::CalculationRouter,
+      Taxerase::Spain::CalculationRouter,
+      Taxerase::Netherlands::CalculationRouter,
+      Taxerase::Poland::CalculationRouter,
+      Taxerase::CzechRepublic::CalculationRouter,
+      Taxerase::Portugal::CalculationRouter
+    ]
+  end
+
+  def count_application_queries
+    query_count = 0
+    subscriber = ActiveSupport::Notifications.subscribe("sql.active_record") do |*args|
+      event = ActiveSupport::Notifications::Event.new(*args)
+      payload = event.payload
+      next if payload[:name] == "SCHEMA" || payload[:cached]
+
+      query_count += 1
+    end
+
+    ActiveRecord::Base.connection.clear_query_cache
+    yield
+    query_count
+  ensure
+    ActiveSupport::Notifications.unsubscribe(subscriber) if subscriber
   end
 end

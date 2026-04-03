@@ -13,6 +13,10 @@ Rails.application.routes.draw do
         resource :salary_calculation, only: :create
       end
 
+      namespace :andorra do
+        resource :salary_calculation, only: :create
+      end
+
       namespace :netherlands do
         resource :salary_calculation, only: :create
       end
@@ -22,6 +26,10 @@ Rails.application.routes.draw do
       end
 
       namespace :czech_republic do
+        resource :salary_calculation, only: :create
+      end
+
+      namespace :portugal do
         resource :salary_calculation, only: :create
       end
     end

@@ -2,9 +2,10 @@ module Api
   module V1
     class CountryCalculatorsController < ApplicationController
       rescue_from KeyError, with: :render_not_found
+      rescue_from Taxerase::CountryCalculators::Registry::UnavailableCountryError, with: :render_not_found
 
       def show
-        definition = Taxerase::CountryCalculators::Registry.fetch(params[:country_code])
+        definition = Taxerase::CountryCalculators::Registry.fetch_available(params[:country_code])
 
         render json: {
           page_title: definition.page_title,

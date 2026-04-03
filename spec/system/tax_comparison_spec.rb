@@ -33,8 +33,10 @@ RSpec.describe "Tax comparison", type: :system, js: true do
 
     within(comparison_sides[1]) do
       expect(page).to have_select("Country", selected: "Netherlands")
+      expect(page).to have_css("option", text: "Andorra")
       expect(page).to have_css("option", text: "Poland")
       expect(page).to have_css("option", text: "Czech Republic")
+      expect(page).to have_css("option", text: "Portugal")
       expect(page).to have_select("Region", selected: "Netherlands", disabled: true)
     end
 
@@ -45,6 +47,25 @@ RSpec.describe "Tax comparison", type: :system, js: true do
     expect(annual_net_income_row.find(".comparison-delta")[:class]).to include("comparison-delta--positive")
     expect(effective_tax_rate_row.find(".comparison-delta")[:class]).to include("comparison-delta--positive")
     expect(total_tax_row.find(".comparison-delta")[:class]).to include("comparison-delta--positive")
+  end
+
+  it "allows comparing Spain against Andorra" do
+    visit root_path
+
+    comparison_sides = all(".comparison-side")
+
+    within(comparison_sides[1]) do
+      select "Andorra", from: "Country"
+      expect(page).to have_select("Region", selected: "Andorra", disabled: true)
+    end
+
+    wait_for_comparison_results
+
+    within(".comparison-card") do
+      expect(page).to have_text("Andorra")
+      expect(page).to have_text("Annual net income")
+      expect(page).to have_text("Total tax")
+    end
   end
 
   it "allows comparing Spain against Spain with different regions" do

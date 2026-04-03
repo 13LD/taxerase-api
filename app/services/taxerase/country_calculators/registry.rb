@@ -1,17 +1,31 @@
 module Taxerase
   module CountryCalculators
     class Registry
+      class UnavailableCountryError < KeyError; end
+
       DEFAULT_COUNTRY_CODE = "ES".freeze
 
       DEFINITIONS = {
         "ES" => SpainDefinition.new,
         "NL" => NetherlandsDefinition.new,
         "PL" => PolandDefinition.new,
-        "CZ" => CzechRepublicDefinition.new
+        "CZ" => CzechRepublicDefinition.new,
+        "PT" => PortugalDefinition.new,
+        "AD" => AndorraDefinition.new
       }.freeze
 
       def self.default
         fetch(DEFAULT_COUNTRY_CODE)
+      end
+
+      def self.default_available
+        definition = fetch(DEFAULT_COUNTRY_CODE)
+        return definition if definition.available?
+
+        available_definitions.first || raise(
+          UnavailableCountryError,
+          "No country calculator seed data is available. Run db:seed."
+        )
       end
 
       def self.fetch(country_code)
@@ -20,16 +34,33 @@ module Taxerase
         raise KeyError, "No country calculator is registered for #{country_code.inspect}."
       end
 
+      def self.fetch_available(country_code)
+        definition = fetch(country_code)
+        return definition if definition.available?
+
+        raise UnavailableCountryError, "#{definition.country.fetch(:name)} calculator data is not available. Run db:seed."
+      end
+
+      def self.home_definition(country_code)
+        fetch_available(country_code.presence || DEFAULT_COUNTRY_CODE)
+      rescue KeyError, UnavailableCountryError
+        default_available
+      end
+
+      def self.available_definitions
+        DEFINITIONS.values.select(&:available?)
+      end
+
       def self.country_options
-        DEFINITIONS.values.map(&:country)
+        available_definitions.map(&:country)
       end
 
       def self.comparison_catalog
-        DEFINITIONS.values.map(&:public_catalog)
+        available_definitions.map(&:public_catalog)
       end
 
       def self.comparison_profile_catalog
-        DEFINITIONS.values
+        available_definitions
           .flat_map(&:public_comparison_profiles)
           .uniq { |profile| profile.fetch(:key) }
       end
