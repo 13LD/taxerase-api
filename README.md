@@ -18,7 +18,6 @@ Taxerase is a Rails 8 monolith for source-backed Spain 2025 tax calculations. Th
 ### Prerequisites
 
 - PostgreSQL running locally
-- Redis running locally
 - Ruby matching [.ruby-version](/Users/dmytrolysohor/Dev/taxera-api/.ruby-version)
 - Node matching [.node-version](/Users/dmytrolysohor/Dev/taxera-api/.node-version)
 - Yarn installed
@@ -32,7 +31,6 @@ POSTGRES_USER=$USER
 POSTGRES_PASSWORD=
 POSTGRES_DB=taxerase_development
 POSTGRES_TEST_DB=taxerase_test
-REDIS_URL=redis://127.0.0.1:6379/0
 ```
 
 If your local PostgreSQL user is not your shell user, export `POSTGRES_USER` and `POSTGRES_PASSWORD` before setup.
@@ -53,11 +51,8 @@ bin/dev
 
 This starts:
 
-- Redis
 - the Rails server
 - the JavaScript watcher that builds `app/assets/builds/application.js`
-- the Resque worker
-- the Resque scheduler
 
 Open `http://127.0.0.1:3000`.
 
@@ -90,10 +85,7 @@ The main GitHub Actions workflow lives in [.github/workflows/ci.yml](/Users/dmyt
 The repository includes a Render Blueprint in [render.yaml](/Users/dmytrolysohor/Dev/taxera-api/render.yaml) for:
 
 - a Rails web service
-- a Resque worker
-- a Resque scheduler
 - a Render Postgres database
-- a Render Key Value instance for Redis-compatible queue storage
 
 ### Build And Start Commands
 
@@ -102,14 +94,12 @@ Render uses [bin/render-build.sh](/Users/dmytrolysohor/Dev/taxera-api/bin/render
 The services use:
 
 - web: `bundle exec puma -C config/puma.rb`
-- worker: `QUEUE=* bundle exec rake resque:work`
-- scheduler: `LOAD_RESQUE_SCHEDULE=true bundle exec rake resque:scheduler`
 
-The web service runs `bundle exec rails db:migrate` as its pre-deploy command.
+The web service runs `bundle exec rails db:migrate && bundle exec rails db:seed` as its pre-deploy command.
 
 ### Auto Deploy After Main Is Green
 
-The Blueprint sets `autoDeployTrigger: checksPass` for the web, worker, and scheduler services.
+The Blueprint sets `autoDeployTrigger: checksPass` for the web service.
 
 That means Render will deploy automatically after:
 
@@ -121,7 +111,7 @@ That means Render will deploy automatically after:
 1. In Render, create a new Blueprint from this repository.
 2. Confirm the services in `render.yaml`.
 3. Provide a value for `RAILS_MASTER_KEY` when prompted.
-4. Let Render create the Postgres and Key Value services.
+4. Let Render create the Postgres service.
 5. After the initial deploy, future merges to `main` with green checks will auto-deploy.
 
 ## Exchange Rates
@@ -129,39 +119,33 @@ That means Render will deploy automatically after:
 Mixed-currency conversion uses persisted EUR-based reference rates stored in the database.
 
 - Initial seeded rates keep local and test environments deterministic.
-- A weekly Resque scheduler task refreshes configured quotes from Frankfurter:
+- You can refresh configured quotes from Frankfurter manually:
   `https://api.frankfurter.dev/v2/rates?base=EUR&quotes=GBP,CHF,NOK,SEK,DKK,PLN,CZK,HUF,RON,ISK`
 
-### Run Background Jobs Locally
-
-If you already use `bin/dev`, the Resque worker and scheduler are started for you.
-
-If you want to run them manually in separate terminals:
-
-```sh
-redis-server
-QUEUE=* bundle exec rake resque:work
-LOAD_RESQUE_SCHEDULE=true bundle exec rake resque:scheduler
-```
-
-What each process does:
-
-- `redis-server`: queue backend
-- `resque:work`: executes queued jobs
-- `resque:scheduler`: enqueues the weekly exchange-rate sync according to `config/resque_schedule.yml`
-
-### Trigger The Exchange Rate Sync Manually
-
-To enqueue the job manually:
-
-```sh
-bundle exec rails runner 'Resque.enqueue(ExchangeRatesSyncJob)'
-```
-
-To run the sync service directly without queueing:
+### Run The Exchange Rate Sync Manually
 
 ```sh
 bundle exec rails runner 'Taxerase::ExchangeRates::SyncRates.call'
+```
+
+Or via the dedicated rake task:
+
+```sh
+bundle exec rake taxerase:exchange_rates:sync
+```
+
+### Run The Exchange Rate Sync On Render
+
+If you connect to the Render web service over SSH, run one of:
+
+```sh
+bundle exec rails runner 'Taxerase::ExchangeRates::SyncRates.call'
+```
+
+or
+
+```sh
+bundle exec rake taxerase:exchange_rates:sync
 ```
 
 ## API

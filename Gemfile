@@ -11,9 +11,7 @@ gem "puma", ">= 5.0"
 # Bundle and transpile JavaScript [https://github.com/rails/jsbundling-rails]
 gem "jsbundling-rails"
 # Use Redis adapter to run Action Cable in production
-gem "redis", ">= 5.0"
-gem "resque"
-gem "resque-scheduler"
+# gem "redis", ">= 4.0.1"
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 # gem "bcrypt", "~> 3.1.7"
