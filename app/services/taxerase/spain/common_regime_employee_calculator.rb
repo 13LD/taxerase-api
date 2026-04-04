@@ -192,7 +192,7 @@ module Taxerase
 
       def assumptions
         base_assumptions = [
-          "Spain only, tax year #{tax_year}.",
+          "Spain, tax year #{tax_year}.",
           "Resident salaried employee in #{regime.region} under the common IRPF regime.",
           "Profile inputs: #{personal_family_minimums_data[:summary]}. No union dues, ascendants, joint filing, or other deductions and credits are included.",
           "Standard indefinite contract assumptions for employee Social Security.",

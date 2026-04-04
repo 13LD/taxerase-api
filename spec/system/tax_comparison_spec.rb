@@ -1,6 +1,10 @@
 require "rails_helper"
 
 RSpec.describe "Tax comparison", type: :system, js: true do
+  def visit_comparison_tab
+    visit root_path(tab: "comparison")
+  end
+
   def wait_for_comparison_results
     within(".comparison-card") do
       expect(page).to have_no_text("Refreshing comparison...", wait: 20)
@@ -9,10 +13,10 @@ RSpec.describe "Tax comparison", type: :system, js: true do
   end
 
   it "shows comparison metrics for Spain vs Netherlands" do
-    visit root_path
+    visit_comparison_tab
     wait_for_comparison_results
 
-    expect(first(".liquid-card")[:class]).to include("comparison-card")
+    expect(find(".comparison-card")[:class]).to include("comparison-card")
 
     within(".comparison-card") do
       expect(page).to have_text("Compare two jurisdictions")
@@ -50,7 +54,7 @@ RSpec.describe "Tax comparison", type: :system, js: true do
   end
 
   it "allows comparing Spain against Andorra" do
-    visit root_path
+    visit_comparison_tab
 
     comparison_sides = all(".comparison-side")
 
@@ -69,7 +73,7 @@ RSpec.describe "Tax comparison", type: :system, js: true do
   end
 
   it "allows comparing Spain against Spain with different regions" do
-    visit root_path
+    visit_comparison_tab
 
     comparison_sides = all(".comparison-side")
 
@@ -89,7 +93,7 @@ RSpec.describe "Tax comparison", type: :system, js: true do
   end
 
   it "keeps the comparison on the same profile when switching to self-employed" do
-    visit root_path
+    visit_comparison_tab
 
     within(".comparison-card") do
       click_button "B2B contract"
@@ -111,7 +115,7 @@ RSpec.describe "Tax comparison", type: :system, js: true do
   end
 
   it "keeps the selected tax profile when changing a comparison country" do
-    visit root_path
+    visit_comparison_tab
 
     within(".comparison-card") do
       click_button "B2B contract"
@@ -136,7 +140,7 @@ RSpec.describe "Tax comparison", type: :system, js: true do
   end
 
   it "keeps comparison currency inputs stable after refreshes" do
-    visit root_path
+    visit_comparison_tab
 
     within(".comparison-card") do
       fill_in "Annual income", with: "450000"
@@ -159,7 +163,7 @@ RSpec.describe "Tax comparison", type: :system, js: true do
   end
 
   it "marks unfavorable deltas in red" do
-    visit root_path
+    visit_comparison_tab
 
     comparison_sides = all(".comparison-side")
 
@@ -184,8 +188,8 @@ RSpec.describe "Tax comparison", type: :system, js: true do
     expect(total_tax_row.find(".comparison-delta")[:class]).to include("comparison-delta--negative")
   end
 
-  it "shows ECB-normalized EUR values with local notes for Poland comparisons" do
-    visit root_path
+  it "shows exchange-rate-normalized EUR values with local notes for Poland comparisons" do
+    visit_comparison_tab
 
     comparison_sides = all(".comparison-side")
 
@@ -209,7 +213,7 @@ RSpec.describe "Tax comparison", type: :system, js: true do
   end
 
   it "allows switching the mixed-country comparison input currency to Czech koruna" do
-    visit root_path
+    visit_comparison_tab
 
     comparison_sides = all(".comparison-side")
 

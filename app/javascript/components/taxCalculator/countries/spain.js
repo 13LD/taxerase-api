@@ -14,7 +14,7 @@ const spainCalculatorConfig = {
         defaultValue: false,
         effects: {
           regimeCategoryOverride: "special_regime",
-          incomeLabel: "Gross employment income",
+          incomeLabel: "Gross income",
           hidePersonalReliefFields: true
         }
       }

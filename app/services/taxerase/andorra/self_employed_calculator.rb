@@ -183,7 +183,7 @@ module Taxerase
 
       def assumptions
         [
-          "Andorra resident self-employed person, tax year #{tax_year}.",
+          "Andorra, tax year #{tax_year}.",
           "Self-employed income is treated as economic-activity income under IRPF with a flat 10% rate after supported reductions and credits.",
           "The calculator uses the seeded standard CASS own-account base at 100% of the prior-year average salaried monthly wage.",
           "Reduced own-account bases, startup or under-35 special regimes, turnover-threshold-driven base changes, and other advanced social-security options are not included."

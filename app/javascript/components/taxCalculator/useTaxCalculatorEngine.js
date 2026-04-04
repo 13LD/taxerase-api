@@ -141,13 +141,8 @@ export default function useTaxCalculatorEngine({
   const showDeductibleExpenses =
     selectedCategory === "self_employed" && !regimeControlEffects.hideDeductibleExpenses;
   const showPersonalReliefFields = !regimeControlEffects.hidePersonalReliefFields;
-  const incomeLabel =
-    regimeControlEffects.incomeLabel ||
-    incomeLabels[selectedCategory] ||
-    (selectedCategory === "self_employed" ? "Revenue before expenses" : "Gross income");
-  const periodLabel =
-    periodLabels[selectedCategory] ||
-    (selectedCategory === "self_employed" ? "Income period" : "Salary period");
+  const incomeLabel = regimeControlEffects.incomeLabel || "Gross income";
+  const periodLabel = "Income period";
   const selectedControlSignatureParts = useMemo(
     () =>
       buildSelectedControlSignatureParts({
@@ -163,6 +158,8 @@ export default function useTaxCalculatorEngine({
       buildCalculationSignature({
         selectedTaxYear,
         selectedRegimeKey,
+        grossIncome,
+        salaryPeriod,
         ageBracket,
         childrenCount,
         childrenUnderThreeCount,
@@ -174,6 +171,8 @@ export default function useTaxCalculatorEngine({
       childrenCount,
       childrenUnderThreeCount,
       disabilityLevel,
+      grossIncome,
+      salaryPeriod,
       selectedInputCurrencyCode,
       selectedControlSignatureParts,
       selectedRegimeKey,
@@ -467,7 +466,7 @@ export default function useTaxCalculatorEngine({
       onDisabilityLevelChange: handleDisabilityLevelChange,
       onGrossIncomeChange: (event) => {
         setGrossIncome(event.target.value);
-        resetFormState();
+        prepareAutoRefresh();
       },
       onInputCurrencyChange: (event) => {
         setSelectedInputCurrencyCode(event.target.value);
@@ -477,7 +476,7 @@ export default function useTaxCalculatorEngine({
       onRegimeControlChange: handleRegimeControlChange,
       onSalaryPeriodChange: (nextSalaryPeriod) => {
         setSalaryPeriod(nextSalaryPeriod);
-        resetFormState();
+        prepareAutoRefresh();
       },
       onSubmit: handleSubmit,
       onTaxYearChange: handleTaxYearChange,

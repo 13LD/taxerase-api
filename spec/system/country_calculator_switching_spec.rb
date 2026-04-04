@@ -131,12 +131,31 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
     visit root_path(country: "PL")
 
     within(".calculator-card") do
-      fill_in "Gross salary", with: "450000"
-      expect(page).to have_field("Gross salary", with: "450000")
+      fill_in "Gross income", with: "450000"
+      expect(page).to have_field("Gross income", with: "450000")
 
       select "2025", from: "Tax year"
 
-      expect(page).to have_field("Gross salary", with: "450000")
+      expect(page).to have_field("Gross income", with: "450000")
+    end
+  end
+
+  it "recalculates Poland automatically when gross salary and salary period change" do
+    visit root_path(country: "PL")
+
+    within(".results-card") do
+      expect(page).to have_text("PLN 120,199.98")
+    end
+
+    within(".calculator-card") do
+      fill_in "Gross income", with: "7000"
+      expect(page).to have_field("Gross income", with: "7000")
+      click_button "Monthly"
+    end
+
+    within(".results-card") do
+      expect(page).to have_text("PLN 61,222.04", wait: 20)
+      expect(page).not_to have_text("PLN 120,199.98")
     end
   end
 

@@ -180,6 +180,29 @@ export default function TaxCalculatorForm({
         value={selectedCategory}
       />
 
+      <CurrencyField
+        currencyCode={inputCurrencyCode}
+        label={incomeLabel}
+        onChange={onGrossIncomeChange}
+        value={grossIncome}
+      />
+
+      {showDeductibleExpenses ? (
+        <CurrencyField
+          currencyCode={inputCurrencyCode}
+          label="Deductible expenses"
+          onChange={onDeductibleExpensesChange}
+          value={deductibleExpenses}
+        />
+      ) : null}
+
+      <SegmentedControl
+        label={periodLabel}
+        onChange={onSalaryPeriodChange}
+        options={salaryPeriodOptions}
+        value={salaryPeriod}
+      />
+
       {regimeControls.map((control) =>
         renderRegimeControl(control, regimeControlValues[control.key], onRegimeControlChange, currencyCode)
       )}
@@ -231,29 +254,6 @@ export default function TaxCalculatorForm({
           value={disabilityLevel}
         />
       ) : null}
-
-      <CurrencyField
-        currencyCode={inputCurrencyCode}
-        label={incomeLabel}
-        onChange={onGrossIncomeChange}
-        value={grossIncome}
-      />
-
-      {showDeductibleExpenses ? (
-        <CurrencyField
-          currencyCode={inputCurrencyCode}
-          label="Deductible expenses"
-          onChange={onDeductibleExpensesChange}
-          value={deductibleExpenses}
-        />
-      ) : null}
-
-      <SegmentedControl
-        label={periodLabel}
-        onChange={onSalaryPeriodChange}
-        options={salaryPeriodOptions}
-        value={salaryPeriod}
-      />
 
       <button
         className="primary-action"

@@ -43,6 +43,8 @@ export function resolveSelectedRegime({
 export function buildCalculationSignature({
   selectedTaxYear,
   selectedRegimeKey,
+  grossIncome,
+  salaryPeriod,
   ageBracket,
   childrenCount,
   childrenUnderThreeCount,
@@ -54,6 +56,8 @@ export function buildCalculationSignature({
   return [
     selectedTaxYear,
     selectedRegimeKey,
+    grossIncome,
+    salaryPeriod,
     ageBracket,
     childrenCount,
     childrenUnderThreeCount,
@@ -66,6 +70,8 @@ export function buildResultCalculationSignature(result, extraSignatureParts = []
   if (
     !result?.metadata?.tax_regime_key ||
     !result?.metadata?.tax_year ||
+    result?.input?.gross_income === undefined ||
+    !result?.input?.salary_period ||
     !result?.input?.age_bracket ||
     result?.input?.children_count === undefined ||
     result?.input?.children_under_three_count === undefined ||
@@ -77,6 +83,8 @@ export function buildResultCalculationSignature(result, extraSignatureParts = []
   return [
     result.metadata.tax_year,
     result.metadata.tax_regime_key,
+    result.input.gross_income,
+    result.input.salary_period,
     result.input.age_bracket,
     result.input.children_count,
     result.input.children_under_three_count,

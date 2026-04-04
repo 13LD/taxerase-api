@@ -146,7 +146,7 @@ module Taxerase
 
       def assumptions
         [
-          "Spain only, tax year #{tax_year}.",
+          "Spain, tax year #{tax_year}.",
           "Beckham Law / Article 93 special regime for eligible inbound workers in #{regime.region}.",
           "This calculator applies the national special-regime employment scale: 24% up to €600,000 and 47% above €600,000.",
           "The region selector is kept for jurisdiction browsing, but the Article 93 employment-income calculation is national and does not use regional IRPF scales or regional personal minimums.",

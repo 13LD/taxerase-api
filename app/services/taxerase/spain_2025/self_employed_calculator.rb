@@ -136,7 +136,7 @@ module Taxerase
 
       def assumptions(social_security_band)
         [
-          "Spain only, tax year 2025.",
+          "Spain, tax year 2025.",
           "Resident self-employed person in #{regime.region} using direct estimation simplified.",
           "Single taxpayer, under 65, no children, no disability, and no extra deductions or credits.",
           "User-entered deductible expenses are treated as ordinary fully deductible business expenses.",

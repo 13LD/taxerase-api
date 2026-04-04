@@ -303,7 +303,7 @@ module Taxerase
 
       def assumptions(special_income_relief)
         assumptions = [
-          "Poland employment contract only, tax year #{tax_year}.",
+          "Poland, tax year #{tax_year}.",
           "Employee payroll contributions use the standard Polish employee rates for retirement, disability, sickness, and health insurance.",
           "Employer-cost cards use employer pension and disability rates, the selected accident rate, and optional Labor Fund, FGŚP, and employer PPK contributions.",
           "Revenue cost mode, PIT-2 monthly tax relief share, and PPK rates are user-selected. Copyright costs are capped at the annual statutory limit stored for the selected year.",

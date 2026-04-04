@@ -262,7 +262,7 @@ module Taxerase
 
       def assumptions(special_income_relief)
         assumptions = [
-          "Poland B2B contract only, tax year #{tax_year}.",
+          "Poland, tax year #{tax_year}.",
           "Tax form can be tax scale, flat tax, or lump sum. Child relief is currently modeled only for the tax-scale path.",
           "ZUS social contributions use the selected relief path: start relief, preferential, Small ZUS Plus, or standard full ZUS. Small ZUS Plus uses 50% of the prior-year average monthly income, clamped to the official min and max bases.",
           "For monthly estimates, fixed B2B contributions are prorated by business days as a simple approximation."

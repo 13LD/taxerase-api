@@ -179,7 +179,7 @@ module Taxerase
 
       def assumptions
         [
-          "Andorra resident employee, tax year #{tax_year}.",
+          "Andorra, tax year #{tax_year}.",
           "The calculator applies the flat 10% IRPF rate after employee CASS, the official 3% work-income deduction capped at EUR 2,500, and the supported personal and family reductions.",
           "Supported reductions in this calculator: taxpayer disability uplift, spouse or partner with no income, dependents, pension contributions, alimony paid, and mortgage-interest credit.",
           "The spouse-income phase-in below the 40,000 EUR household threshold, disabled-dependent uplift, housing-rent deductions, and other edge-case relief interactions are not included."

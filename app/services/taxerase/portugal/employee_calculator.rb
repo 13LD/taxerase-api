@@ -254,7 +254,7 @@ module Taxerase
 
       def assumptions
         [
-          "Portugal only, mainland-resident individual, tax year #{tax_year}.",
+          "Portugal, tax year #{tax_year}.",
           "Employment income uses the seeded employee social security rate and the higher of the standard category A specific deduction or mandatory employee contributions.",
           "Included deductions: dependents, dependents under 3, ascendants in the household, taxpayer disability at 60% or more, general family expenses, health, education, housing rent, alimony, care home costs, and declared domestic work remuneration.",
           "Joint filing, IRS Jovem, union dues, professional order dues, invoice/VAT deductions, disability rehabilitation and insurance deductions, young-dependent bonuses for the second child and later up to age 6, legacy mortgage-interest deductions, and the minimum-existence adjustment are not included."
