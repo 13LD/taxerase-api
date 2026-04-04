@@ -100,7 +100,5 @@ module Taxerase
         @snapshot_rates = nil
       end
     end
-
-    EcbReferenceRateConverter = ReferenceRateConverter
   end
 end
