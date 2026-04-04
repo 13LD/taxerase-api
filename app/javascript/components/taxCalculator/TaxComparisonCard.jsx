@@ -199,7 +199,7 @@ export default function TaxComparisonCard({
         {usesEuroNormalization && fxReference ? (
           <>
             {" "}Shared income inputs are interpreted in {inputCurrencyCode}. Mixed-currency
-            comparison table metrics are normalized to EUR using ECB reference rates from {fxReference.rate_date}.
+            comparison table metrics are normalized to EUR using exchange rates from {fxReference.rate_date}.
           </>
         ) : null}
       </div>

@@ -92,7 +92,7 @@ RSpec.describe "Tax comparison", type: :system, js: true do
     visit root_path
 
     within(".comparison-card") do
-      click_button "Self-employed"
+      click_button "B2B contract"
       fill_in "Annual revenue before expenses", with: "70000"
       fill_in "Annual deductible expenses", with: "12000"
     end
@@ -114,7 +114,7 @@ RSpec.describe "Tax comparison", type: :system, js: true do
     visit root_path
 
     within(".comparison-card") do
-      click_button "Self-employed"
+      click_button "B2B contract"
       fill_in "Annual revenue before expenses", with: "70000"
       fill_in "Annual deductible expenses", with: "12000"
     end
@@ -128,7 +128,7 @@ RSpec.describe "Tax comparison", type: :system, js: true do
     wait_for_comparison_results
 
     within(".comparison-card") do
-      expect(page).to have_button("Self-employed", class: /is-active/)
+      expect(page).to have_button("B2B contract", class: /is-active/)
       expect(page).to have_field("Annual revenue before expenses", with: "70000")
       expect(page).to have_field("Annual deductible expenses", with: "12000")
       expect(page).to have_text("Comparing self-employed tax outcomes")
@@ -142,7 +142,7 @@ RSpec.describe "Tax comparison", type: :system, js: true do
       fill_in "Annual income", with: "450000"
       expect(page).to have_field("Annual income", with: "450000")
 
-      click_button "Self-employed"
+      click_button "B2B contract"
       fill_in "Annual revenue before expenses", with: "450000"
       fill_in "Annual deductible expenses", with: "12000"
 
@@ -198,7 +198,7 @@ RSpec.describe "Tax comparison", type: :system, js: true do
 
     within(".comparison-card") do
       expect(page).to have_text("Shared income inputs are interpreted in EUR.")
-      expect(page).to have_text("Mixed-currency comparison table metrics are normalized to EUR using ECB reference rates from 2026-03-11.")
+      expect(page).to have_text("Mixed-currency comparison table metrics are normalized to EUR using exchange rates from 2026-03-11.")
       expect(page).to have_text("Poland")
     end
 
@@ -221,7 +221,7 @@ RSpec.describe "Tax comparison", type: :system, js: true do
     within(".comparison-card") do
       expect(page).to have_select("Input currency", options: [ "EUR", "CZK" ])
       select "CZK", from: "Input currency"
-      click_button "Self-employed"
+      click_button "B2B contract"
       fill_in "Annual revenue before expenses", with: "600000"
     end
 
@@ -235,7 +235,7 @@ RSpec.describe "Tax comparison", type: :system, js: true do
 
     within(all(".comparison-graphic__panel")[1]) do
       expect(page).to have_text("CZK")
-      expect(page).to have_text("EUR comparison")
+      expect(page).to have_text("€")
     end
   end
 end

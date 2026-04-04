@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_31_232000) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_04_001000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -21,6 +21,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_31_232000) do
     t.string "name", null: false
     t.datetime "updated_at", null: false
     t.index ["code"], name: "index_countries_on_code", unique: true
+  end
+
+  create_table "exchange_rates", force: :cascade do |t|
+    t.string "base_currency_code", null: false
+    t.datetime "created_at", null: false
+    t.datetime "fetched_at", null: false
+    t.string "provider", null: false
+    t.string "quote_currency_code", null: false
+    t.date "rate_date", null: false
+    t.decimal "rate_value", precision: 12, scale: 6, null: false
+    t.string "source_name", null: false
+    t.string "source_url", null: false
+    t.datetime "updated_at", null: false
+    t.index ["provider", "base_currency_code", "quote_currency_code", "rate_date"], name: "idx_exchange_rates_provider_pair_date", unique: true
+    t.index ["provider", "base_currency_code", "rate_date"], name: "idx_exchange_rates_provider_base_date"
   end
 
   create_table "official_tax_sources", force: :cascade do |t|

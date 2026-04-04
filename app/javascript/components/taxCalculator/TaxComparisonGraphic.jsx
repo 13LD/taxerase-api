@@ -1,5 +1,5 @@
 import React from "react";
-import { formatCurrency, formatPercentage } from "./formatters";
+import { formatCompactCurrency, formatCurrency, formatPercentage } from "./formatters";
 
 function metricValue(summaryMetrics, metricKey, valueKey) {
   return summaryMetrics.find((metric) => metric.key === metricKey)?.[valueKey] || 0;
@@ -70,10 +70,10 @@ function JurisdictionGraphic({ comparisonCurrencyCode, label, panelSummary, side
     comparisonCurrencyCode
   );
   const netIncomeNote = netIncome.usesLocalDisplay
-    ? `EUR comparison ${formatCurrency(netIncome.comparisonValue, netIncome.comparisonCurrencyCode)}`
+    ? formatCompactCurrency(netIncome.comparisonValue, netIncome.comparisonCurrencyCode)
     : null;
   const totalTaxNote = totalTax.usesLocalDisplay
-    ? `EUR comparison ${formatCurrency(totalTax.comparisonValue, totalTax.comparisonCurrencyCode)}`
+    ? formatCompactCurrency(totalTax.comparisonValue, totalTax.comparisonCurrencyCode)
     : null;
 
   return (

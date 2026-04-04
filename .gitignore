@@ -21,4 +21,5 @@
 /coverage
 /yarn-error.log
 /byebug_history
+/dump.rdb
 .omx/

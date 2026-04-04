@@ -18,6 +18,7 @@ Taxerase is a Rails 8 monolith for source-backed Spain 2025 tax calculations. Th
 ### Prerequisites
 
 - PostgreSQL running locally
+- Redis running locally
 - Ruby matching [.ruby-version](/Users/dmytrolysohor/Dev/taxera-api/.ruby-version)
 - Node matching [.node-version](/Users/dmytrolysohor/Dev/taxera-api/.node-version)
 - Yarn installed
@@ -31,6 +32,7 @@ POSTGRES_USER=$USER
 POSTGRES_PASSWORD=
 POSTGRES_DB=taxerase_development
 POSTGRES_TEST_DB=taxerase_test
+REDIS_URL=redis://127.0.0.1:6379/0
 ```
 
 If your local PostgreSQL user is not your shell user, export `POSTGRES_USER` and `POSTGRES_PASSWORD` before setup.
@@ -51,8 +53,11 @@ bin/dev
 
 This starts:
 
+- Redis
 - the Rails server
 - the JavaScript watcher that builds `app/assets/builds/application.js`
+- the Resque worker
+- the Resque scheduler
 
 Open `http://127.0.0.1:3000`.
 
@@ -79,6 +84,46 @@ yarn lint:js
 ```
 
 The main GitHub Actions workflow lives in [.github/workflows/ci.yml](/Users/dmytrolysohor/Dev/taxera-api/.github/workflows/ci.yml) and runs against the `main` branch badge shown above.
+
+## Exchange Rates
+
+Mixed-currency conversion uses persisted EUR-based reference rates stored in the database.
+
+- Initial seeded rates keep local and test environments deterministic.
+- A weekly Resque scheduler task refreshes configured quotes from Frankfurter:
+  `https://api.frankfurter.dev/v2/rates?base=EUR&quotes=GBP,CHF,NOK,SEK,DKK,PLN,CZK,HUF,RON,ISK`
+
+### Run Background Jobs Locally
+
+If you already use `bin/dev`, the Resque worker and scheduler are started for you.
+
+If you want to run them manually in separate terminals:
+
+```sh
+redis-server
+QUEUE=* bundle exec rake resque:work
+LOAD_RESQUE_SCHEDULE=true bundle exec rake resque:scheduler
+```
+
+What each process does:
+
+- `redis-server`: queue backend
+- `resque:work`: executes queued jobs
+- `resque:scheduler`: enqueues the weekly exchange-rate sync according to `config/resque_schedule.yml`
+
+### Trigger The Exchange Rate Sync Manually
+
+To enqueue the job manually:
+
+```sh
+bundle exec rails runner 'Resque.enqueue(ExchangeRatesSyncJob)'
+```
+
+To run the sync service directly without queueing:
+
+```sh
+bundle exec rails runner 'Taxerase::ExchangeRates::SyncRates.call'
+```
 
 ## API
 
