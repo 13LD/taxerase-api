@@ -85,6 +85,45 @@ yarn lint:js
 
 The main GitHub Actions workflow lives in [.github/workflows/ci.yml](/Users/dmytrolysohor/Dev/taxera-api/.github/workflows/ci.yml) and runs against the `main` branch badge shown above.
 
+## Deploy On Render
+
+The repository includes a Render Blueprint in [render.yaml](/Users/dmytrolysohor/Dev/taxera-api/render.yaml) for:
+
+- a Rails web service
+- a Resque worker
+- a Resque scheduler
+- a Render Postgres database
+- a Render Key Value instance for Redis-compatible queue storage
+
+### Build And Start Commands
+
+Render uses [bin/render-build.sh](/Users/dmytrolysohor/Dev/taxera-api/bin/render-build.sh) as the build command.
+
+The services use:
+
+- web: `bundle exec puma -C config/puma.rb`
+- worker: `QUEUE=* bundle exec rake resque:work`
+- scheduler: `LOAD_RESQUE_SCHEDULE=true bundle exec rake resque:scheduler`
+
+The web service runs `bundle exec rails db:migrate` as its pre-deploy command.
+
+### Auto Deploy After Main Is Green
+
+The Blueprint sets `autoDeployTrigger: checksPass` for the web, worker, and scheduler services.
+
+That means Render will deploy automatically after:
+
+1. code is merged to `main`
+2. the GitHub checks on that commit finish successfully
+
+### First-Time Render Setup
+
+1. In Render, create a new Blueprint from this repository.
+2. Confirm the services in `render.yaml`.
+3. Provide a value for `RAILS_MASTER_KEY` when prompted.
+4. Let Render create the Postgres and Key Value services.
+5. After the initial deploy, future merges to `main` with green checks will auto-deploy.
+
 ## Exchange Rates
 
 Mixed-currency conversion uses persisted EUR-based reference rates stored in the database.
