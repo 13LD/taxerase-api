@@ -36,7 +36,7 @@ RSpec.describe "Spain calculator selectors", type: :system, js: true do
     end
 
     within_calculator_card do
-      expect(page).to have_field("Revenue before expenses", with: "60000")
+      expect(page).to have_field("Gross income", with: "60000")
       expect(page).to have_field("Deductible expenses", with: "0")
     end
 
@@ -134,6 +134,56 @@ RSpec.describe "Spain calculator selectors", type: :system, js: true do
     expect_metric_card("State personal and family minimum", "€28,000.00")
     expect_metric_card("Madrid personal and family minimum", "€28,406.65")
     expect(page).to have_text("Profile inputs: 75 or older, 2 children (1 under 3), taxpayer disability 65% or more")
+  end
+
+  it "recalculates automatically when gross income and salary period change" do
+    visit root_path
+
+    within_results_card do
+      expect(page).to have_text("€41,551.44")
+    end
+
+    within_calculator_card do
+      fill_in "Gross income", with: "7000"
+      expect(page).to have_field("Gross income", with: "7000")
+      click_button "Monthly"
+    end
+
+    within_results_card do
+      expect(page).to have_text("€55,216.86", wait: 20)
+      expect(page).not_to have_text("€41,551.44")
+    end
+  end
+
+  it "does not get stuck calculating for decimal gross income inputs" do
+    visit root_path
+
+    within_calculator_card do
+      fill_in "Gross income", with: "7000.00"
+    end
+
+    within_results_card do
+      expect(page).to have_no_text("Calculating...", wait: 20)
+      expect(page).to have_text("€5,925.98")
+    end
+
+    within_calculator_card do
+      fill_in "Gross income", with: "7000.50"
+    end
+
+    within_results_card do
+      expect(page).to have_no_text("Calculating...", wait: 20)
+      expect(page).to have_text("€5,926.48")
+    end
+
+    within_calculator_card do
+      fill_in "Gross income", with: "7000.0000"
+    end
+
+    within_results_card do
+      expect(page).to have_no_text("Calculating...", wait: 20)
+      expect(page).to have_text("€5,925.98")
+    end
   end
 
   it "shows only fully supported public options" do

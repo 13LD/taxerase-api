@@ -18,14 +18,6 @@ const polandCalculatorConfig = {
       employee: "Contract of employment",
       self_employed: "B2B contract"
     },
-    incomeLabels: {
-      employee: "Gross salary",
-      self_employed: "Revenue"
-    },
-    periodLabels: {
-      employee: "Salary period",
-      self_employed: "Revenue period"
-    },
     regimeControls: [
       {
         key: "revenue_cost_mode",

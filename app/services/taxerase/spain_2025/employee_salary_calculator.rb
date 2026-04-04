@@ -119,7 +119,7 @@ module Taxerase
 
       def assumptions
         [
-          "Spain only, tax year 2025.",
+          "Spain, tax year 2025.",
           "Resident salaried employee in #{regime.region} under the common IRPF regime.",
           "Single taxpayer, under 65, no children, no disability, no union dues, and no extra deductions or credits.",
           "Standard indefinite contract assumptions for employee Social Security.",

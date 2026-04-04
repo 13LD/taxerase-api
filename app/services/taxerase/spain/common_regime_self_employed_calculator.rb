@@ -196,7 +196,7 @@ module Taxerase
 
       def assumptions(social_security_band)
         [
-          "Spain only, tax year #{tax_year}.",
+          "Spain, tax year #{tax_year}.",
           "Resident self-employed person in #{regime.region} using direct estimation simplified.",
           "Profile inputs: #{personal_family_minimums_data[:summary]}. No ascendants, joint filing, or other deductions and credits are included.",
           "User-entered deductible expenses are treated as ordinary deductible business expenses.",

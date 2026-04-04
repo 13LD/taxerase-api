@@ -1,124 +1,52 @@
 import React, { startTransition, useCallback, useEffect, useRef, useState } from "react";
-import TaxCalculatorForm from "./taxCalculator/TaxCalculatorForm";
-import TaxComparisonCard from "./taxCalculator/TaxComparisonCard";
-import TaxCalculatorResults from "./taxCalculator/TaxCalculatorResults";
-import TaxCalculatorTraceability from "./taxCalculator/TaxCalculatorTraceability";
+import CalculatorHomeTab from "./CalculatorHomeTab";
+import ComparisonTab from "./ComparisonTab";
 import { requestCountryCalculator } from "./taxCalculator/api";
-import { resolveCountryCalculatorConfig } from "./taxCalculator/countries";
-import useTaxCalculatorEngine from "./taxCalculator/useTaxCalculatorEngine";
-import useTaxComparisonEngine from "./taxCalculator/useTaxComparisonEngine";
 
-function CountryCalculatorPanel({
-  calculatorProps,
-  countrySwitchErrors,
-  isCountrySwitching,
-  onCountryChangeRequest
-}) {
-  const {
-    country,
-    country_options: countryOptions,
-    input_currency_options: inputCurrencyOptions,
-    tax_year_options: taxYearOptions,
-    default_tax_regime_key: defaultTaxRegimeKey,
-    regime_options: regimeOptions,
-    default_input: defaultInput,
-    initial_result: initialResult
-  } = calculatorProps;
+const TAB_OPTIONS = [
+  {
+    key: "calculator",
+    label: "Calculator",
+    description: "Single-country calculator with detailed regime context."
+  },
+  {
+    key: "comparison",
+    label: "Compare 2 countries or regions",
+    description: "Dedicated two-country comparison workspace."
+  }
+];
 
-  const calculatorConfig = resolveCountryCalculatorConfig(country?.code);
-  const formConfig = calculatorConfig.formConfig || {};
-  const visibleForCategory = (setting, selectedCategory) => {
-    if (Array.isArray(setting)) return setting.includes(selectedCategory);
-    return Boolean(setting);
-  };
-  const {
-    assumptionItems,
-    detailCards,
-    displayedSources,
-    formProps,
-    headlineMetrics,
-    selectedRegime
-  } = useTaxCalculatorEngine({
-    calculationEndpoint: calculatorConfig.calculationEndpoint,
-    countryCurrencyCode: country?.currency_code || "EUR",
-    defaultInput,
-    defaultTaxRegimeKey,
-    inputCurrencyOptions: inputCurrencyOptions || [],
-    incomeLabels: formConfig.incomeLabels || {},
-    regimeControls: formConfig.regimeControls || [],
-    initialResult,
-    periodLabels: formConfig.periodLabels || {},
-    profileLabels: formConfig.profileLabels || {},
-    regimeOptions,
-    taxYearOptions
-  });
-
-  const combinedErrors = countrySwitchErrors.concat(formProps.errors);
-
-  return (
-    <>
-      <div className="glass-stack">
-        <section className="liquid-card calculator-card">
-          <div className="section-head section-head--calculator">
-            <p className="section-kicker">{calculatorConfig.sectionKicker}</p>
-
-            <div className="section-head__title-row">
-              <h2>{selectedRegime?.name || calculatorConfig.fallbackTitle}</h2>
-            </div>
-          </div>
-
-          <TaxCalculatorForm
-            {...formProps}
-            ageBracketOptions={formConfig.ageBracketOptions || []}
-            ageFieldHint={formConfig.ageFieldHint}
-            countryOptions={countryOptions || []}
-            disabilityOptions={formConfig.disabilityOptions || []}
-            errors={combinedErrors}
-            isCountrySwitching={isCountrySwitching}
-            onCountryChange={(event) => onCountryChangeRequest(event.target.value)}
-            selectedCountryCode={country?.code || ""}
-            showAgeField={visibleForCategory(formConfig.showAgeField, formProps.selectedCategory)}
-            showChildrenCountField={visibleForCategory(formConfig.showChildrenCountField, formProps.selectedCategory)}
-            showChildrenUnderThreeField={visibleForCategory(formConfig.showChildrenUnderThreeField, formProps.selectedCategory)}
-            showDisabilityField={visibleForCategory(formConfig.showDisabilityField, formProps.selectedCategory)}
-          />
-        </section>
-      </div>
-
-      <div className="glass-stack">
-        <TaxCalculatorResults detailCards={detailCards} headlineMetrics={headlineMetrics} />
-      </div>
-
-      <div className="experience-grid__full-width">
-        <TaxCalculatorTraceability
-          assumptionItems={assumptionItems}
-          displayedSources={displayedSources}
-        />
-      </div>
-    </>
-  );
+function normalizeTab(tab) {
+  return tab === "comparison" ? "comparison" : "calculator";
 }
 
-function ComparisonPanel({ calculatorProps }) {
-  const { comparison_catalog: comparisonCatalog, country, default_input: defaultInput } = calculatorProps;
-  const { comparisonProps } = useTaxComparisonEngine({
-    comparisonCatalog: comparisonCatalog || [],
-    currentCountryCode: country?.code || "",
-    defaultGrossIncome: defaultInput?.gross_income
-  });
+function activeTabFromLocation() {
+  if (typeof window === "undefined") return "calculator";
 
-  return (
-    <div className="experience-grid__full-width">
-      <TaxComparisonCard {...comparisonProps} />
-    </div>
-  );
+  const currentUrl = new URL(window.location.href);
+  return normalizeTab(currentUrl.searchParams.get("tab"));
 }
 
 export default function CountryCalculatorApp(initialProps = {}) {
   const [calculatorProps, setCalculatorProps] = useState(initialProps);
+  const [activeTab, setActiveTab] = useState(() => activeTabFromLocation());
   const [countrySwitchErrors, setCountrySwitchErrors] = useState([]);
   const [isCountrySwitching, setIsCountrySwitching] = useState(false);
   const requestAbortControllerRef = useRef(null);
+  const activeTabRef = useRef(activeTab);
+
+  useEffect(() => {
+    activeTabRef.current = activeTab;
+  }, [activeTab]);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setActiveTab(activeTabFromLocation());
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
 
   useEffect(
     () => () => {
@@ -126,6 +54,20 @@ export default function CountryCalculatorApp(initialProps = {}) {
     },
     []
   );
+
+  const updateUrl = useCallback((mutateSearchParams) => {
+    const nextUrl = new URL(window.location.href);
+    mutateSearchParams(nextUrl.searchParams);
+    window.history.replaceState({}, "", nextUrl.toString());
+  }, []);
+
+  const handleTabChange = useCallback((nextTab) => {
+    const normalizedTab = normalizeTab(nextTab);
+    setActiveTab(normalizedTab);
+    updateUrl((searchParams) => {
+      searchParams.set("tab", normalizedTab);
+    });
+  }, [updateUrl]);
 
   const handleCountryChangeRequest = useCallback(
     async (nextCountryCode) => {
@@ -159,9 +101,10 @@ export default function CountryCalculatorApp(initialProps = {}) {
 
         if (payload.page_title) document.title = payload.page_title;
 
-        const nextUrl = new URL(window.location.href);
-        nextUrl.searchParams.set("country", nextCountryCode);
-        window.history.replaceState({}, "", nextUrl.toString());
+        updateUrl((searchParams) => {
+          searchParams.set("country", nextCountryCode);
+          searchParams.set("tab", activeTabRef.current);
+        });
         setIsCountrySwitching(false);
       } catch {
         if (abortController.signal.aborted) return;
@@ -170,20 +113,67 @@ export default function CountryCalculatorApp(initialProps = {}) {
         setIsCountrySwitching(false);
       }
     },
-    [calculatorProps.country?.code]
+    [calculatorProps.country?.code, updateUrl]
   );
 
   return (
-    <section className="experience-grid">
-      <ComparisonPanel calculatorProps={calculatorProps} />
+    <section className="tabbed-calculator-shell">
+      <section className="liquid-card calculator-tabs-card">
+        <div className="section-head">
+          <div>
+            <p className="section-kicker">Tax Workspace</p>
+            <h2>Select a mode</h2>
+          </div>
+        </div>
 
-      <CountryCalculatorPanel
-        key={calculatorProps.country?.code || "calculator"}
-        calculatorProps={calculatorProps}
-        countrySwitchErrors={countrySwitchErrors}
-        isCountrySwitching={isCountrySwitching}
-        onCountryChangeRequest={handleCountryChangeRequest}
-      />
+        <div
+          aria-label="Tax workspace tabs"
+          className="calculator-tabs"
+          role="tablist"
+        >
+          {TAB_OPTIONS.map((tab) => (
+            <button
+              aria-controls={`${tab.key}-panel`}
+              aria-selected={activeTab === tab.key}
+              className={`calculator-tabs__tab${activeTab === tab.key ? " is-active" : ""}`}
+              id={`${tab.key}-tab`}
+              key={tab.key}
+              onClick={() => handleTabChange(tab.key)}
+              role="tab"
+              type="button"
+            >
+              <span>{tab.label}</span>
+              <small>{tab.description}</small>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <div
+        aria-hidden={activeTab !== "calculator"}
+        className="tabbed-calculator-shell__panel"
+        hidden={activeTab !== "calculator"}
+        id="calculator-panel"
+        role="tabpanel"
+      >
+        <CalculatorHomeTab
+          key={calculatorProps.country?.code || "calculator"}
+          calculatorProps={calculatorProps}
+          countrySwitchErrors={countrySwitchErrors}
+          isCountrySwitching={isCountrySwitching}
+          onCountryChangeRequest={handleCountryChangeRequest}
+        />
+      </div>
+
+      <div
+        aria-hidden={activeTab !== "comparison"}
+        className="tabbed-calculator-shell__panel"
+        hidden={activeTab !== "comparison"}
+        id="comparison-panel"
+        role="tabpanel"
+      >
+        <ComparisonTab calculatorProps={calculatorProps} />
+      </div>
     </section>
   );
 }

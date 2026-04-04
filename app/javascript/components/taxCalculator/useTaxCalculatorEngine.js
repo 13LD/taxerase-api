@@ -27,6 +27,7 @@ import {
   buildCalculationSignature,
   buildRegionOptions,
   buildResultCalculationSignature,
+  buildSelectionResultSignature,
   findInitialRegime,
   resolveSelectedRegime
 } from "./selection";
@@ -38,8 +39,8 @@ export default function useTaxCalculatorEngine({
   defaultTaxRegimeKey,
   inputCurrencyOptions = [],
   initialResult,
-  incomeLabels = {},
-  periodLabels = {},
+  incomeLabels: _incomeLabels = {},
+  periodLabels: _periodLabels = {},
   profileLabels = {},
   regimeControls = [],
   regimeOptions,
@@ -141,13 +142,8 @@ export default function useTaxCalculatorEngine({
   const showDeductibleExpenses =
     selectedCategory === "self_employed" && !regimeControlEffects.hideDeductibleExpenses;
   const showPersonalReliefFields = !regimeControlEffects.hidePersonalReliefFields;
-  const incomeLabel =
-    regimeControlEffects.incomeLabel ||
-    incomeLabels[selectedCategory] ||
-    (selectedCategory === "self_employed" ? "Revenue before expenses" : "Gross income");
-  const periodLabel =
-    periodLabels[selectedCategory] ||
-    (selectedCategory === "self_employed" ? "Income period" : "Salary period");
+  const incomeLabel = regimeControlEffects.incomeLabel || "Gross income";
+  const periodLabel = "Income period";
   const selectedControlSignatureParts = useMemo(
     () =>
       buildSelectedControlSignatureParts({
@@ -158,11 +154,13 @@ export default function useTaxCalculatorEngine({
     [regimeControlValues, regimeControls, selectedCategory]
   );
 
-  const selectedCalculationSignature = useMemo(
+  const selectedCalculationRequestSignature = useMemo(
     () =>
       buildCalculationSignature({
         selectedTaxYear,
         selectedRegimeKey,
+        grossIncome,
+        salaryPeriod,
         ageBracket,
         childrenCount,
         childrenUnderThreeCount,
@@ -174,6 +172,34 @@ export default function useTaxCalculatorEngine({
       childrenCount,
       childrenUnderThreeCount,
       disabilityLevel,
+      grossIncome,
+      salaryPeriod,
+      selectedInputCurrencyCode,
+      selectedControlSignatureParts,
+      selectedRegimeKey,
+      selectedTaxYear
+    ]
+  );
+  const selectedCalculationResultSignature = useMemo(
+    () =>
+      buildSelectionResultSignature({
+        selectedTaxYear,
+        selectedRegimeKey,
+        grossIncome,
+        salaryPeriod,
+        ageBracket,
+        childrenCount,
+        childrenUnderThreeCount,
+        disabilityLevel,
+        extraSignatureParts: [ selectedInputCurrencyCode, ...selectedControlSignatureParts ]
+      }),
+    [
+      ageBracket,
+      childrenCount,
+      childrenUnderThreeCount,
+      disabilityLevel,
+      grossIncome,
+      salaryPeriod,
       selectedInputCurrencyCode,
       selectedControlSignatureParts,
       selectedRegimeKey,
@@ -200,8 +226,8 @@ export default function useTaxCalculatorEngine({
   }, [countryCurrencyCode, result, resultControlSignatureParts]);
   const isSupportedRegime = Boolean(selectedRegime?.supported);
   const resultMatchesSelection =
-    selectedCalculationSignature !== null &&
-    selectedCalculationSignature === resultCalculationSignature;
+    selectedCalculationResultSignature !== null &&
+    selectedCalculationResultSignature === resultCalculationSignature;
   const displayStatus = !selectedRegime
     ? "unavailable"
     : !isSupportedRegime
@@ -411,14 +437,16 @@ export default function useTaxCalculatorEngine({
       return;
     }
 
-    if (selectedCalculationSignature === resultCalculationSignature) return;
+    if (selectedCalculationRequestSignature === null) return;
+    if (selectedCalculationRequestSignature === resultCalculationSignature && status !== "loading") return;
 
     void submitCalculation();
   }, [
     isSupportedRegime,
     resultCalculationSignature,
-    selectedCalculationSignature,
+    selectedCalculationRequestSignature,
     selectedRegime,
+    status,
     submitCalculation
   ]);
 
@@ -467,7 +495,7 @@ export default function useTaxCalculatorEngine({
       onDisabilityLevelChange: handleDisabilityLevelChange,
       onGrossIncomeChange: (event) => {
         setGrossIncome(event.target.value);
-        resetFormState();
+        prepareAutoRefresh();
       },
       onInputCurrencyChange: (event) => {
         setSelectedInputCurrencyCode(event.target.value);
@@ -477,7 +505,7 @@ export default function useTaxCalculatorEngine({
       onRegimeControlChange: handleRegimeControlChange,
       onSalaryPeriodChange: (nextSalaryPeriod) => {
         setSalaryPeriod(nextSalaryPeriod);
-        resetFormState();
+        prepareAutoRefresh();
       },
       onSubmit: handleSubmit,
       onTaxYearChange: handleTaxYearChange,

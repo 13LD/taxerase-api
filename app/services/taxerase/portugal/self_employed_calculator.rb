@@ -306,7 +306,7 @@ module Taxerase
 
       def assumptions
         [
-          "Portugal only, mainland-resident individual, simplified category B regime, tax year #{tax_year}.",
+          "Portugal, tax year #{tax_year}.",
           "The activity type selects the official simplified-regime taxable-income coefficient and the matching social-security relevant-income share used by this calculator.",
           "Documented business expenses are treated as supporting expenses for the simplified-regime 15% documentation check and as cash expenses in annual net income.",
           "Mandatory self-employed social security is estimated annually from the seeded rate and relevant-income share. Quarterly declarations, exemptions, adjustment bands, and minimum or maximum incidence-base mechanics are not included.",

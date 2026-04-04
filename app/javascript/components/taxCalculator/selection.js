@@ -43,6 +43,8 @@ export function resolveSelectedRegime({
 export function buildCalculationSignature({
   selectedTaxYear,
   selectedRegimeKey,
+  grossIncome,
+  salaryPeriod,
   ageBracket,
   childrenCount,
   childrenUnderThreeCount,
@@ -54,6 +56,46 @@ export function buildCalculationSignature({
   return [
     selectedTaxYear,
     selectedRegimeKey,
+    grossIncome,
+    salaryPeriod,
+    ageBracket,
+    childrenCount,
+    childrenUnderThreeCount,
+    disabilityLevel,
+    ...extraSignatureParts
+  ].join(":");
+}
+
+function normalizeGrossIncomeForSignature(grossIncome) {
+  if (grossIncome === null || grossIncome === undefined) return grossIncome;
+
+  const rawValue = String(grossIncome).trim();
+  if (rawValue === "") return grossIncome;
+
+  const numericValue = Number(rawValue);
+  return Number.isFinite(numericValue) ? numericValue : grossIncome;
+}
+
+export function buildSelectionResultSignature({
+  selectedTaxYear,
+  selectedRegimeKey,
+  grossIncome,
+  salaryPeriod,
+  ageBracket,
+  childrenCount,
+  childrenUnderThreeCount,
+  disabilityLevel,
+  extraSignatureParts = []
+}) {
+  if (!selectedRegimeKey) return null;
+
+  const normalizedGrossIncome = normalizeGrossIncomeForSignature(grossIncome);
+
+  return [
+    selectedTaxYear,
+    selectedRegimeKey,
+    normalizedGrossIncome,
+    salaryPeriod,
     ageBracket,
     childrenCount,
     childrenUnderThreeCount,
@@ -66,6 +108,8 @@ export function buildResultCalculationSignature(result, extraSignatureParts = []
   if (
     !result?.metadata?.tax_regime_key ||
     !result?.metadata?.tax_year ||
+    result?.input?.gross_income === undefined ||
+    !result?.input?.salary_period ||
     !result?.input?.age_bracket ||
     result?.input?.children_count === undefined ||
     result?.input?.children_under_three_count === undefined ||
@@ -77,6 +121,8 @@ export function buildResultCalculationSignature(result, extraSignatureParts = []
   return [
     result.metadata.tax_year,
     result.metadata.tax_regime_key,
+    normalizeGrossIncomeForSignature(result.input.gross_income),
+    result.input.salary_period,
     result.input.age_bracket,
     result.input.children_count,
     result.input.children_under_three_count,

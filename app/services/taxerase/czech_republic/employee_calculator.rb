@@ -153,7 +153,7 @@ module Taxerase
 
       def assumptions(annual_child_tax_bonus:)
         assumptions = [
-          "Czech Republic only, tax year #{tax_year}.",
+          "Czech Republic, tax year #{tax_year}.",
           "Resident employee with standard employee-paid social security and health insurance contributions.",
           "Employee social security is capped at the annual maximum assessment base stored for the seeded year. Health insurance has no cap in this calculator.",
           "The calculator applies the basic taxpayer credit, optional disability credit, and child tax credit. Child tax bonus is only paid when the annual qualifying income reaches the seeded statutory threshold.",

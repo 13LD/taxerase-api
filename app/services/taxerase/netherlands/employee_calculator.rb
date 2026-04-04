@@ -202,7 +202,7 @@ module Taxerase
 
       def assumptions(profile, thirty_percent_ruling)
         base_assumptions = [
-          "Netherlands only, tax year #{tax_year}.",
+          "Netherlands, tax year #{tax_year}.",
           "Resident employee in the Netherlands, nationwide calculation with no regional surtax split.",
           "The calculation uses Box 1 resident income tax rates, the general tax credit, and the labour tax credit.",
           "Profile input: #{profile[:summary]}. Mid-year AOW transitions and pre-1946 AOW tables are not included.",

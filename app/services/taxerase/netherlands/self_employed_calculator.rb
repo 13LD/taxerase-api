@@ -161,7 +161,7 @@ module Taxerase
 
       def assumptions(profile)
         [
-          "Netherlands only, tax year #{tax_year}.",
+          "Netherlands, tax year #{tax_year}.",
           "Resident self-employed person in the Netherlands, nationwide calculation with no regional surtax split.",
           "Profile input: #{profile[:summary]}. Mid-year AOW transitions and pre-1946 AOW tables are not included.",
           "The calculation assumes you qualify as an entrepreneur for Dutch income tax and satisfy the hours criterion, so the zelfstandigenaftrek is applied.",

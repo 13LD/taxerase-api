@@ -140,18 +140,6 @@ export default function TaxCalculatorForm({
         />
       ) : null}
 
-      {inputCurrencyOptions.length > 1 ? (
-        <SelectField
-          label="Input currency"
-          onChange={onInputCurrencyChange}
-          options={inputCurrencyOptions.map((currencyOption) => ({
-            value: currencyOption.code,
-            label: currencyOption.name
-          }))}
-          value={inputCurrencyCode}
-        />
-      ) : null}
-
       <div className={`field-row ${showRegionField ? "" : "field-row--single"}`.trim()}>
         <SelectField
           label="Tax year"
@@ -178,6 +166,41 @@ export default function TaxCalculatorForm({
         onChange={onCategoryChange}
         options={profileOptions}
         value={selectedCategory}
+      />
+
+      {inputCurrencyOptions.length > 1 ? (
+        <SelectField
+          label="Input currency"
+          onChange={onInputCurrencyChange}
+          options={inputCurrencyOptions.map((currencyOption) => ({
+            value: currencyOption.code,
+            label: currencyOption.name
+          }))}
+          value={inputCurrencyCode}
+        />
+      ) : null}
+
+      <CurrencyField
+        currencyCode={inputCurrencyCode}
+        label={incomeLabel}
+        onChange={onGrossIncomeChange}
+        value={grossIncome}
+      />
+
+      {showDeductibleExpenses ? (
+        <CurrencyField
+          currencyCode={inputCurrencyCode}
+          label="Deductible expenses"
+          onChange={onDeductibleExpensesChange}
+          value={deductibleExpenses}
+        />
+      ) : null}
+
+      <SegmentedControl
+        label={periodLabel}
+        onChange={onSalaryPeriodChange}
+        options={salaryPeriodOptions}
+        value={salaryPeriod}
       />
 
       {regimeControls.map((control) =>
@@ -231,29 +254,6 @@ export default function TaxCalculatorForm({
           value={disabilityLevel}
         />
       ) : null}
-
-      <CurrencyField
-        currencyCode={inputCurrencyCode}
-        label={incomeLabel}
-        onChange={onGrossIncomeChange}
-        value={grossIncome}
-      />
-
-      {showDeductibleExpenses ? (
-        <CurrencyField
-          currencyCode={inputCurrencyCode}
-          label="Deductible expenses"
-          onChange={onDeductibleExpensesChange}
-          value={deductibleExpenses}
-        />
-      ) : null}
-
-      <SegmentedControl
-        label={periodLabel}
-        onChange={onSalaryPeriodChange}
-        options={salaryPeriodOptions}
-        value={salaryPeriod}
-      />
 
       <button
         className="primary-action"
