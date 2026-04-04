@@ -101,7 +101,7 @@ module Taxerase
         @children_count = children_count
         @children_under_three_count = children_under_three_count
         @disability_level = disability_level
-        @currency_converter = EcbReferenceRateConverter.new
+        @currency_converter = ReferenceRateConverter.new
       end
 
       def call

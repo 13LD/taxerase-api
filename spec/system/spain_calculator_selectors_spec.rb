@@ -32,7 +32,7 @@ RSpec.describe "Spain calculator selectors", type: :system, js: true do
     expect_metric_card("Effective tax rate", /\d+\.\d{2}%/)
 
     within_calculator_card do
-      click_button "Self-employed"
+      click_button "B2B contract"
     end
 
     within_calculator_card do

@@ -77,7 +77,7 @@ module Taxerase
         regime.association(:tax_brackets).reset
         timestamp = Time.current
 
-        TaxBracket.insert_all!(
+        TaxBracket.upsert_all(
           rows.each_with_index.map do |(upper_bound, rate), index|
             {
               tax_regime_id: regime.id,
@@ -88,7 +88,8 @@ module Taxerase
               created_at: timestamp,
               updated_at: timestamp
             }
-          end
+          end,
+          unique_by: :idx_on_tax_regime_id_bracket_group_position_e563c89903
         )
       end
 
@@ -97,7 +98,7 @@ module Taxerase
         regime.association(:tax_brackets).reset
         timestamp = Time.current
 
-        TaxBracket.insert_all!(
+        TaxBracket.upsert_all(
           rows.each_with_index.map do |row, index|
             {
               tax_regime_id: regime.id,
@@ -111,7 +112,8 @@ module Taxerase
               created_at: timestamp,
               updated_at: timestamp
             }
-          end
+          end,
+          unique_by: :idx_on_tax_regime_id_bracket_group_position_e563c89903
         )
       end
 
@@ -120,7 +122,7 @@ module Taxerase
         regime.association(:tax_brackets).reset
         timestamp = Time.current
 
-        TaxBracket.insert_all!(
+        TaxBracket.upsert_all(
           rows.each_with_index.map do |row, index|
             {
               tax_regime_id: regime.id,
@@ -134,7 +136,8 @@ module Taxerase
               created_at: timestamp,
               updated_at: timestamp
             }
-          end
+          end,
+          unique_by: :idx_on_tax_regime_id_bracket_group_position_e563c89903
         )
       end
 
@@ -143,7 +146,7 @@ module Taxerase
         regime.association(:tax_parameters).reset
         timestamp = Time.current
 
-        TaxParameter.insert_all!(
+        TaxParameter.upsert_all(
           values.map do |key, value|
             {
               tax_regime_id: regime.id,
@@ -153,7 +156,8 @@ module Taxerase
               created_at: timestamp,
               updated_at: timestamp
             }
-          end
+          end,
+          unique_by: :index_tax_parameters_on_tax_regime_id_and_key
         )
       end
 
@@ -162,7 +166,7 @@ module Taxerase
         regime.association(:tax_source_usages).reset
         timestamp = Time.current
 
-        TaxSourceUsage.insert_all!(
+        TaxSourceUsage.upsert_all(
           usages.each_with_index.map do |usage, index|
             {
               tax_regime_id: regime.id,
@@ -174,7 +178,8 @@ module Taxerase
               created_at: timestamp,
               updated_at: timestamp
             }
-          end
+          end,
+          unique_by: :idx_tax_source_usages_unique_link
         )
       end
 

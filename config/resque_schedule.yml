@@ -1,0 +1,5 @@
+exchange_rates_sync_weekly:
+  cron: "0 2 * * 1"
+  class: "ExchangeRatesSyncJob"
+  queue: exchange_rates
+  description: "Fetch weekly EUR-based exchange rates from Frankfurter and persist them."

@@ -1,2 +1,5 @@
+redis: redis-server
 web: env RUBY_DEBUG_OPEN=true bin/rails server
 js: yarn build --watch
+worker: QUEUE=* bundle exec rake resque:work
+scheduler: LOAD_RESQUE_SCHEDULE=true bundle exec rake resque:scheduler

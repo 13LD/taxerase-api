@@ -1,6 +1,6 @@
 export const profileLabels = {
-  employee: "Employed",
-  self_employed: "Self-employed"
+  employee: "Contract of employment",
+  self_employed: "B2B contract"
 };
 
 export const ageBracketOptions = [

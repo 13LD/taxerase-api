@@ -12,7 +12,7 @@ module Taxerase
     def initialize(native_currency_code:, supported_currency_codes:)
       @native_currency_code = native_currency_code.to_s.upcase
       @supported_currency_codes = supported_currency_codes.map { |code| code.to_s.upcase }
-      @converter = Taxerase::Comparisons::EcbReferenceRateConverter.new
+      @converter = Taxerase::Comparisons::ReferenceRateConverter.new
     end
 
     def resolve_input_currency_code(input_currency_code)
@@ -34,6 +34,8 @@ module Taxerase
       )
     rescue ArgumentError
       amount
+    rescue KeyError => error
+      raise ValidationError.new([ error.message ])
     end
 
     def apply_to_result(result, input_currency_code:)
@@ -50,7 +52,7 @@ module Taxerase
       convert_result_amounts!(result, resolved_input_currency_code)
       result[:metadata][:input_fx_reference] = fx_reference
       result[:assumptions] = [
-        "Income inputs entered in #{resolved_input_currency_code} are converted to #{native_currency_code} using ECB reference rates from #{fx_reference[:rate_date]}.",
+        "Income inputs entered in #{resolved_input_currency_code} are converted to #{native_currency_code} using #{fx_reference[:provider]} rates from #{fx_reference[:rate_date]}.",
         "Displayed monetary amounts are converted back to #{resolved_input_currency_code} for presentation.",
         *Array(result[:assumptions])
       ]

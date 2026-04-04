@@ -61,7 +61,7 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
     visit root_path(country: "NL")
 
     within(".calculator-card") do
-      click_button "Self-employed"
+      click_button "B2B contract"
       fill_in "Deductible expenses", with: "10000"
       expect(page).not_to have_field("Apply 30% ruling")
       click_button "Recalculate"
@@ -167,7 +167,7 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
     visit root_path(country: "CZ")
 
     within(".calculator-card") do
-      click_button "Self-employed"
+      click_button "B2B contract"
 
       expect(page).to have_select("Expense method", selected: "60% flat expenses")
       expect(page).not_to have_field("Deductible expenses")
@@ -216,7 +216,7 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
       expect(page).to have_field("Care home expenses")
       expect(page).to have_field("Domestic work remuneration")
 
-      click_button "Simplified self-employed"
+      click_button "B2B contract"
 
       expect(page).to have_text("Simplified self-employed - Portugal")
       expect(page).to have_select("Activity type")
@@ -247,7 +247,7 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
       expect(page).not_to have_field("Children under 3")
       expect(page).not_to have_field("Taxpayer age")
 
-      click_button "Self-employed activity"
+      click_button "B2B contract"
 
       expect(page).to have_text("Standard self-employed - Andorra")
       expect(page).to have_field("Deductible expenses")

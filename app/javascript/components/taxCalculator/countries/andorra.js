@@ -9,10 +9,6 @@ const andorraCalculatorConfig = {
   fallbackTitle: "Andorra tax estimate",
   sectionKicker: "European tax calculator",
   formConfig: {
-    profileLabels: {
-      employee: "Employment income",
-      self_employed: "Self-employed activity"
-    },
     incomeLabels: {
       employee: "Gross income",
       self_employed: "Business revenue"

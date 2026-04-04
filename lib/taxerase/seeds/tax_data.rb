@@ -2,6 +2,7 @@ module Taxerase
   module Seeds
     class TaxData
       SEEDERS = [
+        ExchangeRates,
         AndorraTaxRules,
         SpainTaxRules,
         NetherlandsTaxRules,

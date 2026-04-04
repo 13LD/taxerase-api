@@ -183,7 +183,7 @@ RSpec.describe "Api::V1::Comparisons", type: :request do
       expect(json.dig("metadata", "input_currency_code")).to eq("EUR")
       expect(json.dig("metadata", "comparison_currency_code")).to eq("EUR")
       expect(json.dig("metadata", "mixed_currency_comparison")).to eq(true)
-      expect(json.dig("metadata", "fx_reference", "provider")).to eq("ECB")
+      expect(json.dig("metadata", "fx_reference", "provider")).to eq("Frankfurter")
       expect(json.dig("metadata", "fx_reference", "rate_date")).to eq("2026-03-11")
       expect(json.dig("right", "currency_code")).to eq("PLN")
       expect(json.dig("right", "gross_income_input")).to be > 60_000

@@ -61,10 +61,6 @@ const portugalCalculatorConfig = {
   fallbackTitle: "Portugal tax estimate",
   sectionKicker: "EU tax calculator",
   formConfig: {
-    profileLabels: {
-      employee: "Employment contract",
-      self_employed: "Simplified self-employed"
-    },
     incomeLabels: {
       employee: "Gross income",
       self_employed: "Business revenue"

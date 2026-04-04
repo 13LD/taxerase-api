@@ -25,6 +25,18 @@ export function formatCurrency(value, currencyCode = "EUR") {
   return currencyFormatters[resolvedCurrencyCode].format(Number(value || 0));
 }
 
+export function formatCompactCurrency(value, currencyCode = "EUR") {
+  const resolvedCurrencyCode = currencyCode || "EUR";
+  const normalizedValue = Math.trunc(Number(value || 0) * 10) / 10;
+
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: resolvedCurrencyCode,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 1
+  }).format(normalizedValue);
+}
+
 export function currencySymbol(currencyCode = "EUR") {
   const resolvedCurrencyCode = currencyCode || "EUR";
 
