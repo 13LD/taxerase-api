@@ -33,6 +33,11 @@ export default function CountryCalculatorApp(initialProps = {}) {
   const [countrySwitchErrors, setCountrySwitchErrors] = useState([]);
   const [isCountrySwitching, setIsCountrySwitching] = useState(false);
   const requestAbortControllerRef = useRef(null);
+  const activeTabRef = useRef(activeTab);
+
+  useEffect(() => {
+    activeTabRef.current = activeTab;
+  }, [activeTab]);
 
   useEffect(() => {
     const handlePopState = () => {
@@ -98,7 +103,7 @@ export default function CountryCalculatorApp(initialProps = {}) {
 
         updateUrl((searchParams) => {
           searchParams.set("country", nextCountryCode);
-          searchParams.set("tab", activeTab);
+          searchParams.set("tab", activeTabRef.current);
         });
         setIsCountrySwitching(false);
       } catch {
@@ -108,7 +113,7 @@ export default function CountryCalculatorApp(initialProps = {}) {
         setIsCountrySwitching(false);
       }
     },
-    [activeTab, calculatorProps.country?.code, updateUrl]
+    [calculatorProps.country?.code, updateUrl]
   );
 
   return (
