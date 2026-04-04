@@ -84,4 +84,4 @@ services:
 
 databases:
   - name: taxerase-db
-    plan: starter
+    plan: basic-256mb
