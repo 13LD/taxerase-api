@@ -27,6 +27,7 @@ import {
   buildCalculationSignature,
   buildRegionOptions,
   buildResultCalculationSignature,
+  buildSelectionResultSignature,
   findInitialRegime,
   resolveSelectedRegime
 } from "./selection";
@@ -153,9 +154,35 @@ export default function useTaxCalculatorEngine({
     [regimeControlValues, regimeControls, selectedCategory]
   );
 
-  const selectedCalculationSignature = useMemo(
+  const selectedCalculationRequestSignature = useMemo(
     () =>
       buildCalculationSignature({
+        selectedTaxYear,
+        selectedRegimeKey,
+        grossIncome,
+        salaryPeriod,
+        ageBracket,
+        childrenCount,
+        childrenUnderThreeCount,
+        disabilityLevel,
+        extraSignatureParts: [ selectedInputCurrencyCode, ...selectedControlSignatureParts ]
+      }),
+    [
+      ageBracket,
+      childrenCount,
+      childrenUnderThreeCount,
+      disabilityLevel,
+      grossIncome,
+      salaryPeriod,
+      selectedInputCurrencyCode,
+      selectedControlSignatureParts,
+      selectedRegimeKey,
+      selectedTaxYear
+    ]
+  );
+  const selectedCalculationResultSignature = useMemo(
+    () =>
+      buildSelectionResultSignature({
         selectedTaxYear,
         selectedRegimeKey,
         grossIncome,
@@ -199,8 +226,8 @@ export default function useTaxCalculatorEngine({
   }, [countryCurrencyCode, result, resultControlSignatureParts]);
   const isSupportedRegime = Boolean(selectedRegime?.supported);
   const resultMatchesSelection =
-    selectedCalculationSignature !== null &&
-    selectedCalculationSignature === resultCalculationSignature;
+    selectedCalculationResultSignature !== null &&
+    selectedCalculationResultSignature === resultCalculationSignature;
   const displayStatus = !selectedRegime
     ? "unavailable"
     : !isSupportedRegime
@@ -410,14 +437,16 @@ export default function useTaxCalculatorEngine({
       return;
     }
 
-    if (selectedCalculationSignature === resultCalculationSignature) return;
+    if (selectedCalculationRequestSignature === null) return;
+    if (selectedCalculationRequestSignature === resultCalculationSignature && status !== "loading") return;
 
     void submitCalculation();
   }, [
     isSupportedRegime,
     resultCalculationSignature,
-    selectedCalculationSignature,
+    selectedCalculationRequestSignature,
     selectedRegime,
+    status,
     submitCalculation
   ]);
 

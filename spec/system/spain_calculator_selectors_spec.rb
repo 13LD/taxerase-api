@@ -155,6 +155,37 @@ RSpec.describe "Spain calculator selectors", type: :system, js: true do
     end
   end
 
+  it "does not get stuck calculating for decimal gross income inputs" do
+    visit root_path
+
+    within_calculator_card do
+      fill_in "Gross income", with: "7000.00"
+    end
+
+    within_results_card do
+      expect(page).to have_no_text("Calculating...", wait: 20)
+      expect(page).to have_text("€5,550.00")
+    end
+
+    within_calculator_card do
+      fill_in "Gross income", with: "7000.50"
+    end
+
+    within_results_card do
+      expect(page).to have_no_text("Calculating...", wait: 20)
+      expect(page).to have_text("€5,550.50")
+    end
+
+    within_calculator_card do
+      fill_in "Gross income", with: "7000.0000"
+    end
+
+    within_results_card do
+      expect(page).to have_no_text("Calculating...", wait: 20)
+      expect(page).to have_text("€5,550.00")
+    end
+  end
+
   it "shows only fully supported public options" do
     visit root_path
 
