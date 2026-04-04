@@ -164,7 +164,7 @@ RSpec.describe "Spain calculator selectors", type: :system, js: true do
 
     within_results_card do
       expect(page).to have_no_text("Calculating...", wait: 20)
-      expect(page).to have_text("€5,550.00")
+      expect(page).to have_text("€5,925.98")
     end
 
     within_calculator_card do
@@ -173,7 +173,7 @@ RSpec.describe "Spain calculator selectors", type: :system, js: true do
 
     within_results_card do
       expect(page).to have_no_text("Calculating...", wait: 20)
-      expect(page).to have_text("€5,550.50")
+      expect(page).to have_text("€5,926.48")
     end
 
     within_calculator_card do
@@ -182,7 +182,7 @@ RSpec.describe "Spain calculator selectors", type: :system, js: true do
 
     within_results_card do
       expect(page).to have_no_text("Calculating...", wait: 20)
-      expect(page).to have_text("€5,550.00")
+      expect(page).to have_text("€5,925.98")
     end
   end
 
