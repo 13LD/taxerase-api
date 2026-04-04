@@ -53,10 +53,12 @@ export function buildCalculationSignature({
 }) {
   if (!selectedRegimeKey) return null;
 
+  const normalizedGrossIncome = normalizeGrossIncomeForSignature(grossIncome);
+
   return [
     selectedTaxYear,
     selectedRegimeKey,
-    grossIncome,
+    normalizedGrossIncome,
     salaryPeriod,
     ageBracket,
     childrenCount,
@@ -64,6 +66,16 @@ export function buildCalculationSignature({
     disabilityLevel,
     ...extraSignatureParts
   ].join(":");
+}
+
+function normalizeGrossIncomeForSignature(grossIncome) {
+  if (grossIncome === null || grossIncome === undefined) return grossIncome;
+
+  const rawValue = String(grossIncome).trim();
+  if (rawValue === "") return grossIncome;
+
+  const numericValue = Number(rawValue);
+  return Number.isFinite(numericValue) ? numericValue : grossIncome;
 }
 
 export function buildResultCalculationSignature(result, extraSignatureParts = []) {
@@ -83,7 +95,7 @@ export function buildResultCalculationSignature(result, extraSignatureParts = []
   return [
     result.metadata.tax_year,
     result.metadata.tax_regime_key,
-    result.input.gross_income,
+    normalizeGrossIncomeForSignature(result.input.gross_income),
     result.input.salary_period,
     result.input.age_bracket,
     result.input.children_count,
