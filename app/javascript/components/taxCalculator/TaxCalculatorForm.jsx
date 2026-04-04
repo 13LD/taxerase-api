@@ -140,18 +140,6 @@ export default function TaxCalculatorForm({
         />
       ) : null}
 
-      {inputCurrencyOptions.length > 1 ? (
-        <SelectField
-          label="Input currency"
-          onChange={onInputCurrencyChange}
-          options={inputCurrencyOptions.map((currencyOption) => ({
-            value: currencyOption.code,
-            label: currencyOption.name
-          }))}
-          value={inputCurrencyCode}
-        />
-      ) : null}
-
       <div className={`field-row ${showRegionField ? "" : "field-row--single"}`.trim()}>
         <SelectField
           label="Tax year"
@@ -179,6 +167,18 @@ export default function TaxCalculatorForm({
         options={profileOptions}
         value={selectedCategory}
       />
+
+      {inputCurrencyOptions.length > 1 ? (
+        <SelectField
+          label="Input currency"
+          onChange={onInputCurrencyChange}
+          options={inputCurrencyOptions.map((currencyOption) => ({
+            value: currencyOption.code,
+            label: currencyOption.name
+          }))}
+          value={inputCurrencyCode}
+        />
+      ) : null}
 
       <CurrencyField
         currencyCode={inputCurrencyCode}
