@@ -22,4 +22,16 @@
 /yarn-error.log
 /byebug_history
 /dump.rdb
-.omx/
+
+# Local AI/agent orchestration files
+/AGENTS.md
+/.agents/
+/.codex/
+/.omx/
+/.claude/
+/.gemini/
+/CLAUDE.md
+/GEMINI.md
+
+# Local AI/agent docs
+/docs/
