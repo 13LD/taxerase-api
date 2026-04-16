@@ -52,17 +52,28 @@ module Taxerase
       end
 
       def self.country_options
-        available_definitions.map(&:country)
+        comparison_catalog.map { |entry| entry.fetch(:country) }
       end
 
       def self.comparison_catalog
-        available_definitions.map(&:public_catalog)
+        rows_by_country = TaxRegime.public_catalog_rows_by_country(supported_methods_by_country:)
+
+        DEFINITIONS.filter_map do |country_code, definition|
+          country_rows = rows_by_country[country_code]
+          next unless country_rows
+
+          definition.public_catalog(country_rows)
+        end
+      end
+
+      def self.supported_methods_by_country
+        DEFINITIONS.transform_values do |definition|
+          definition.calculation_router.const_get(:SUPPORTED_METHODS).keys
+        end
       end
 
       def self.comparison_profile_catalog
-        available_definitions
-          .flat_map(&:public_comparison_profiles)
-          .uniq { |profile| profile.fetch(:key) }
+        BaseDefinition::COMPARISON_PROFILES
       end
 
       def self.fetch_comparison_profile(profile_key)

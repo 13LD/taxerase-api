@@ -2,11 +2,9 @@ require "rails_helper"
 
 RSpec.describe Taxerase::CzechRepublic::TaxCredits do
   let(:regime) do
-    TaxRegime.find_by!(
-      country: Country.find_by!(code: "CZ"),
-      key: "employee_czech_republic",
-      tax_year: 2025
-    )
+    TaxRegime
+      .for_country_year(country: Country.find_by!(code: "CZ"), tax_year: 2025)
+      .find_by!(key: "employee_czech_republic")
   end
 
   describe ".child_tax_bonus" do

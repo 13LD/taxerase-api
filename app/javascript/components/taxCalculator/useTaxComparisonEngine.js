@@ -26,9 +26,11 @@ import {
 export default function useTaxComparisonEngine({
   comparisonCatalog,
   currentCountryCode,
-  defaultGrossIncome
+  defaultGrossIncome,
+  enabled = true
 }) {
   const requestAbortControllerRef = useRef(null);
+  const successfulSignatureRef = useRef(null);
   const profileOptions = useMemo(
     () => buildComparisonProfileOptions(comparisonCatalog),
     [comparisonCatalog]
@@ -246,6 +248,7 @@ export default function useTaxComparisonEngine({
       startTransition(() => {
         setComparisonResult(payload);
       });
+      successfulSignatureRef.current = comparisonSignature;
       setStatus("success");
     } catch {
       if (abortController.signal.aborted) return;
@@ -256,6 +259,7 @@ export default function useTaxComparisonEngine({
     }
   }, [
     canCompare,
+    comparisonSignature,
     leftCountryCode,
     leftRegime,
     inputCurrencyCode,
@@ -269,8 +273,15 @@ export default function useTaxComparisonEngine({
   ]);
 
   useEffect(() => {
+    if (!enabled) {
+      requestAbortControllerRef.current?.abort();
+      return;
+    }
+
+    if (successfulSignatureRef.current === comparisonSignature) return;
+
     void runComparison();
-  }, [comparisonSignature, runComparison]);
+  }, [comparisonSignature, enabled, runComparison]);
 
   useEffect(
     () => () => {

@@ -2,11 +2,9 @@ require "rails_helper"
 
 RSpec.describe Taxerase::Poland::SpecialIncomeRelief do
   let(:regime) do
-    TaxRegime.find_by!(
-      country: Country.find_by!(code: "PL"),
-      key: "employee_poland",
-      tax_year: 2025
-    )
+    TaxRegime
+      .for_country_year(country: Country.find_by!(code: "PL"), tax_year: 2025)
+      .find_by!(key: "employee_poland")
   end
 
   describe ".call" do

@@ -49,6 +49,17 @@ RSpec.configure do |config|
     Taxerase::Seeds::TaxData.call
   end
 
+  if defined?(Bullet)
+    config.before do
+      Bullet.start_request
+    end
+
+    config.after do
+      Bullet.perform_out_of_channel_notifications if Bullet.notification?
+      Bullet.end_request
+    end
+  end
+
   # You can uncomment this line to turn off ActiveRecord support entirely.
   # config.use_active_record = false
 

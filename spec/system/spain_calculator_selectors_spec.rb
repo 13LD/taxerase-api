@@ -76,10 +76,22 @@ RSpec.describe "Spain calculator selectors", type: :system, js: true do
     visit root_path
 
     within_calculator_card do
+      page.execute_script(<<~JS)
+        window.__salaryCalcFetchCalls = [];
+        const originalFetch = window.fetch.bind(window);
+        window.fetch = (...args) => {
+          if (String(args[0]).includes("/salary_calculation")) {
+            window.__salaryCalcFetchCalls.push(String(args[0]));
+          }
+          return originalFetch(...args);
+        };
+      JS
+
       select "Madrid", from: "Region"
     end
 
     expect(page).to have_text("Resident employee - Madrid")
+    expect(page.evaluate_script("window.__salaryCalcFetchCalls.length")).to eq(1)
 
     within_results_card do
       expect(page).to have_text("Income tax")

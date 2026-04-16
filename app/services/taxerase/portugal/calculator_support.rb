@@ -141,7 +141,7 @@ module Taxerase
       end
 
       def country
-        @country ||= Country.find_by!(code: self.class::COUNTRY_CODE)
+        @country ||= Taxerase::Portugal::CalculationRouter.country
       end
 
       def parameter_decimal!(key)

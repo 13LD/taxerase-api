@@ -352,17 +352,13 @@ module Taxerase
 
       def purge_obsolete_regimes!(country)
         expected_keys_by_year = expected_regime_keys_by_year
+        expected_regime_ids = expected_keys_by_year.flat_map do |tax_year, keys|
+          TaxRegime.for_country_year(country:, tax_year:).where(key: keys).pluck(:id)
+        end
 
-        country.tax_regimes
-          .where.not(
-            "(tax_year = ? AND key IN (?)) OR (tax_year = ? AND key IN (?)) OR (tax_year = ? AND key IN (?))",
-            2024,
-            expected_keys_by_year.fetch(2024),
-            2025,
-            expected_keys_by_year.fetch(2025),
-            2026,
-            expected_keys_by_year.fetch(2026)
-          )
+        TaxRegime
+          .for_country(country)
+          .where.not(id: expected_regime_ids)
           .find_each(&:destroy!)
       end
 

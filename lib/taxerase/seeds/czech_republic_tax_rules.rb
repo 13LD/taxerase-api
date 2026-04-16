@@ -96,7 +96,7 @@ module Taxerase
       end
 
       def seed_country(country)
-        country.tax_regimes.where(category: %w[employee self_employed]).where.not(tax_year: LIVE_YEARS).find_each(&:destroy!)
+        destroy_stale_regimes!(country, categories: %w[employee self_employed], live_years: LIVE_YEARS)
 
         LIVE_YEARS.each do |tax_year|
           seed_employee_regime(country, tax_year)

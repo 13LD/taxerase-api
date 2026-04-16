@@ -208,12 +208,10 @@ module Taxerase
       end
 
       def regime
-        @regime ||= TaxRegime.includes(:country, :tax_brackets, :tax_parameters, tax_source_usages: :official_tax_source).find_by(
-          country:,
-          key: tax_regime_key,
-          tax_year:,
-          category: "self_employed"
-        )
+        @regime ||= TaxRegime
+          .with_rule_data
+          .for_country_year(country:, tax_year:)
+          .find_by(key: tax_regime_key, category: "self_employed")
       end
 
       def metadata

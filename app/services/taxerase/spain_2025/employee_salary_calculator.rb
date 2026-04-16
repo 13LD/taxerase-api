@@ -93,16 +93,14 @@ module Taxerase
       end
 
       def regime
-        @regime ||= TaxRegime.includes(:country, :tax_brackets, :tax_parameters).find_by(
-          country:,
-          key: tax_regime_key,
-          tax_year: TAX_YEAR,
-          category: "employee"
-        )
+        @regime ||= TaxRegime
+          .includes(:country, :tax_brackets, :tax_parameters)
+          .for_country_year(country:, tax_year: TAX_YEAR)
+          .find_by(key: tax_regime_key, category: "employee")
       end
 
       def country
-        @country ||= Country.find_by!(code: COUNTRY_CODE)
+        @country ||= CalculationRouter.country
       end
 
       def metadata

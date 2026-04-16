@@ -83,6 +83,8 @@ export default function useTaxCalculatorEngine({
   const [status, setStatus] = useState("ready");
   const [errors, setErrors] = useState([]);
   const requestAbortControllerRef = useRef(null);
+  const inFlightCalculationSignatureRef = useRef(null);
+  const successfulCalculationSignatureRef = useRef(null);
 
   const regimesForYear = useMemo(
     () => regimeOptions.filter((regime) => regime.tax_year === selectedTaxYear),
@@ -361,13 +363,17 @@ export default function useTaxCalculatorEngine({
     prepareAutoRefresh();
   }
 
-  const submitCalculation = useCallback(async () => {
+  const submitCalculation = useCallback(async ({ force = false } = {}) => {
     if (!selectedRegime || !isSupportedRegime) return;
+    if (!selectedCalculationRequestSignature) return;
+    if (!force && inFlightCalculationSignatureRef.current === selectedCalculationRequestSignature) return;
+    if (!force && successfulCalculationSignatureRef.current === selectedCalculationRequestSignature) return;
 
     requestAbortControllerRef.current?.abort();
 
     const abortController = new AbortController();
     requestAbortControllerRef.current = abortController;
+    inFlightCalculationSignatureRef.current = selectedCalculationRequestSignature;
 
     setStatus("loading");
     setErrors([]);
@@ -395,9 +401,17 @@ export default function useTaxCalculatorEngine({
       });
 
       const payload = await response.json();
-      if (abortController.signal.aborted) return;
+      if (abortController.signal.aborted) {
+        if (inFlightCalculationSignatureRef.current === selectedCalculationRequestSignature) {
+          inFlightCalculationSignatureRef.current = null;
+        }
+        return;
+      }
 
       if (!response.ok) {
+        if (inFlightCalculationSignatureRef.current === selectedCalculationRequestSignature) {
+          inFlightCalculationSignatureRef.current = null;
+        }
         setErrors(payload.errors || ["The calculator could not process this request."]);
         setStatus("error");
         return;
@@ -406,10 +420,22 @@ export default function useTaxCalculatorEngine({
       startTransition(() => {
         setResult(payload);
       });
+      successfulCalculationSignatureRef.current = selectedCalculationRequestSignature;
+      if (inFlightCalculationSignatureRef.current === selectedCalculationRequestSignature) {
+        inFlightCalculationSignatureRef.current = null;
+      }
       setStatus("success");
     } catch {
-      if (abortController.signal.aborted) return;
+      if (abortController.signal.aborted) {
+        if (inFlightCalculationSignatureRef.current === selectedCalculationRequestSignature) {
+          inFlightCalculationSignatureRef.current = null;
+        }
+        return;
+      }
 
+      if (inFlightCalculationSignatureRef.current === selectedCalculationRequestSignature) {
+        inFlightCalculationSignatureRef.current = null;
+      }
       setErrors(["Network error while calculating."]);
       setStatus("error");
     }
@@ -426,6 +452,7 @@ export default function useTaxCalculatorEngine({
     regimeControls,
     salaryPeriod,
     selectedInputCurrencyCode,
+    selectedCalculationRequestSignature,
     selectedRegime,
     selectedTaxYear,
     showDeductibleExpenses
@@ -434,11 +461,17 @@ export default function useTaxCalculatorEngine({
   useEffect(() => {
     if (!selectedRegime || !isSupportedRegime) {
       requestAbortControllerRef.current?.abort();
+      inFlightCalculationSignatureRef.current = null;
       return;
     }
 
     if (selectedCalculationRequestSignature === null) return;
-    if (selectedCalculationRequestSignature === resultCalculationSignature && status !== "loading") return;
+    if (selectedCalculationRequestSignature === resultCalculationSignature) {
+      successfulCalculationSignatureRef.current = selectedCalculationRequestSignature;
+      return;
+    }
+    if (inFlightCalculationSignatureRef.current === selectedCalculationRequestSignature) return;
+    if (successfulCalculationSignatureRef.current === selectedCalculationRequestSignature) return;
 
     void submitCalculation();
   }, [
@@ -446,7 +479,6 @@ export default function useTaxCalculatorEngine({
     resultCalculationSignature,
     selectedCalculationRequestSignature,
     selectedRegime,
-    status,
     submitCalculation
   ]);
 
@@ -459,7 +491,7 @@ export default function useTaxCalculatorEngine({
 
   async function handleSubmit(event) {
     event.preventDefault();
-    await submitCalculation();
+    await submitCalculation({ force: true });
   }
 
   return {

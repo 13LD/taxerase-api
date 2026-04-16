@@ -12,49 +12,26 @@ RSpec.describe Taxerase::Seeds::TaxData do
       portugal = Country.find_by!(code: "PT")
       andorra = Country.find_by!(code: "AD")
 
-      expect(TaxRegime.find_by!(country: spain, key: "employee_madrid", tax_year: 2025).country).to eq(spain)
-      expect(TaxRegime.find_by!(country: spain, key: "self_employed_madrid", tax_year: 2025).country).to eq(spain)
-      expect(TaxRegime.find_by!(country: spain, key: "beckham_madrid", tax_year: 2025).country).to eq(spain)
-      expect(TaxRegime.find_by!(country: netherlands, key: "employee_netherlands", tax_year: 2025).country).to eq(netherlands)
-      expect(TaxRegime.find_by!(country: netherlands, key: "self_employed_netherlands", tax_year: 2025).country).to eq(netherlands)
-      expect(TaxRegime.find_by!(country: poland, key: "employee_poland", tax_year: 2025).country).to eq(poland)
-      expect(TaxRegime.find_by!(country: poland, key: "self_employed_poland", tax_year: 2025).country).to eq(poland)
-      expect(TaxRegime.find_by!(country: czech_republic, key: "employee_czech_republic", tax_year: 2025).country).to eq(czech_republic)
-      expect(TaxRegime.find_by!(country: czech_republic, key: "self_employed_czech_republic", tax_year: 2025).country).to eq(czech_republic)
-      expect(TaxRegime.find_by!(country: portugal, key: "employee_portugal", tax_year: 2025).country).to eq(portugal)
-      expect(TaxRegime.find_by!(country: portugal, key: "self_employed_portugal", tax_year: 2025).country).to eq(portugal)
-      expect(TaxRegime.find_by!(country: andorra, key: "employee_andorra", tax_year: 2025).country).to eq(andorra)
-      expect(TaxRegime.find_by!(country: andorra, key: "self_employed_andorra", tax_year: 2025).country).to eq(andorra)
+      expect(regime_for(spain, "employee_madrid", 2025).country).to eq(spain)
+      expect(regime_for(spain, "self_employed_madrid", 2025).country).to eq(spain)
+      expect(regime_for(spain, "beckham_madrid", 2025).country).to eq(spain)
+      expect(regime_for(netherlands, "employee_netherlands", 2025).country).to eq(netherlands)
+      expect(regime_for(netherlands, "self_employed_netherlands", 2025).country).to eq(netherlands)
+      expect(regime_for(poland, "employee_poland", 2025).country).to eq(poland)
+      expect(regime_for(poland, "self_employed_poland", 2025).country).to eq(poland)
+      expect(regime_for(czech_republic, "employee_czech_republic", 2025).country).to eq(czech_republic)
+      expect(regime_for(czech_republic, "self_employed_czech_republic", 2025).country).to eq(czech_republic)
+      expect(regime_for(portugal, "employee_portugal", 2025).country).to eq(portugal)
+      expect(regime_for(portugal, "self_employed_portugal", 2025).country).to eq(portugal)
+      expect(regime_for(andorra, "employee_andorra", 2025).country).to eq(andorra)
+      expect(regime_for(andorra, "self_employed_andorra", 2025).country).to eq(andorra)
 
-      andorra_source_mismatches = TaxSourceUsage
-        .joins(:tax_regime, :official_tax_source)
-        .where(tax_regimes: { country_id: andorra.id })
-        .where.not(official_tax_sources: { country_code: "AD" })
-
-      spain_source_mismatches = TaxSourceUsage
-        .joins(:tax_regime, :official_tax_source)
-        .where(tax_regimes: { country_id: spain.id })
-        .where.not(official_tax_sources: { country_code: "ES" })
-
-      netherlands_source_mismatches = TaxSourceUsage
-        .joins(:tax_regime, :official_tax_source)
-        .where(tax_regimes: { country_id: netherlands.id })
-        .where.not(official_tax_sources: { country_code: "NL" })
-
-      poland_source_mismatches = TaxSourceUsage
-        .joins(:tax_regime, :official_tax_source)
-        .where(tax_regimes: { country_id: poland.id })
-        .where.not(official_tax_sources: { country_code: "PL" })
-
-      czech_source_mismatches = TaxSourceUsage
-        .joins(:tax_regime, :official_tax_source)
-        .where(tax_regimes: { country_id: czech_republic.id })
-        .where.not(official_tax_sources: { country_code: "CZ" })
-
-      portugal_source_mismatches = TaxSourceUsage
-        .joins(:tax_regime, :official_tax_source)
-        .where(tax_regimes: { country_id: portugal.id })
-        .where.not(official_tax_sources: { country_code: "PT" })
+      andorra_source_mismatches = source_mismatches_for(andorra)
+      spain_source_mismatches = source_mismatches_for(spain)
+      netherlands_source_mismatches = source_mismatches_for(netherlands)
+      poland_source_mismatches = source_mismatches_for(poland)
+      czech_source_mismatches = source_mismatches_for(czech_republic)
+      portugal_source_mismatches = source_mismatches_for(portugal)
 
       expect(andorra_source_mismatches).to be_empty
       expect(spain_source_mismatches).to be_empty
@@ -63,5 +40,17 @@ RSpec.describe Taxerase::Seeds::TaxData do
       expect(czech_source_mismatches).to be_empty
       expect(portugal_source_mismatches).to be_empty
     end
+  end
+
+  def regime_for(country, key, tax_year)
+    TaxRegime.for_country_year(country:, tax_year:).find_by!(key:)
+  end
+
+  def source_mismatches_for(country)
+    TaxSourceUsage
+      .joins(tax_regime: :tax_rule_set)
+      .joins(:official_tax_source)
+      .where(tax_rule_sets: { country_id: country.id })
+      .where.not(official_tax_sources: { country_id: country.id })
   end
 end

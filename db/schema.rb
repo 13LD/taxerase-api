@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_04_001000) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_16_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -40,7 +40,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_04_001000) do
 
   create_table "official_tax_sources", force: :cascade do |t|
     t.string "authority_name", null: false
-    t.string "country_code", null: false
+    t.bigint "country_id", null: false
     t.datetime "created_at", null: false
     t.string "jurisdiction", null: false
     t.string "key", null: false
@@ -52,6 +52,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_04_001000) do
     t.string "title", null: false
     t.datetime "updated_at", null: false
     t.string "url", null: false
+    t.index ["country_id"], name: "index_official_tax_sources_on_country_id"
     t.index ["key"], name: "index_official_tax_sources_on_key", unique: true
   end
 
@@ -85,16 +86,32 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_04_001000) do
   create_table "tax_regimes", force: :cascade do |t|
     t.boolean "active", default: true, null: false
     t.string "category", null: false
-    t.bigint "country_id", null: false
     t.datetime "created_at", null: false
     t.text "description"
     t.string "key", null: false
     t.string "name", null: false
     t.string "region"
+    t.bigint "tax_rule_set_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tax_rule_set_id", "key"], name: "index_tax_regimes_on_tax_rule_set_id_and_key", unique: true
+    t.index ["tax_rule_set_id"], name: "index_tax_regimes_on_tax_rule_set_id"
+  end
+
+  create_table "tax_rule_sets", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.bigint "country_id", null: false
+    t.datetime "created_at", null: false
+    t.string "key", default: "default", null: false
+    t.string "name", null: false
+    t.text "notes"
+    t.date "published_on"
+    t.string "release_version", default: "seeded-v1", null: false
+    t.string "status", default: "published", null: false
     t.integer "tax_year", null: false
     t.datetime "updated_at", null: false
-    t.index ["country_id", "tax_year", "key"], name: "index_tax_regimes_on_country_id_and_tax_year_and_key", unique: true
-    t.index ["country_id"], name: "index_tax_regimes_on_country_id"
+    t.index ["country_id", "tax_year", "key"], name: "index_tax_rule_sets_on_country_id_and_tax_year_and_key", unique: true
+    t.index ["country_id", "tax_year", "status"], name: "index_tax_rule_sets_on_country_id_and_tax_year_and_status"
+    t.index ["country_id"], name: "index_tax_rule_sets_on_country_id"
   end
 
   create_table "tax_source_usages", force: :cascade do |t|
@@ -111,9 +128,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_04_001000) do
     t.index ["tax_regime_id"], name: "index_tax_source_usages_on_tax_regime_id"
   end
 
+  add_foreign_key "official_tax_sources", "countries"
   add_foreign_key "tax_brackets", "tax_regimes"
   add_foreign_key "tax_parameters", "tax_regimes"
-  add_foreign_key "tax_regimes", "countries"
+  add_foreign_key "tax_regimes", "tax_rule_sets"
+  add_foreign_key "tax_rule_sets", "countries"
   add_foreign_key "tax_source_usages", "official_tax_sources"
   add_foreign_key "tax_source_usages", "tax_regimes"
 end

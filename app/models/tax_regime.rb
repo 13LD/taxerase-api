@@ -1,15 +1,199 @@
 class TaxRegime < ApplicationRecord
-  belongs_to :country
+  belongs_to :tax_rule_set
+  has_one :country, through: :tax_rule_set
   has_many :tax_brackets, dependent: :destroy
   has_many :tax_parameters, dependent: :destroy
   has_many :tax_source_usages, dependent: :destroy
   has_many :official_tax_sources, through: :tax_source_usages
 
+  delegate :country_id, :tax_year, :release_version, to: :tax_rule_set
+
   validates :key, presence: true
   validates :name, presence: true
-  validates :tax_year, presence: true
   validates :category, presence: true
-  validates :key, uniqueness: { scope: %i[country_id tax_year] }
+  validates :key, uniqueness: { scope: :tax_rule_set_id }
+
+  scope :for_country, ->(country) {
+    joins(:tax_rule_set).where(tax_rule_sets: { country_id: country&.id || country })
+  }
+  scope :for_country_year, ->(country:, tax_year:) {
+    for_country(country).where(tax_rule_sets: { tax_year: tax_year })
+  }
+  scope :for_tax_year, ->(tax_year) {
+    joins(:tax_rule_set).where(tax_rule_sets: { tax_year: tax_year })
+  }
+  scope :ordered_for_catalog, -> {
+    includes(:tax_rule_set)
+      .joins(:tax_rule_set)
+      .order(Arel.sql("tax_rule_sets.tax_year ASC"), :category, :region, :name)
+  }
+  scope :with_rule_data, -> {
+    includes(:country, :tax_brackets, :tax_parameters, tax_source_usages: :official_tax_source)
+  }
+  scope :with_source_data, -> {
+    includes(:country, :tax_parameters, tax_source_usages: :official_tax_source)
+  }
+  scope :with_routing_data, -> {
+    includes(:tax_rule_set, :tax_parameters)
+  }
+
+  def self.default_supported_key_for(country:, tax_year:, supported_methods:, category: "employee")
+    supported = for_country_year(country:, tax_year:)
+      .joins(:tax_parameters)
+      .where(
+        active: true,
+        category:,
+        tax_parameters: {
+          key: "calculation_method",
+          value_text: supported_methods
+        }
+      )
+      .order(:region, :name)
+      .pick(:key)
+
+    supported || for_country_year(country:, tax_year:)
+      .where(active: true, category:)
+      .order(:region, :name)
+      .pick(:key)
+  end
+
+  def self.supported_tax_years_for(country:, supported_methods:)
+    public_catalog_data_for(country:, supported_methods:).fetch(:tax_year_options)
+  end
+
+  def self.supported_categories_for(country:, supported_methods:)
+    public_catalog_data_for(country:, supported_methods:).fetch(:categories)
+  end
+
+  def self.public_catalog_options_for(country:, supported_methods:)
+    public_catalog_data_for(country:, supported_methods:).fetch(:regime_options)
+  end
+
+  def self.public_catalog_data_for(country:, supported_methods:)
+    rows = public_catalog_rows_for(country:, supported_methods:)
+
+    {
+      tax_year_options: rows.map { |row| row.fetch(:tax_year) }.uniq.sort,
+      categories: rows.map { |row| row.fetch(:category) }.uniq,
+      regime_options: rows
+    }
+  end
+
+  def self.public_catalog_rows_by_country(supported_methods_by_country:)
+    rows = joins(tax_rule_set: :country)
+      .joins(:tax_parameters)
+      .where(active: true, tax_parameters: { key: "calculation_method" })
+      .order(
+        Arel.sql("countries.code ASC"),
+        Arel.sql("tax_rule_sets.tax_year ASC"),
+        :category,
+        :region,
+        :name
+      )
+      .pluck(
+        Arel.sql("countries.code"),
+        Arel.sql("countries.name"),
+        Arel.sql("countries.currency_code"),
+        :key,
+        :name,
+        :region,
+        :category,
+        Arel.sql("tax_rule_sets.tax_year"),
+        Arel.sql("tax_parameters.value_text")
+      )
+
+    rows
+      .select { |row| supported_methods_by_country.fetch(row[0], []).include?(row[8]) }
+      .group_by(&:first)
+      .transform_values do |country_rows|
+      first_row = country_rows.first
+      {
+        country: {
+          code: first_row[0],
+          name: first_row[1],
+          currency_code: first_row[2]
+        },
+        regime_options: country_rows.map do |row|
+          {
+            key: row[3],
+            name: row[4],
+            region: row[5],
+            category: row[6],
+            tax_year: row[7]
+          }
+        end
+      }
+    end
+  end
+
+  def self.public_regime_options_for(country:, catalog_options:)
+    options_by_pair = catalog_options.index_by { |regime| [ regime.fetch(:key), regime.fetch(:tax_year) ] }
+
+    for_country(country)
+      .includes(:tax_rule_set, :tax_parameters, tax_source_usages: :official_tax_source)
+      .joins(:tax_rule_set)
+      .where(key: catalog_options.map { |regime| regime.fetch(:key) }.uniq)
+      .order(Arel.sql("tax_rule_sets.tax_year ASC"), :category, :region, :name)
+      .select { |regime| options_by_pair.key?([ regime.key, regime.tax_year ]) }
+      .map do |regime|
+        {
+          key: regime.key,
+          name: regime.name,
+          region: regime.region,
+          category: regime.category,
+          tax_year: regime.tax_year,
+          description: regime.description,
+          supported: true,
+          status: "Live",
+          sources: regime.source_links
+        }
+      end
+  end
+
+  def self.public_catalog_rows_for(country:, supported_methods:)
+    supported_rule_scope(country:, supported_methods:)
+      .distinct
+      .order(Arel.sql("tax_rule_sets.tax_year ASC"), :category, :region, :name)
+      .pluck(
+        :key,
+        :name,
+        :region,
+        :category,
+        Arel.sql("tax_rule_sets.tax_year")
+      )
+      .map do |key, name, region, category, tax_year|
+        {
+          key:,
+          name:,
+          region:,
+          category:,
+          tax_year:
+        }
+      end
+  end
+
+  def self.public_catalog_option_for(country:, tax_year:, key:, supported_methods:)
+    row = supported_rule_scope(country:, supported_methods:)
+      .where(key:)
+      .where(tax_rule_sets: { tax_year: tax_year })
+      .pick(
+        :key,
+        :name,
+        :region,
+        :category,
+        Arel.sql("tax_rule_sets.tax_year")
+      )
+    return unless row
+
+    key, name, region, category, tax_year = row
+    {
+      key:,
+      name:,
+      region:,
+      category:,
+      tax_year:
+    }
+  end
 
   def brackets_for(group)
     bracket_records_for(group).map { |bracket| [ bracket.upper_bound&.to_d, bracket.rate.to_d ] }
@@ -64,4 +248,17 @@ class TaxRegime < ApplicationRecord
       }
     end
   end
+
+  def self.supported_rule_scope(country:, supported_methods:)
+    for_country(country)
+      .joins(:tax_parameters)
+      .where(
+        active: true,
+        tax_parameters: {
+          key: "calculation_method",
+          value_text: supported_methods
+        }
+      )
+  end
+  private_class_method :supported_rule_scope
 end

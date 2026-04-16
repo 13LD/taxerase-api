@@ -104,21 +104,20 @@ module Taxerase
       end
 
       def self.default_regime_key(tax_year)
-        regimes = country.tax_regimes
-          .includes(:tax_parameters)
-          .where(tax_year:, category: "employee", active: true)
-          .order(:region, :name)
-        preferred = regimes.find do |regime|
-          SUPPORTED_METHODS.key?(regime.parameter_text("calculation_method"))
-        end
-
-        preferred&.key || regimes.first&.key
+        TaxRegime.default_supported_key_for(
+          country:,
+          tax_year:,
+          supported_methods: SUPPORTED_METHODS.keys
+        )
       end
 
-      def self.regime_options
-        country.tax_regimes
+      def self.regime_options(catalog_options = nil)
+        return TaxRegime.public_regime_options_for(country:, catalog_options:) if catalog_options
+
+        TaxRegime
+          .for_country(country)
           .includes(:tax_parameters, tax_source_usages: :official_tax_source)
-          .order(:tax_year, :category, :region, :name)
+          .ordered_for_catalog
           .map do |regime|
             supported = supported?(regime)
             {
@@ -135,30 +134,41 @@ module Taxerase
           end
       end
 
-      def self.public_regime_options
-        regime_options.select { |regime| regime[:supported] }
+      def self.public_regime_options(catalog_options = nil)
+        regime_options(catalog_options || public_catalog_regime_options)
+      end
+
+      def self.public_catalog_regime_options
+        TaxRegime.public_catalog_options_for(country:, supported_methods: SUPPORTED_METHODS.keys)
+      end
+
+      def self.public_catalog_data
+        TaxRegime.public_catalog_data_for(country:, supported_methods: SUPPORTED_METHODS.keys)
+      end
+
+      def self.public_regime_categories
+        TaxRegime.supported_categories_for(country:, supported_methods: SUPPORTED_METHODS.keys)
       end
 
       def self.public_tax_year_options
-        public_regime_options.map { |regime| regime[:tax_year] }.uniq.sort
+        TaxRegime.supported_tax_years_for(country:, supported_methods: SUPPORTED_METHODS.keys)
       end
 
       def self.supported?(regime_or_key, tax_year = nil)
         regime = if regime_or_key.is_a?(TaxRegime)
           regime_or_key
         else
-          TaxRegime.find_by(country:, key: regime_or_key, tax_year:)
+          TaxRegime.for_country_year(country:, tax_year:).find_by(key: regime_or_key)
         end
 
         regime.present? && regime.country_id == country.id && SUPPORTED_METHODS.key?(regime.parameter_text("calculation_method"))
       end
 
       def self.regime_for!(regime_key, tax_year)
-        TaxRegime.includes(:country, :tax_brackets, :tax_parameters, tax_source_usages: :official_tax_source).find_by!(
-          country:,
-          key: regime_key,
-          tax_year:
-        )
+        TaxRegime
+          .with_routing_data
+          .for_country_year(country:, tax_year:)
+          .find_by!(key: regime_key)
       rescue ActiveRecord::RecordNotFound
         raise UnsupportedRegimeError.new([ "#{regime_key} is not available for Poland #{tax_year}." ])
       end

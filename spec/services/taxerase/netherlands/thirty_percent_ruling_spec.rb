@@ -2,8 +2,8 @@ require "rails_helper"
 
 RSpec.describe Taxerase::Netherlands::ThirtyPercentRuling do
   let(:country) { Country.find_by!(code: "NL") }
-  let(:regime_2025) { TaxRegime.find_by!(country:, key: "employee_netherlands", tax_year: 2025) }
-  let(:regime_2024) { TaxRegime.find_by!(country:, key: "employee_netherlands", tax_year: 2024) }
+  let(:regime_2025) { TaxRegime.for_country_year(country:, tax_year: 2025).find_by!(key: "employee_netherlands") }
+  let(:regime_2024) { TaxRegime.for_country_year(country:, tax_year: 2024).find_by!(key: "employee_netherlands") }
 
   describe ".call" do
     it "applies the standard threshold for 2025" do

@@ -1,7 +1,11 @@
 require "rails_helper"
 
 RSpec.describe Taxerase::Spain::PersonalFamilyMinimums do
-  let(:regime) { TaxRegime.find_by!(key: "employee_madrid", tax_year: 2025) }
+  let(:regime) do
+    TaxRegime
+      .for_country_year(country: Country.find_by!(code: "ES"), tax_year: 2025)
+      .find_by!(key: "employee_madrid")
+  end
 
   describe ".call" do
     it "builds state and regional personal-family minimums from the selected profile" do
