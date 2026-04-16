@@ -467,7 +467,20 @@ export default function useTaxCalculatorEngine({
 
     if (selectedCalculationRequestSignature === null) return;
     if (selectedCalculationRequestSignature === resultCalculationSignature) {
+      if (
+        inFlightCalculationSignatureRef.current &&
+        inFlightCalculationSignatureRef.current !== selectedCalculationRequestSignature
+      ) {
+        requestAbortControllerRef.current?.abort();
+        inFlightCalculationSignatureRef.current = null;
+      }
       successfulCalculationSignatureRef.current = selectedCalculationRequestSignature;
+      if (errors.length > 0) {
+        setErrors([]);
+      }
+      if (status !== "ready" && status !== "success") {
+        setStatus("success");
+      }
       return;
     }
     if (inFlightCalculationSignatureRef.current === selectedCalculationRequestSignature) return;
@@ -479,6 +492,8 @@ export default function useTaxCalculatorEngine({
     resultCalculationSignature,
     selectedCalculationRequestSignature,
     selectedRegime,
+    status,
+    errors.length,
     submitCalculation
   ]);
 
