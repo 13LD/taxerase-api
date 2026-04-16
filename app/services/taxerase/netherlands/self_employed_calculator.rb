@@ -1,6 +1,8 @@
 module Taxerase
   module Netherlands
     class SelfEmployedCalculator
+      include Taxerase::Support::RegimeBackedCalculation
+
       class ValidationError < StandardError
         attr_reader :errors
 
@@ -135,10 +137,7 @@ module Taxerase
       end
 
       def regime
-        @regime ||= TaxRegime
-          .with_rule_data
-          .for_country_year(country:, tax_year:)
-          .find_by(key: tax_regime_key, category: "self_employed")
+        @regime ||= find_regime(category: "self_employed", tax_year: tax_year, country: country)
       end
 
       def country
@@ -146,15 +145,7 @@ module Taxerase
       end
 
       def metadata
-        {
-          country_code: regime.country.code,
-          country_name: regime.country.name,
-          region: regime.region,
-          tax_year: regime.tax_year,
-          tax_regime_key: regime.key,
-          tax_regime_name: regime.name,
-          calculator_version: "netherlands-self-employed-v1"
-        }
+        build_regime_metadata(calculator_version: "netherlands-self-employed-v1")
       end
 
       def assumptions(profile)
