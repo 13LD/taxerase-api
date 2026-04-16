@@ -76,10 +76,22 @@ RSpec.describe "Spain calculator selectors", type: :system, js: true do
     visit root_path
 
     within_calculator_card do
+      page.execute_script(<<~JS)
+        window.__salaryCalcFetchCalls = [];
+        const originalFetch = window.fetch.bind(window);
+        window.fetch = (...args) => {
+          if (String(args[0]).includes("/salary_calculation")) {
+            window.__salaryCalcFetchCalls.push(String(args[0]));
+          }
+          return originalFetch(...args);
+        };
+      JS
+
       select "Madrid", from: "Region"
     end
 
     expect(page).to have_text("Resident employee - Madrid")
+    expect(page.evaluate_script("window.__salaryCalcFetchCalls.length")).to eq(1)
 
     within_results_card do
       expect(page).to have_text("Income tax")
@@ -91,6 +103,39 @@ RSpec.describe "Spain calculator selectors", type: :system, js: true do
     expect_metric_card("Annual net income", /€\d[\d,]*\.\d{2}/)
     expect_metric_card("Monthly net income", /€\d[\d,]*\.\d{2}/)
     expect_metric_card("Effective tax rate", /\d+\.\d{2}%/)
+  end
+
+  it "restores the prior result instead of staying stuck calculating when selectors revert" do
+    visit root_path
+
+    page.execute_script(<<~JS)
+      window.__salaryCalcFetchCalls = [];
+      const originalFetch = window.fetch.bind(window);
+      window.fetch = (...args) => {
+        if (String(args[0]).includes("/salary_calculation")) {
+          const payload = JSON.parse(args[1]?.body || "{}");
+          window.__salaryCalcFetchCalls.push(payload.calculation.tax_regime_key);
+
+          if (payload.calculation.tax_regime_key === "employee_madrid") {
+            return new Promise(() => {});
+          }
+        }
+
+        return originalFetch(...args);
+      };
+    JS
+
+    within_calculator_card do
+      select "Madrid", from: "Region"
+      select "Andalusia", from: "Region"
+    end
+
+    within_results_card do
+      expect(page).to have_no_text("Calculating...", wait: 20)
+      expect(page).to have_text("€41,551.44")
+    end
+
+    expect(page.evaluate_script("window.__salaryCalcFetchCalls")).to eq([ "employee_madrid" ])
   end
 
   it "recalculates automatically when the year dropdown changes to 2024" do

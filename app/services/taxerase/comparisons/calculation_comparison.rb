@@ -196,10 +196,15 @@ module Taxerase
       end
 
       def find_public_regime(country_code, tax_regime_key)
-        definition_for(country_code).public_catalog[:regime_options].find do |regime|
-          regime[:tax_year] == tax_year && regime[:key] == tax_regime_key
-        end
-      rescue KeyError
+        router = router_for(country_code)
+
+        TaxRegime.public_catalog_option_for(
+          country: router.country,
+          tax_year:,
+          key: tax_regime_key,
+          supported_methods: router.const_get(:SUPPORTED_METHODS).keys
+        )
+      rescue KeyError, NameError
         nil
       end
 
@@ -208,9 +213,9 @@ module Taxerase
       end
 
       def comparison_profile
-        @comparison_profile ||= Taxerase::CountryCalculators::Registry.fetch_comparison_profile(selected_category)
-      rescue KeyError
-        nil
+        @comparison_profile ||= Taxerase::CountryCalculators::BaseDefinition::COMPARISON_PROFILES.find do |profile|
+          profile.fetch(:key) == selected_category.to_s
+        end
       end
 
       def definition_for(country_code)

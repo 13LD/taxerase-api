@@ -133,7 +133,7 @@ module Taxerase
       end
 
       def country_record
-        @country_record ||= Country.find_by(code: self.class::COUNTRY_CODE)
+        @country_record ||= Taxerase::Andorra::CalculationRouter.country
       end
 
       def parameter_decimal(key)

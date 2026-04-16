@@ -5,12 +5,18 @@ module Api
       rescue_from Taxerase::CountryCalculators::Registry::UnavailableCountryError, with: :render_not_found
 
       def show
-        definition = Taxerase::CountryCalculators::Registry.fetch_available(params[:country_code])
+        definition = Taxerase::CountryCalculators::Registry.fetch(params[:country_code])
 
         render json: {
           page_title: definition.page_title,
           calculator_props: definition.build_props
         }
+      rescue ActiveRecord::RecordNotFound, ArgumentError
+        render_not_found(
+          Taxerase::CountryCalculators::Registry::UnavailableCountryError.new(
+            "#{definition.country.fetch(:name)} calculator data is not available. Run db:seed."
+          )
+        )
       end
 
       private

@@ -1,6 +1,8 @@
 module Taxerase
   module Spain2025
     class EmployeeSalaryCalculator
+      include Taxerase::Support::RegimeBackedCalculation
+
       class ValidationError < StandardError
         attr_reader :errors
 
@@ -93,28 +95,15 @@ module Taxerase
       end
 
       def regime
-        @regime ||= TaxRegime.includes(:country, :tax_brackets, :tax_parameters).find_by(
-          country:,
-          key: tax_regime_key,
-          tax_year: TAX_YEAR,
-          category: "employee"
-        )
+        @regime ||= find_regime(category: "employee", tax_year: TAX_YEAR, country: country)
       end
 
       def country
-        @country ||= Country.find_by!(code: COUNTRY_CODE)
+        @country ||= CalculationRouter.country
       end
 
       def metadata
-        {
-          country_code: regime.country.code,
-          country_name: regime.country.name,
-          region: regime.region,
-          tax_year: regime.tax_year,
-          tax_regime_key: regime.key,
-          tax_regime_name: regime.name,
-          calculator_version: "spain-2025-employee-v2"
-        }
+        build_regime_metadata(calculator_version: "spain-2025-employee-v2")
       end
 
       def assumptions

@@ -37,6 +37,25 @@ RSpec.describe "Tax workspace tabs", type: :system, js: true do
     expect(page).to have_no_css(".calculator-card", visible: true)
   end
 
+  it "does not request comparison data while opening in calculator mode" do
+    page.driver.browser.execute_cdp(
+      "Page.addScriptToEvaluateOnNewDocument",
+      source: <<~JS
+        window.__codexFetchCalls = [];
+        const originalFetch = window.fetch.bind(window);
+        window.fetch = (...args) => {
+          window.__codexFetchCalls.push(String(args[0]));
+          return originalFetch(...args);
+        };
+      JS
+    )
+
+    visit root_path
+
+    expect(page).to have_css(".calculator-card", visible: true)
+    expect(page.evaluate_script("window.__codexFetchCalls")).to be_empty
+  end
+
   it "preserves calculator and comparison state when switching tabs" do
     visit root_path
 

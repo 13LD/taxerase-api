@@ -26,9 +26,11 @@ module Taxerase
       end
 
       def build_props
-        tax_year_options = calculation_router.public_tax_year_options
+        comparison_catalog = Registry.comparison_catalog
+        selected_catalog = comparison_catalog.find { |entry| entry.dig(:country, :code) == country.fetch(:code) }
+        tax_year_options = selected_catalog&.fetch(:tax_year_options) || calculation_router.public_tax_year_options
         default_tax_year = tax_year_options.last || default_input.fetch(:tax_year)
-        default_tax_regime_key = calculation_router.default_regime_key(default_tax_year)
+        default_tax_regime_key = default_regime_key_for(default_tax_year, selected_catalog)
 
         raise ArgumentError, "No public tax regimes are configured for #{country.fetch(:name)}." if default_tax_regime_key.blank?
 
@@ -36,27 +38,37 @@ module Taxerase
 
         {
           country: country,
-          country_options: Registry.country_options,
-          comparison_catalog: Registry.comparison_catalog,
+          country_options: comparison_catalog.map { |entry| entry.fetch(:country) },
+          comparison_catalog: comparison_catalog,
           input_currency_options: input_currency_options,
           tax_year_options: tax_year_options,
           default_tax_regime_key: default_tax_regime_key,
-          regime_options: calculation_router.public_regime_options,
+          regime_options: calculation_router.public_regime_options(selected_catalog&.fetch(:regime_options)),
           default_input: resolved_default_input,
           initial_result: calculation_router.call(**resolved_default_input, tax_regime_key: default_tax_regime_key)
         }
       end
 
-      def public_catalog
-        {
+      def public_catalog(country_rows = nil)
+        country_rows ||= {
           country: country,
-          input_currency_options: input_currency_options,
-          tax_year_options: calculation_router.public_tax_year_options,
-          comparison_profiles: public_comparison_profiles,
-          regime_options: calculation_router.public_regime_options.map do |regime|
-            regime.slice(:key, :name, :region, :category, :tax_year)
-          end
+          regime_options: calculation_router.public_catalog_regime_options
         }
+        regime_options = country_rows.fetch(:regime_options)
+        tax_year_options = regime_options.map { |regime| regime.fetch(:tax_year) }.uniq.sort
+        return if tax_year_options.empty?
+
+        categories = regime_options.map { |regime| regime.fetch(:category) }.uniq
+
+        {
+          country: country_rows.fetch(:country),
+          input_currency_options: input_currency_options,
+          tax_year_options: tax_year_options,
+          comparison_profiles: comparison_profiles_for(categories),
+          regime_options: regime_options
+        }
+      rescue ActiveRecord::RecordNotFound
+        nil
       end
 
       def comparison_profiles
@@ -73,8 +85,10 @@ module Taxerase
       end
 
       def public_comparison_profiles
-        supported_categories = calculation_router.public_regime_options.map { |regime| regime[:category] }.uniq
+        comparison_profiles_for(calculation_router.public_regime_categories)
+      end
 
+      def comparison_profiles_for(supported_categories)
         comparison_profiles.select do |profile|
           supported_categories.include?(profile.fetch(:key))
         end
@@ -105,6 +119,12 @@ module Taxerase
 
       def normalize_comparison_age_bracket(age_bracket)
         age_bracket
+      end
+
+      def default_regime_key_for(default_tax_year, selected_catalog)
+        selected_catalog&.fetch(:regime_options)&.find do |regime|
+          regime[:tax_year] == default_tax_year && regime[:category] == "employee"
+        end&.fetch(:key) || calculation_router.default_regime_key(default_tax_year)
       end
     end
   end

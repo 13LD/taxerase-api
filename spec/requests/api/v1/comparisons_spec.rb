@@ -108,6 +108,29 @@ RSpec.describe "Api::V1::Comparisons", type: :request do
       expect(total_tax_metric["right_value"]).to be > 0
     end
 
+    it "does not rebuild global comparison catalog data for every country" do
+      query_count = count_application_queries do
+        post api_v1_comparisons_path,
+          params: {
+            comparison: {
+              left_country_code: "ES",
+              left_tax_regime_key: "self_employed_madrid",
+              right_country_code: "NL",
+              right_tax_regime_key: "self_employed_netherlands",
+              tax_year: 2025,
+              selected_category: "self_employed",
+              gross_income: 60_000,
+              deductible_expenses: 0,
+              salary_period: "YEAR"
+            }
+          },
+          as: :json
+      end
+
+      expect(response).to have_http_status(:ok)
+      expect(query_count).to be < 30
+    end
+
     it "uses Poland flat tax for self-employed comparisons" do
       flat_tax_result = Taxerase::Poland::CalculationRouter.call(
         gross_income: 120_000,
@@ -375,5 +398,22 @@ RSpec.describe "Api::V1::Comparisons", type: :request do
 
       expect(json["errors"]).to include("selected_category is not a registered comparison profile")
     end
+  end
+
+  def count_application_queries
+    query_count = 0
+    subscriber = ActiveSupport::Notifications.subscribe("sql.active_record") do |*args|
+      event = ActiveSupport::Notifications::Event.new(*args)
+      payload = event.payload
+      next if payload[:name] == "SCHEMA" || payload[:cached]
+
+      query_count += 1
+    end
+
+    ActiveRecord::Base.connection.clear_query_cache
+    yield
+    query_count
+  ensure
+    ActiveSupport::Notifications.unsubscribe(subscriber) if subscriber
   end
 end

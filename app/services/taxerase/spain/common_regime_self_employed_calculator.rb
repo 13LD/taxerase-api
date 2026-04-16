@@ -1,6 +1,8 @@
 module Taxerase
   module Spain
     class CommonRegimeSelfEmployedCalculator
+      include Taxerase::Support::RegimeBackedCalculation
+
       class ValidationError < StandardError
         attr_reader :errors
 
@@ -170,28 +172,15 @@ module Taxerase
       end
 
       def regime
-        @regime ||= TaxRegime.includes(:country, :tax_brackets, :tax_parameters, tax_source_usages: :official_tax_source).find_by(
-          country:,
-          key: tax_regime_key,
-          tax_year: tax_year,
-          category: "self_employed"
-        )
+        @regime ||= find_regime(category: "self_employed", tax_year: tax_year, country: country)
       end
 
       def country
-        @country ||= Country.find_by!(code: COUNTRY_CODE)
+        @country ||= CalculationRouter.country
       end
 
       def metadata
-        {
-          country_code: regime.country.code,
-          country_name: regime.country.name,
-          region: regime.region,
-          tax_year: regime.tax_year,
-          tax_regime_key: regime.key,
-          tax_regime_name: regime.name,
-          calculator_version: "spain-common-self-employed-v1"
-        }
+        build_regime_metadata(calculator_version: "spain-common-self-employed-v1")
       end
 
       def assumptions(social_security_band)

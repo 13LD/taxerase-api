@@ -172,7 +172,7 @@ export default function CountryCalculatorApp(initialProps = {}) {
         id="comparison-panel"
         role="tabpanel"
       >
-        <ComparisonTab calculatorProps={calculatorProps} />
+        <ComparisonTab calculatorProps={calculatorProps} enabled={activeTab === "comparison"} />
       </div>
     </section>
   );

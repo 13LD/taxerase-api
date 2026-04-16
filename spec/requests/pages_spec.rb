@@ -36,6 +36,15 @@ RSpec.describe "Pages", type: :request do
       expect(response.body).not_to include("employee_navarre")
     end
 
+    it "builds calculator payload without repeated query-cache work" do
+      query_count = count_application_queries do
+        get root_path, params: { tab: "calculator" }
+      end
+
+      expect(response).to have_http_status(:ok)
+      expect(query_count).to be < 30
+    end
+
     it "renders the Andorra calculator page when requested" do
       get root_path, params: { country: "AD" }
 
@@ -150,5 +159,22 @@ RSpec.describe "Pages", type: :request do
     CALCULATION_ROUTERS.each do |router|
       router.remove_instance_variable(:@country) if router.instance_variable_defined?(:@country)
     end
+  end
+
+  def count_application_queries
+    query_count = 0
+    subscriber = ActiveSupport::Notifications.subscribe("sql.active_record") do |*args|
+      event = ActiveSupport::Notifications::Event.new(*args)
+      payload = event.payload
+      next if payload[:name] == "SCHEMA" || payload[:cached]
+
+      query_count += 1
+    end
+
+    ActiveRecord::Base.connection.clear_query_cache
+    yield
+    query_count
+  ensure
+    ActiveSupport::Notifications.unsubscribe(subscriber) if subscriber
   end
 end

@@ -42,7 +42,10 @@ module Taxerase
         expected_regime_keys_by_year.each do |tax_year, keys|
           next if keys.empty?
 
-          mismatched_regimes = TaxRegime.where(key: keys, tax_year: tax_year).where.not(country_id: country.id)
+          mismatched_regimes = TaxRegime
+            .for_tax_year(tax_year)
+            .where(key: keys)
+            .where.not(tax_rule_sets: { country_id: country.id })
           next unless mismatched_regimes.exists?
 
           raise "#{country.code} seed integrity check failed for #{tax_year}: #{mismatched_regimes.pluck(:key).join(', ')}"
@@ -51,9 +54,10 @@ module Taxerase
 
       def verify_source_country_links!(country)
         mismatched_source_usage = TaxSourceUsage
-          .joins(:tax_regime, :official_tax_source)
-          .where(tax_regimes: { country_id: country.id })
-          .where.not(official_tax_sources: { country_code: country.code })
+          .joins(tax_regime: :tax_rule_set)
+          .joins(:official_tax_source)
+          .where(tax_rule_sets: { country_id: country.id })
+          .where.not(official_tax_sources: { country_id: country.id })
 
         return unless mismatched_source_usage.exists?
 
@@ -61,7 +65,8 @@ module Taxerase
       end
 
       def build_regime(country:, key:, name:, tax_year:, category:, region:, description:)
-        regime = TaxRegime.find_or_initialize_by(country:, key:, tax_year:)
+        rule_set = build_rule_set(country:, tax_year:)
+        regime = TaxRegime.find_or_initialize_by(tax_rule_set: rule_set, key:)
         regime.update!(
           name:,
           category:,
@@ -70,6 +75,37 @@ module Taxerase
           description:
         )
         regime
+      end
+
+      def build_rule_set(country:, tax_year:)
+        rule_set = TaxRuleSet.find_or_initialize_by(
+          country:,
+          tax_year:,
+          key: rule_set_key(tax_year)
+        )
+        rule_set.update!(
+          name: "#{country.name} #{tax_year} seeded tax rules",
+          release_version: rule_set_release_version(tax_year),
+          status: "published",
+          active: true
+        )
+        rule_set
+      end
+
+      def rule_set_key(_tax_year)
+        "default"
+      end
+
+      def rule_set_release_version(_tax_year)
+        "seeded-v1"
+      end
+
+      def destroy_stale_regimes!(country, categories:, live_years:)
+        TaxRegime
+          .for_country(country)
+          .where(category: categories)
+          .where.not(tax_rule_sets: { tax_year: live_years })
+          .find_each(&:destroy!)
       end
 
       def replace_brackets!(regime, group, rows)
@@ -184,9 +220,11 @@ module Taxerase
       end
 
       def source_for!(key)
-        definition = source_definitions.fetch(key)
+        definition = source_definitions.fetch(key).dup
+        source_country_code = definition.delete(:country_code) || country_code
+        source_country = Country.find_by!(code: source_country_code)
         source = OfficialTaxSource.find_or_initialize_by(key: key)
-        source.update!(definition)
+        source.update!(definition.merge(country: source_country))
         source
       end
     end

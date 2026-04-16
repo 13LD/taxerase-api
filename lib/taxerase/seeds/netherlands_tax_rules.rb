@@ -293,14 +293,15 @@ module Taxerase
       end
 
       def purge_obsolete_regimes!(country)
-        country.tax_regimes
+        TaxRegime.for_country(country)
           .where(category: %w[employee self_employed])
-          .where.not(tax_year: LIVE_YEARS)
+          .where.not(tax_rule_sets: { tax_year: LIVE_YEARS })
           .find_each(&:destroy!)
 
         LIVE_YEARS.each do |tax_year|
-          country.tax_regimes
-            .where(category: %w[employee self_employed], tax_year:)
+          TaxRegime
+            .for_country_year(country:, tax_year:)
+            .where(category: %w[employee self_employed])
             .where.not(key: REGIME_KEYS)
             .find_each(&:destroy!)
         end
