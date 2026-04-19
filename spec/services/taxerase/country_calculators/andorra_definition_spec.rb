@@ -37,7 +37,13 @@ RSpec.describe Taxerase::CountryCalculators::AndorraDefinition do
         deductible_expenses: 0,
         children_count: 0,
         children_under_three_count: 0,
-        disability_level: "none"
+        disability_level: "none",
+        disabled_dependents_count: 0,
+        has_spouse_or_partner: false,
+        spouse_general_income: 0,
+        self_employed_social_security_regime: "standard",
+        apply_housing_rent_support: false,
+        housing_rent: 0
       )
       expect(props[:initial_result].dig(:metadata, :country_code)).to eq("AD")
       expect(props[:initial_result].dig(:metadata, :tax_regime_key)).to eq(expected_default_regime_key)

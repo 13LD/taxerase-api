@@ -263,13 +263,38 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
         options: [ "None", "Recognized disability" ]
       )
       expect(page).to have_select("Dependent ascendants")
+      expect(page).to have_select("Disabled dependants")
+      expect(page).to have_unchecked_field("Include spouse or stable partner")
+      expect(page).to have_unchecked_field("Estimate housing rent support")
       expect(page).not_to have_field("Children under 3")
       expect(page).not_to have_field("Taxpayer age")
+
+      check "Include spouse or stable partner"
+      expect(page).to have_unchecked_field("Spouse/partner has no general-base income")
+      expect(page).to have_field("Spouse/partner annual general-base income")
+
+      check "Estimate housing rent support"
+      expect(page).to have_unchecked_field("Priority-group housing support")
+      expect(page).to have_field("Annual housing rent")
+
+      fill_in "Spouse/partner annual general-base income", with: "10980"
+      fill_in "Annual housing rent", with: "12000"
+      click_button "Recalculate"
 
       click_button "B2B contract"
 
       expect(page).to have_text("Standard self-employed - Andorra")
       expect(page).to have_field("Deductible expenses")
+      expect(page).to have_select("Self-employed CASS regime")
+    end
+
+    within(".results-card") do
+      expect(page).to have_text("Spouse phase-in increment", wait: 20)
+      expect(page).to have_text("Housing rent support estimate (non-tax)", wait: 20)
+    end
+
+    within(".assumptions-card") do
+      expect(page).to have_text("outside IRPF and CASS totals", wait: 20)
     end
 
     within(".results-card") do
@@ -277,6 +302,27 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
       expect(page).to have_text("Earned-income bonus")
       expect(page).to have_text("Andorran IRPF")
       expect(page).to have_text("Total tax")
+    end
+  end
+
+  it "recalculates Andorra self-employed with the under-35 CASS regime" do
+    visit root_path(country: "AD")
+
+    within(".calculator-card") do
+      click_button "B2B contract"
+      fill_in "Deductible expenses", with: "4000"
+      select "Under 35: months 1 to 12", from: "Self-employed CASS regime"
+      click_button "Recalculate"
+    end
+
+    within(".results-card") do
+      expect(page).to have_text("Monthly CASS contribution base", wait: 20)
+      expect(page).to have_text("Self-employed CASS contribution", wait: 20)
+      expect(page).to have_text("Andorran IRPF", wait: 20)
+    end
+
+    within(".assumptions-card") do
+      expect(page).to have_text("under-35 special CASS regime is applied for the first 12 months", wait: 20)
     end
   end
 end
