@@ -70,6 +70,34 @@ RSpec.describe "Api::V1::Andorra::SalaryCalculations", type: :request do
       expect(json.dig("breakdown", "annual_net_income")).to be > baseline.dig("breakdown", "annual_net_income")
     end
 
+    it "applies the spouse-income phase-in and keeps housing support separate from tax" do
+      post api_v1_andorra_salary_calculation_path,
+        params: {
+          calculation: {
+            gross_income: 55_000,
+            tax_year: 2025,
+            salary_period: "YEAR",
+            tax_regime_key: "employee_andorra",
+            has_spouse_or_partner: true,
+            spouse_general_income: 10_980,
+            apply_housing_rent_support: true,
+            housing_support_priority_group: false,
+            housing_rent: 12_000
+          }
+        },
+        as: :json
+
+      expect(response).to have_http_status(:ok)
+
+      json = JSON.parse(response.body)
+
+      expect(json.dig("breakdown", "taxpayer_reduction")).to eq(29_020.0)
+      expect(json.dig("breakdown", "spouse_phase_in_increment")).to eq(5_020.0)
+      expect(json.dig("breakdown", "annual_housing_rent_support_estimate")).to eq(3_600.0)
+      expect(json.dig("detail_cards").map { |card| card["label"] }).to include("Housing rent support estimate (non-tax)")
+      expect(json.dig("assumptions").join(" ")).to include("outside IRPF and CASS totals")
+    end
+
     it "returns a self-employed breakdown" do
       post api_v1_andorra_salary_calculation_path,
         params: {
@@ -98,6 +126,29 @@ RSpec.describe "Api::V1::Andorra::SalaryCalculations", type: :request do
       expect(json["sources"]).not_to be_empty
     end
 
+    it "supports the under-35 special self-employed CASS regime" do
+      post api_v1_andorra_salary_calculation_path,
+        params: {
+          calculation: {
+            gross_income: 24_000,
+            deductible_expenses: 4_000,
+            tax_year: 2026,
+            salary_period: "YEAR",
+            tax_regime_key: "self_employed_andorra",
+            self_employed_social_security_regime: "under_35_first_12_months"
+          }
+        },
+        as: :json
+
+      expect(response).to have_http_status(:ok)
+
+      json = JSON.parse(response.body)
+
+      expect(json.dig("breakdown", "self_employed_social_security_base_monthly")).to eq(838.93)
+      expect(json.dig("breakdown", "annual_social_security")).to eq(1_006.72)
+      expect(json.dig("breakdown", "annual_income_tax")).to eq(0.0)
+    end
+
     it "returns validation errors for invalid input" do
       post api_v1_andorra_salary_calculation_path,
         params: {
@@ -110,7 +161,8 @@ RSpec.describe "Api::V1::Andorra::SalaryCalculations", type: :request do
             children_count: -1,
             children_under_three_count: 0,
             disability_level: "invalid",
-            ascendants_count: -1
+            ascendants_count: -1,
+            self_employed_social_security_regime: "invalid"
           }
         },
         as: :json
@@ -124,6 +176,29 @@ RSpec.describe "Api::V1::Andorra::SalaryCalculations", type: :request do
       expect(json["errors"]).to include("salary_period must be YEAR or MONTH")
       expect(json["errors"]).to include("children_count must be 0 or greater")
       expect(json["errors"]).to include("disability_level must be one of: none, recognized_disability")
+      expect(json["errors"]).to include("self_employed_social_security_regime must be one of: standard, under_35_first_12_months, under_35_month_13_to_24")
+    end
+
+    it "ignores stale spouse income when spouse controls are hidden" do
+      post api_v1_andorra_salary_calculation_path,
+        params: {
+          calculation: {
+            gross_income: 60_000,
+            tax_year: 2025,
+            salary_period: "YEAR",
+            tax_regime_key: "employee_andorra",
+            has_spouse_or_partner: false,
+            spouse_without_income: true,
+            spouse_general_income: 5_000
+          }
+        },
+        as: :json
+
+      expect(response).to have_http_status(:ok)
+
+      json = JSON.parse(response.body)
+
+      expect(json.dig("breakdown", "spouse_phase_in_increment")).to eq(0.0)
     end
   end
 end

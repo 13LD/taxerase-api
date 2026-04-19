@@ -2,6 +2,12 @@ module Taxerase
   module Andorra
     module CalculatorSupport
       DISABILITY_LEVELS = %w[none recognized_disability].freeze
+      ZERO_VALUE_DETAIL_CARD_LABELS = [
+        "Spouse phase-in increment",
+        "Dependent disability uplift",
+        "Housing rent support estimate (non-tax)"
+      ].freeze
+      HOUSING_SUPPORT_ASSUMPTION = "Housing rent support is shown as a separate sourced estimate outside IRPF and CASS totals. Use it only when the selected-year housing-support conditions are met.".freeze
 
       private
 
@@ -17,10 +23,18 @@ module Taxerase
         errors.concat(TaxRelief.validation_errors(
           children_count: parsed_children_count + parsed_ascendants_count,
           disability_level: disability_level,
+          has_spouse_or_partner: has_spouse_or_partner,
           spouse_without_income: spouse_without_income,
+          spouse_general_income: spouse_general_income,
+          disabled_dependents_count: parsed_disabled_dependents_count,
           mortgage_interest: mortgage_interest,
           pension_contributions: pension_contributions,
           alimony_paid: alimony_paid
+        ))
+        errors.concat(HousingSupport.validation_errors(
+          apply_housing_rent_support: apply_housing_rent_support,
+          housing_support_priority_group: housing_support_priority_group,
+          housing_rent: housing_rent
         ))
 
         if include_deductible_expenses
@@ -51,10 +65,15 @@ module Taxerase
           disability_level: disability_level.to_s,
           ascendants_count: parsed_ascendants_count,
           disabled_dependents_count: parsed_disabled_dependents_count,
+          has_spouse_or_partner: has_spouse_or_partner?,
           spouse_without_income: spouse_without_income?,
+          spouse_general_income: round_currency(parsed_spouse_general_income),
           mortgage_interest: round_currency(parsed_mortgage_interest),
           pension_contributions: round_currency(parsed_pension_contributions),
-          alimony_paid: round_currency(parsed_alimony_paid)
+          alimony_paid: round_currency(parsed_alimony_paid),
+          apply_housing_rent_support: apply_housing_rent_support?,
+          housing_support_priority_group: housing_support_priority_group?,
+          housing_rent: round_currency(parsed_housing_rent)
         }
       end
 
@@ -65,23 +84,28 @@ module Taxerase
 
         @andorra_tax_relief[cache_key] ||= begin
           reductions = TaxRelief.reductions(
-            regime: regime,
             children_count: total_dependents,
             disability_level: disability_level,
-          spouse_without_income: spouse_without_income,
-          mortgage_interest: mortgage_interest,
-          pension_contributions: pension_contributions,
-          alimony_paid: alimony_paid,
-          net_general_income: net_general_income,
-          parameter_decimal: method(:parameter_decimal)
-        )
-          disability_uplift = regime.parameter_decimal!("dependent_reduction") * BigDecimal("0.5") * parsed_disabled_dependents_count
-
-          reductions.merge(
-            dependent_reduction: reductions[:dependent_reduction] + disability_uplift,
-            total_base_reductions: reductions[:total_base_reductions] + disability_uplift
+            has_spouse_or_partner: has_spouse_or_partner,
+            spouse_without_income: spouse_without_income,
+            spouse_general_income: spouse_general_income,
+            disabled_dependents_count: parsed_disabled_dependents_count,
+            mortgage_interest: mortgage_interest,
+            pension_contributions: pension_contributions,
+            alimony_paid: alimony_paid,
+            net_general_income: net_general_income,
+            parameter_decimal: method(:parameter_decimal)
           )
         end
+      end
+
+      def andorra_housing_support
+        @andorra_housing_support ||= HousingSupport.estimate(
+          annual_housing_rent: parsed_housing_rent,
+          apply_housing_rent_support: apply_housing_rent_support,
+          housing_support_priority_group: housing_support_priority_group,
+          parameter_decimal: method(:parameter_decimal)
+        )
       end
 
       def parsed_gross_income
@@ -112,6 +136,10 @@ module Taxerase
         @parsed_mortgage_interest ||= TaxRelief.parse_amount(mortgage_interest)
       end
 
+      def parsed_spouse_general_income
+        @parsed_spouse_general_income ||= TaxRelief.parse_amount(spouse_general_income)
+      end
+
       def parsed_pension_contributions
         @parsed_pension_contributions ||= TaxRelief.parse_amount(pension_contributions)
       end
@@ -120,8 +148,24 @@ module Taxerase
         @parsed_alimony_paid ||= TaxRelief.parse_amount(alimony_paid)
       end
 
+      def parsed_housing_rent
+        @parsed_housing_rent ||= HousingSupport.parse_amount(housing_rent)
+      end
+
+      def has_spouse_or_partner?
+        TaxRelief.boolean_value?(has_spouse_or_partner)
+      end
+
       def spouse_without_income?
         TaxRelief.boolean_value?(spouse_without_income)
+      end
+
+      def apply_housing_rent_support?
+        HousingSupport.boolean_value?(apply_housing_rent_support)
+      end
+
+      def housing_support_priority_group?
+        HousingSupport.boolean_value?(housing_support_priority_group)
       end
 
       def normalized_salary_period
@@ -149,6 +193,32 @@ module Taxerase
 
       def round_percentage(decimal)
         (decimal * 100).round(2).to_f
+      end
+
+      def supported_reductions_assumption(include_taxpayer_disability:)
+        reduction_labels = [
+          ("taxpayer disability uplift" if include_taxpayer_disability),
+          "spouse or partner no-income or partial-income personal-minimum phase-in",
+          "dependents",
+          "dependent disability uplift",
+          "pension contributions",
+          "alimony paid",
+          "habitual-home mortgage credit"
+        ].compact.join(", ")
+
+        "Supported reductions in this calculator: #{reduction_labels}."
+      end
+
+      def append_housing_support_assumption(base_assumptions)
+        return base_assumptions unless apply_housing_rent_support?
+
+        base_assumptions + [ HOUSING_SUPPORT_ASSUMPTION ]
+      end
+
+      def prune_zero_value_detail_cards(cards)
+        cards.reject do |card|
+          card[:value].zero? && ZERO_VALUE_DETAIL_CARD_LABELS.include?(card[:label])
+        end
       end
     end
   end

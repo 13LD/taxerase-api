@@ -21,10 +21,16 @@ module Api
             disability_level: calculation_params[:disability_level],
             ascendants_count: calculation_params[:ascendants_count],
             disabled_dependents_count: calculation_params[:disabled_dependents_count],
+            has_spouse_or_partner: calculation_params[:has_spouse_or_partner],
             spouse_without_income: calculation_params[:spouse_without_income],
+            spouse_general_income: calculation_params[:spouse_general_income],
             mortgage_interest: calculation_params[:mortgage_interest],
             pension_contributions: calculation_params[:pension_contributions],
-            alimony_paid: calculation_params[:alimony_paid]
+            alimony_paid: calculation_params[:alimony_paid],
+            self_employed_social_security_regime: calculation_params[:self_employed_social_security_regime],
+            apply_housing_rent_support: calculation_params[:apply_housing_rent_support],
+            housing_support_priority_group: calculation_params[:housing_support_priority_group],
+            housing_rent: calculation_params[:housing_rent]
           )
         end
 
@@ -44,10 +50,16 @@ module Api
             :disability_level,
             :ascendants_count,
             :disabled_dependents_count,
+            :has_spouse_or_partner,
             :spouse_without_income,
+            :spouse_general_income,
             :mortgage_interest,
             :pension_contributions,
-            :alimony_paid
+            :alimony_paid,
+            :self_employed_social_security_regime,
+            :apply_housing_rent_support,
+            :housing_support_priority_group,
+            :housing_rent
           )
         end
 

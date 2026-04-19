@@ -25,10 +25,17 @@ module Taxerase
           children_under_three_count: 0,
           disability_level: "none",
           ascendants_count: 0,
+          disabled_dependents_count: 0,
+          has_spouse_or_partner: false,
           spouse_without_income: false,
+          spouse_general_income: 0,
           mortgage_interest: 0,
           pension_contributions: 0,
-          alimony_paid: 0
+          alimony_paid: 0,
+          self_employed_social_security_regime: "standard",
+          apply_housing_rent_support: false,
+          housing_support_priority_group: false,
+          housing_rent: 0
         }
       end
 
@@ -41,10 +48,17 @@ module Taxerase
         input
         {
           ascendants_count: 0,
+          disabled_dependents_count: 0,
+          has_spouse_or_partner: false,
           spouse_without_income: false,
+          spouse_general_income: 0,
           mortgage_interest: 0,
           pension_contributions: 0,
-          alimony_paid: 0
+          alimony_paid: 0,
+          self_employed_social_security_regime: "standard",
+          apply_housing_rent_support: false,
+          housing_support_priority_group: false,
+          housing_rent: 0
         }
       end
     end
