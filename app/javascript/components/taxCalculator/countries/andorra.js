@@ -77,7 +77,7 @@ const andorraCalculatorConfig = {
             defaultValue: "0",
             resultInputKey: "spouse_general_income",
             visibleWhen: (controlValues) =>
-              Boolean(controlValues.has_spouse_or_partner) && !Boolean(controlValues.spouse_without_income)
+              Boolean(controlValues.has_spouse_or_partner) && !controlValues.spouse_without_income
           }
         ]
       },
