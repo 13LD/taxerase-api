@@ -22,12 +22,6 @@ module Taxerase
         errors << "has_spouse_or_partner must be true or false" unless BOOLEAN_VALUES.include?(has_spouse_or_partner)
         errors << "spouse_without_income must be true or false" unless BOOLEAN_VALUES.include?(spouse_without_income)
         errors << "spouse_general_income must be 0 or greater" if parse_amount(spouse_general_income).negative?
-        if !boolean_value?(has_spouse_or_partner) && (boolean_value?(spouse_without_income) || parse_amount(spouse_general_income).positive?)
-          errors << "spouse inputs require has_spouse_or_partner to be true"
-        end
-        if boolean_value?(has_spouse_or_partner) && boolean_value?(spouse_without_income) && parse_amount(spouse_general_income).positive?
-          errors << "spouse_general_income must be 0 when spouse_without_income is selected"
-        end
         errors << "mortgage_interest must be 0 or greater" if parse_amount(mortgage_interest).negative?
         errors << "pension_contributions must be 0 or greater" if parse_amount(pension_contributions).negative?
         errors << "alimony_paid must be 0 or greater" if parse_amount(alimony_paid).negative?

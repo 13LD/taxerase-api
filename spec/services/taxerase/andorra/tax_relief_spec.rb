@@ -15,6 +15,25 @@ RSpec.describe Taxerase::Andorra::TaxRelief do
     }.fetch(key)
   end
 
+
+  describe ".validation_errors" do
+    it "does not reject stale spouse values when spouse inputs are hidden" do
+      errors = described_class.validation_errors(
+        children_count: 0,
+        disability_level: "none",
+        has_spouse_or_partner: false,
+        spouse_without_income: true,
+        spouse_general_income: 5_000,
+        disabled_dependents_count: 0,
+        mortgage_interest: 0,
+        pension_contributions: 0,
+        alimony_paid: 0
+      )
+
+      expect(errors).to be_empty
+    end
+  end
+
   describe ".reductions" do
     it "applies the spouse-income phase-in from the official example" do
       reductions = described_class.reductions(

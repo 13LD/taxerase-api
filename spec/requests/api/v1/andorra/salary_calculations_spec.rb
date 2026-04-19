@@ -179,7 +179,7 @@ RSpec.describe "Api::V1::Andorra::SalaryCalculations", type: :request do
       expect(json["errors"]).to include("self_employed_social_security_regime must be one of: standard, under_35_first_12_months, under_35_month_13_to_24")
     end
 
-    it "rejects spouse-specific inputs when no spouse or partner is selected" do
+    it "ignores stale spouse income when spouse controls are hidden" do
       post api_v1_andorra_salary_calculation_path,
         params: {
           calculation: {
@@ -188,16 +188,17 @@ RSpec.describe "Api::V1::Andorra::SalaryCalculations", type: :request do
             salary_period: "YEAR",
             tax_regime_key: "employee_andorra",
             has_spouse_or_partner: false,
+            spouse_without_income: true,
             spouse_general_income: 5_000
           }
         },
         as: :json
 
-      expect(response).to have_http_status(:unprocessable_content)
+      expect(response).to have_http_status(:ok)
 
       json = JSON.parse(response.body)
 
-      expect(json["errors"]).to include("spouse inputs require has_spouse_or_partner to be true")
+      expect(json.dig("breakdown", "spouse_phase_in_increment")).to eq(0.0)
     end
   end
 end
