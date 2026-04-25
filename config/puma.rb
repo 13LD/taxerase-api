@@ -28,6 +28,13 @@
 threads_count = ENV.fetch("RAILS_MAX_THREADS", 3)
 threads threads_count, threads_count
 
+requested_workers = ENV.fetch("WEB_CONCURRENCY", 0)
+workers_count = requested_workers == "auto" ? :auto : requested_workers.to_i
+
+# Puma treats WEB_CONCURRENCY=1 as cluster mode with a single worker, which
+# adds master-process overhead without improving throughput.
+workers(workers_count == 1 ? 0 : workers_count)
+
 # Specifies the `port` that Puma will listen on to receive requests; default is 3000.
 port ENV.fetch("PORT", 3000)
 
