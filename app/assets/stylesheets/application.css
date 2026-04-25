@@ -518,34 +518,112 @@ a {
 .report-calendar-workflows {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
   gap: 10px;
 }
 
 .report-calendar-workflow {
   display: grid;
-  gap: 12px;
-  padding: 14px;
   border: 1px solid var(--line);
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.05);
+  overflow: hidden;
 }
 
-.report-calendar-workflow h3 {
-  margin: 2px 0 8px;
+.report-calendar-workflow[open] {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.report-calendar-workflow__summary {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.report-calendar-workflow__summary::-webkit-details-marker {
+  display: none;
+}
+
+.report-calendar-workflow__summary > span:first-child {
+  display: grid;
+  gap: 7px;
+}
+
+.report-calendar-workflow__summary strong {
+  color: var(--ink);
   font-size: 1.05rem;
   letter-spacing: -0.02em;
 }
 
-.report-calendar-workflow p,
+.report-calendar-workflow__summary small,
 .report-calendar-workflow__step p {
   margin: 0;
   color: var(--muted);
+  font-size: 0.9rem;
   line-height: 1.5;
 }
 
-.report-calendar-workflow__step {
+.report-calendar-workflow__meta {
+  flex: 0 0 auto;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: rgba(114, 170, 255, 0.14);
+  color: #9dc2ff;
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.report-calendar-workflow__steps {
   display: grid;
-  gap: 6px;
+  gap: 12px;
+  margin: 0;
+  padding: 0 14px 14px;
+  list-style: none;
+}
+
+.report-calendar-workflow__step {
+  display: flex;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.report-calendar-workflow__step-number {
+  display: inline-grid;
+  flex: 0 0 26px;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.report-calendar-workflow__step strong {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--ink);
+}
+
+.report-calendar-workflow__reference {
+  display: inline-flex;
+  width: fit-content;
+  margin-top: 8px;
+  color: #a8d4ff;
+  font-size: 0.86rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.report-calendar-workflow__reference:hover {
+  color: #d9ecff;
+  text-decoration: underline;
 }
 
 .liquid-card {

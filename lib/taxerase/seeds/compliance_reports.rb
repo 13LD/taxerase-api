@@ -56,6 +56,7 @@ module Taxerase
               key: workflow.fetch("key"),
               name: workflow.fetch("name"),
               description: workflow.fetch("description"),
+              reference_url: workflow["reference_url"],
               position: workflow.fetch("position", index + 1),
               created_at: timestamp,
               updated_at: timestamp

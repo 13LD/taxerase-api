@@ -7,7 +7,16 @@ RSpec.describe Taxerase::Compliance::ReportCalendar do
       modelo_130 = payload.fetch(:reports).find { |report| report.fetch(:key) == "modelo_130" }
 
       expect(payload.dig(:country, :code)).to eq("ES")
-      expect(modelo_130.fetch(:workflows).first.fetch(:name)).to eq("Quarterly IRPF payment workflow")
+      expect(modelo_130.fetch(:workflows).map { |workflow| workflow.fetch(:name) }).to eq(
+        [
+          "Prepare quarterly IRPF inputs",
+          "Submit Modelo 130",
+          "Settle the quarterly IRPF payment"
+        ]
+      )
+      expect(modelo_130.fetch(:workflows).first.fetch(:reference_url)).to eq(
+        "https://sede.agenciatributaria.gob.es/Sede/procedimientoini/G601.shtml"
+      )
       expect(modelo_130.fetch(:events).first).to include(
         event_type: "submission",
         event_date: "2026-04-20",

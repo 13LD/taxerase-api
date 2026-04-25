@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_25_143000) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_25_162000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -79,6 +79,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_25_143000) do
     t.string "key", null: false
     t.string "name", null: false
     t.integer "position", default: 1, null: false
+    t.string "reference_url"
     t.bigint "tax_report_id", null: false
     t.datetime "updated_at", null: false
     t.index ["tax_report_id", "key"], name: "index_report_workflows_on_tax_report_id_and_key", unique: true

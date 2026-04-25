@@ -17,6 +17,18 @@ RSpec.describe "Tax workspace tabs", type: :system, js: true do
     expect(page).to have_css(".calculator-card", visible: true)
   end
 
+  def workflow_card_height(report_name)
+    page.evaluate_script(<<~JS)
+      Array.from(document.querySelectorAll(".report-calendar-workflow"))
+        .find((element) => element.textContent.includes("#{report_name}"))
+        .getBoundingClientRect().height
+    JS
+  end
+
+  def modelo_130_reference_url
+    "https://sede.agenciatributaria.gob.es/Sede/procedimientoini/G601.shtml"
+  end
+
   it "defaults to the calculator tab and syncs the tab query param" do
     visit root_path
 
@@ -66,6 +78,23 @@ RSpec.describe "Tax workspace tabs", type: :system, js: true do
     expect(find(".report-calendar-chart__item", text: "Modelo 130", match: :first)["title"]).to include(
       "Submission window runs from 1 to 20 April"
     )
+    expect(page).to have_css(".report-calendar-workflow", text: "Modelo 130")
+    expect(page).to have_no_text("Collect quarterly revenue")
+    modelo_303_height_before = workflow_card_height("Modelo 303")
+
+    find(".report-calendar-workflow__summary", text: "Modelo 130").click
+
+    expect(page).to have_text("Prepare quarterly IRPF inputs")
+    expect(page).to have_text("Collect quarterly revenue")
+    modelo_303_height_after = workflow_card_height("Modelo 303")
+    expect(modelo_303_height_after).to be_within(1).of(modelo_303_height_before)
+
+    within(find(".report-calendar-workflow", text: "Modelo 130")) do
+      expect(page).to have_link(
+        "Official tax agency reference",
+        href: modelo_130_reference_url
+      )
+    end
 
     within(".calculator-tabs") do
       click_button "Invoice"

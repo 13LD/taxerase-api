@@ -69,7 +69,8 @@ module Taxerase
         {
           key: workflow.key,
           name: workflow.name,
-          description: workflow.description
+          description: workflow.description,
+          reference_url: workflow.reference_url
         }
       end
 
