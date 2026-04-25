@@ -31,6 +31,13 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
       expect(page).not_to have_select("Input currency")
       expect(page).to have_text("For the supported Netherlands tax years 2024 and 2025, AOW age is 67.")
       expect(page).to have_unchecked_field("Apply 30% ruling")
+      expect(page).to have_field("Fiscal partner")
+      select "2024", from: "Tax year"
+      expect(page).not_to have_field("Fiscal partner")
+      expect(page).not_to have_field("Under-12 dependents")
+      expect(page).not_to have_field("Partner alimony paid")
+      select "2025", from: "Tax year"
+      expect(page).to have_field("Fiscal partner")
       check "Apply 30% ruling"
       expect(page).to have_select(
         "30% ruling basis",

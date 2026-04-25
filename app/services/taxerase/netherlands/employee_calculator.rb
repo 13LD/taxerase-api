@@ -2,6 +2,7 @@ module Taxerase
   module Netherlands
     class EmployeeCalculator
       include Taxerase::Support::RegimeBackedCalculation
+      include InputSupport
 
       class ValidationError < StandardError
         attr_reader :errors
@@ -22,7 +23,8 @@ module Taxerase
         tax_year:,
         age_bracket:,
         apply_thirty_percent_ruling: false,
-        thirty_percent_ruling_basis: nil
+        thirty_percent_ruling_basis: nil,
+        **calculation_inputs
       )
         new(
           gross_income:,
@@ -31,7 +33,8 @@ module Taxerase
           tax_year:,
           age_bracket:,
           apply_thirty_percent_ruling:,
-          thirty_percent_ruling_basis:
+          thirty_percent_ruling_basis:,
+          calculation_inputs:
         ).call
       end
 
@@ -42,7 +45,8 @@ module Taxerase
         tax_year:,
         age_bracket:,
         apply_thirty_percent_ruling:,
-        thirty_percent_ruling_basis:
+        thirty_percent_ruling_basis:,
+        calculation_inputs: {}
       )
         @gross_income = gross_income
         @salary_period = salary_period
@@ -51,6 +55,7 @@ module Taxerase
         @age_bracket = age_bracket
         @apply_thirty_percent_ruling = apply_thirty_percent_ruling
         @thirty_percent_ruling_basis = thirty_percent_ruling_basis
+        @calculation_inputs = calculation_inputs.symbolize_keys
       end
 
       def call
@@ -65,22 +70,29 @@ module Taxerase
         )
         taxable_employment_income = thirty_percent_ruling.fetch(:taxable_employment_income)
         profile = profile_data
+        personal_deductions = PersonalDeductions.call(
+          regime:,
+          profile:,
+          taxable_income: taxable_employment_income,
+          combined_income: combined_income(taxable_employment_income),
+          inputs: calculation_inputs
+        )
+        taxable_income_after_deductions = personal_deductions.fetch(:taxable_income_after_deductions)
         box_1_tax_before_credits = ProgressiveTax.call(
-          amount: taxable_employment_income,
+          amount: taxable_income_after_deductions,
           brackets: regime.brackets_for(box_1_bracket_group(profile))
         )
-        general_tax_credit = FormulaBrackets.call(
+        credits = TaxCredits.call(
           regime:,
-          bracket_group: general_tax_credit_group(profile),
-          amount: taxable_employment_income
+          profile:,
+          taxable_income: taxable_income_after_deductions,
+          labour_income: taxable_employment_income,
+          **credit_inputs
         )
-        labour_tax_credit = FormulaBrackets.call(
-          regime:,
-          bracket_group: labour_tax_credit_group(profile),
-          amount: taxable_employment_income
-        )
+        credit_components = credits.fetch(:components)
+        total_tax_credits = credits.fetch(:total)
         annual_income_tax = [
-          box_1_tax_before_credits - general_tax_credit - labour_tax_credit,
+          box_1_tax_before_credits - total_tax_credits,
           0
         ].max
         total_tax = annual_income_tax
@@ -88,41 +100,36 @@ module Taxerase
 
         {
           metadata: metadata,
-          input: {
-            gross_income: round_currency(parsed_gross_income),
-            salary_period: normalized_salary_period,
-            tax_year:,
-            annual_gross_income: round_currency(annual_gross_income),
-            monthly_gross_income: round_currency(annual_gross_income / 12),
-            age_bracket:,
-            apply_thirty_percent_ruling: thirty_percent_ruling.fetch(:enabled),
-            thirty_percent_ruling_basis: thirty_percent_ruling.fetch(:basis),
-            children_count: 0,
-            children_under_three_count: 0,
-            disability_level: "none"
-          },
-          breakdown: {
-            taxable_employment_income: round_currency(taxable_employment_income),
-            thirty_percent_ruling_untaxed_allowance: round_currency(thirty_percent_ruling.fetch(:untaxed_allowance)),
-            box_1_tax_before_credits: round_currency(box_1_tax_before_credits),
-            general_tax_credit: round_currency(general_tax_credit),
-            labour_tax_credit: round_currency(labour_tax_credit),
-            annual_income_tax: round_currency(annual_income_tax),
-            total_tax: round_currency(total_tax),
-            annual_net_income: round_currency(annual_net_income),
-            monthly_net_income: round_currency(annual_net_income / 12),
-            effective_tax_rate: round_percentage(total_tax / annual_gross_income)
-          },
+          input: input_payload(
+            annual_gross_income:,
+            taxable_employment_income:,
+            thirty_percent_ruling:
+          ),
+          breakdown: breakdown_payload(
+            annual_gross_income:,
+            annual_income_tax:,
+            annual_net_income:,
+            box_1_tax_before_credits:,
+            credit_components:,
+            personal_deductions:,
+            taxable_employment_income:,
+            taxable_income_after_deductions:,
+            thirty_percent_ruling:,
+            total_tax:,
+            total_tax_credits:
+          ),
           detail_cards: detail_cards(
             annual_income_tax:,
             box_1_tax_before_credits:,
-            general_tax_credit:,
-            labour_tax_credit:,
+            credit_components:,
+            personal_deductions:,
             taxable_employment_income:,
+            taxable_income_after_deductions:,
+            thirty_percent_ruling:,
             total_tax:,
-            thirty_percent_ruling:
+            total_tax_credits:
           ),
-          assumptions: assumptions(profile, thirty_percent_ruling),
+          assumptions: assumptions(profile, thirty_percent_ruling, personal_deductions, credits),
           sources: regime.source_links
         }
       end
@@ -130,16 +137,65 @@ module Taxerase
       private
 
       attr_reader :gross_income, :salary_period, :tax_regime_key, :tax_year, :age_bracket,
-        :apply_thirty_percent_ruling, :thirty_percent_ruling_basis
+        :apply_thirty_percent_ruling, :thirty_percent_ruling_basis, :calculation_inputs
+
+      def input_payload(annual_gross_income:, taxable_employment_income:, thirty_percent_ruling:)
+        {
+          gross_income: round_currency(parsed_gross_income),
+          salary_period: normalized_salary_period,
+          tax_year:,
+          annual_gross_income: round_currency(annual_gross_income),
+          monthly_gross_income: round_currency(annual_gross_income / 12),
+          taxable_employment_income: round_currency(taxable_employment_income),
+          age_bracket:,
+          apply_thirty_percent_ruling: thirty_percent_ruling.fetch(:enabled),
+          thirty_percent_ruling_basis: thirty_percent_ruling.fetch(:basis),
+          **credit_input_payload
+        }.merge(personal_deduction_input_payload)
+      end
+
+      def breakdown_payload(
+        annual_gross_income:,
+        annual_income_tax:,
+        annual_net_income:,
+        box_1_tax_before_credits:,
+        credit_components:,
+        personal_deductions:,
+        taxable_employment_income:,
+        taxable_income_after_deductions:,
+        thirty_percent_ruling:,
+        total_tax:,
+        total_tax_credits:
+      )
+        {
+          taxable_employment_income: round_currency(taxable_employment_income),
+          personal_deductions: round_currency(personal_deductions.fetch(:applied)),
+          remaining_personal_deduction_carryforward: round_currency(personal_deductions.fetch(:carryforward)),
+          taxable_income_after_deductions: round_currency(taxable_income_after_deductions),
+          thirty_percent_ruling_untaxed_allowance: round_currency(thirty_percent_ruling.fetch(:untaxed_allowance)),
+          box_1_tax_before_credits: round_currency(box_1_tax_before_credits),
+          **round_breakdown(credit_components),
+          total_tax_credits: round_currency(total_tax_credits),
+          annual_income_tax: round_currency(annual_income_tax),
+          total_tax: round_currency(total_tax),
+          annual_net_income: round_currency(annual_net_income),
+          monthly_net_income: round_currency(annual_net_income / 12),
+          effective_tax_rate: round_percentage(total_tax / annual_gross_income),
+          personal_deduction_components: round_breakdown(personal_deductions.fetch(:components)),
+          personal_deduction_prior_carryforward: round_currency(personal_deductions.fetch(:prior_carryforward))
+        }
+      end
 
       def detail_cards(
         annual_income_tax:,
         box_1_tax_before_credits:,
-        general_tax_credit:,
-        labour_tax_credit:,
+        credit_components:,
+        personal_deductions:,
         taxable_employment_income:,
+        taxable_income_after_deductions:,
+        thirty_percent_ruling:,
         total_tax:,
-        thirty_percent_ruling:
+        total_tax_credits:
       )
         cards = []
 
@@ -150,11 +206,18 @@ module Taxerase
           }
         end
 
+        additional_credits = total_tax_credits -
+          credit_components.fetch(:general_tax_credit) -
+          credit_components.fetch(:labour_tax_credit)
+
         cards + [
           { label: "Taxable employment income", value: round_currency(taxable_employment_income) },
+          { label: "Personal deductions applied", value: round_currency(personal_deductions.fetch(:applied)) },
+          { label: "Taxable income after deductions", value: round_currency(taxable_income_after_deductions) },
           { label: "Box 1 tax before credits", value: round_currency(box_1_tax_before_credits) },
-          { label: "General tax credit", value: round_currency(general_tax_credit) },
-          { label: "Labour tax credit", value: round_currency(labour_tax_credit) },
+          { label: "General tax credit", value: round_currency(credit_components.fetch(:general_tax_credit)) },
+          { label: "Labour tax credit", value: round_currency(credit_components.fetch(:labour_tax_credit)) },
+          { label: "Additional credits", value: round_currency(additional_credits) },
           { label: "Income tax after credits", value: round_currency(annual_income_tax) },
           { label: "Total tax", value: round_currency(total_tax) }
         ]
@@ -189,13 +252,15 @@ module Taxerase
         build_regime_metadata(calculator_version: "netherlands-employee-v1")
       end
 
-      def assumptions(profile, thirty_percent_ruling)
+      def assumptions(profile, thirty_percent_ruling, personal_deductions, credits)
         base_assumptions = [
           "Netherlands, tax year #{tax_year}.",
           "Resident employee in the Netherlands, nationwide calculation with no regional surtax split.",
-          "The calculation uses Box 1 resident income tax rates, the general tax credit, and the labour tax credit.",
+          "The calculation uses Box 1 resident income tax rates, tax credits, documented personal deductions, and carryforward tracking.",
           "Profile input: #{profile[:summary]}. Mid-year AOW transitions and pre-1946 AOW tables are not included.",
-          "No fiscal partner, mortgage interest, pension deductions beyond the selected inputs, commuting reimbursements, or other deductions and credits are included.",
+          "Fiscal-partner effects are included for the selected credit and deduction inputs; mortgage interest, commuting reimbursements, and non-entered deductions are not included.",
+          "Personal deductions applied: #{round_currency(personal_deductions.fetch(:applied))}; carryforward after this calculation: #{round_currency(personal_deductions.fetch(:carryforward))}.",
+          "Additional credit eligibility: #{active_credit_eligibility(credits)}.",
           "Standard employment income assumes the employer pays the Zvw werkgeversheffing, so no employee-paid Zvw contribution is added to the result."
         ]
 
@@ -235,14 +300,6 @@ module Taxerase
 
       def box_1_bracket_group(profile)
         profile[:aow_eligible] ? "box_1_aow" : "box_1_under_aow"
-      end
-
-      def general_tax_credit_group(profile)
-        profile[:aow_eligible] ? "general_tax_credit_aow" : "general_tax_credit_under_aow"
-      end
-
-      def labour_tax_credit_group(profile)
-        profile[:aow_eligible] ? "labour_tax_credit_aow" : "labour_tax_credit_under_aow"
       end
 
       def round_currency(amount)

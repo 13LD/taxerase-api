@@ -5,6 +5,7 @@
       "key": "modelo_130",
       "name": "Modelo 130",
       "tax_year": 2026,
+      "tax_years": [2025, 2026, 2027],
       "description": "IRPF quarterly payment on account for self-employed professionals under direct estimation.",
       "workflows": [
         {
@@ -97,6 +98,7 @@
       "key": "modelo_303",
       "name": "Modelo 303",
       "tax_year": 2026,
+      "tax_years": [2025, 2026, 2027],
       "description": "Quarterly IVA self-assessment return for ordinary VAT filers.",
       "workflows": [
         {
@@ -189,6 +191,7 @@
       "key": "modelo_390",
       "name": "Modelo 390",
       "tax_year": 2026,
+      "tax_years": [2025, 2026, 2027],
       "description": "Annual IVA summary return, where required, submitted with the final VAT return window.",
       "workflows": [
         {
@@ -226,6 +229,7 @@
       "key": "modelo_349",
       "name": "Modelo 349",
       "tax_year": 2026,
+      "tax_years": [2025, 2026, 2027],
       "description": "Recapitulative statement for intra-Community transactions.",
       "workflows": [
         {
@@ -290,25 +294,32 @@
       "key": "modelo_100",
       "name": "Modelo 100",
       "tax_year": 2026,
+      "tax_years": [2025, 2026, 2027],
       "description": "Annual IRPF Renta return for the 2025 income year, filed during the 2026 Renta campaign.",
       "workflows": [
         {
           "key": "review_renta_taxpayer_data",
           "name": "Review Renta taxpayer data",
           "description": "Review draft taxpayer data, employment/self-employment income, deductions, family circumstances, and regional items.",
-          "reference_url": "https://sede.agenciatributaria.gob.es/Sede/ayuda/manuales-videos-folletos/manuales-ayuda-presentacion/irpf-2025/3-cuestiones-generales/3_3-declaracion-irpf/3_3_2-plazo-presentacion-declaraciones.html"
+          "reference_urls_by_tax_year": {
+            "2026": "https://sede.agenciatributaria.gob.es/Sede/ayuda/manuales-videos-folletos/manuales-ayuda-presentacion/irpf-2025/3-cuestiones-generales/3_3-declaracion-irpf/3_3_2-plazo-presentacion-declaraciones.html"
+          }
         },
         {
           "key": "submit_modelo_100",
           "name": "Submit Modelo 100",
           "description": "Submit the annual Renta return during the campaign window after confirming the final calculation.",
-          "reference_url": "https://sede.agenciatributaria.gob.es/Sede/ayuda/manuales-videos-folletos/manuales-ayuda-presentacion/irpf-2025/3-cuestiones-generales/3_3-declaracion-irpf/3_3_2-plazo-presentacion-declaraciones.html"
+          "reference_urls_by_tax_year": {
+            "2026": "https://sede.agenciatributaria.gob.es/Sede/ayuda/manuales-videos-folletos/manuales-ayuda-presentacion/irpf-2025/3-cuestiones-generales/3_3-declaracion-irpf/3_3_2-plazo-presentacion-declaraciones.html"
+          }
         },
         {
           "key": "choose_renta_payment_method",
           "name": "Choose Renta payment method",
           "description": "If the return is payable, choose single payment or the special 60/40 split payment option and track both payment dates.",
-          "reference_url": "https://sede.agenciatributaria.gob.es/Sede/ayuda/manuales-videos-folletos/manuales-ayuda-presentacion/irpf-2025/3-cuestiones-generales/3_3-declaracion-irpf/3_3_4-fraccionamiento-pago-domiciliacion.html"
+          "reference_urls_by_tax_year": {
+            "2026": "https://sede.agenciatributaria.gob.es/Sede/ayuda/manuales-videos-folletos/manuales-ayuda-presentacion/irpf-2025/3-cuestiones-generales/3_3-declaracion-irpf/3_3_4-fraccionamiento-pago-domiciliacion.html"
+          }
         }
       ],
       "events": [

@@ -333,6 +333,72 @@
       "zvw_max_contribution_income": 75864
     }
   },
+  "additional_tax_credit_rules": {
+    "2025": {
+      "iack_income_threshold": 6145,
+      "iack_rate": 0.1145,
+      "iack_max_credit": 2986,
+      "older_person_credit_max": 2035,
+      "older_person_credit_income_threshold": 45308,
+      "older_person_credit_reduction_rate": 0.15,
+      "single_older_person_credit": 531,
+      "young_disabled_credit": 909,
+      "green_investment_credit_rate": 0.001,
+      "green_investment_exemption_single": 26312,
+      "green_investment_exemption_partner": 52624
+    }
+  },
+  "personal_deduction_rules": {
+    "2025": {
+      "healthcare_cost_threshold_rate": 0.0165,
+      "healthcare_uplift_income_ceiling": 40502,
+      "healthcare_uplift_rate_under_aow": 0.4,
+      "healthcare_uplift_rate_aow": 1.13,
+      "temporary_home_stay_km_rate": 0.23,
+      "temporary_home_stay_day_rate": 13,
+      "ordinary_gift_threshold_rate": 0.01,
+      "ordinary_gift_min_threshold": 60,
+      "ordinary_gift_income_cap_rate": 0.1,
+      "cultural_gift_uplift_rate": 0.25,
+      "cultural_gift_uplift_cap": 1250
+    }
+  },
+  "entrepreneur_relief_rules": {
+    "2024": {
+      "hours_criterion": 1225,
+      "disability_starter_hours_criterion": 800,
+      "private_vehicle_km_rate": 0.23,
+      "mixed_cost_deductible_rate": 0.8
+    },
+    "2025": {
+      "hours_criterion": 1225,
+      "disability_starter_hours_criterion": 800,
+      "starters_deduction": 2123,
+      "disability_starter_deduction_first": 12000,
+      "disability_starter_deduction_second": 8000,
+      "disability_starter_deduction_third": 4000,
+      "s_and_o_deduction": 15738,
+      "s_and_o_starter_deduction": 7875,
+      "s_and_o_hours_minimum": 500,
+      "meewerkaftrek_partner_fee_cap": 5000,
+      "meewerkaftrek_rate_525": 0.0125,
+      "meewerkaftrek_rate_875": 0.02,
+      "meewerkaftrek_rate_1225": 0.03,
+      "meewerkaftrek_rate_1750": 0.04,
+      "stakingsaftrek_cap": 3630,
+      "kia_lower_bound": 2901,
+      "kia_first_cap": 70602,
+      "kia_fixed_cap": 130744,
+      "kia_phaseout_cap": 392230,
+      "kia_rate": 0.28,
+      "kia_fixed_amount": 19769,
+      "kia_phaseout_rate": 0.0756,
+      "mixed_cost_fixed_nondeductible_amount": 5700,
+      "mixed_cost_deductible_rate": 0.8,
+      "private_vehicle_km_rate": 0.23,
+      "cessation_annuity_cap": 566197
+    }
+  },
   "thirty_percent_ruling_rules": {
     "2024": {
       "rate": 0.3,

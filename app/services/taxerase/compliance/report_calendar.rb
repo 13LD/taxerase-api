@@ -2,6 +2,7 @@ module Taxerase
   module Compliance
     class ReportCalendar
       DEFAULT_TAX_YEAR = 2026
+      YEAR_WINDOW_RADIUS = 1
 
       def self.call(...)
         new(...).call
@@ -15,13 +16,16 @@ module Taxerase
       def call
         reports = TaxReport
           .active
-          .for_country_year(country:, tax_year:)
+          .for_country_year(country:, tax_year: tax_year_range)
           .includes(:report_workflows, :report_events)
           .ordered_for_calendar
 
         {
           country: country_payload,
           tax_year: tax_year,
+          start_year: tax_year_range.begin,
+          end_year: tax_year_range.end,
+          tax_years: tax_year_range.to_a,
           reports: reports.map { |report| report_payload(report) }
         }
       end
@@ -36,6 +40,10 @@ module Taxerase
 
       def tax_year
         @tax_year.to_i
+      end
+
+      def tax_year_range
+        @tax_year_range ||= ((tax_year - YEAR_WINDOW_RADIUS)..(tax_year + YEAR_WINDOW_RADIUS))
       end
 
       def country_payload

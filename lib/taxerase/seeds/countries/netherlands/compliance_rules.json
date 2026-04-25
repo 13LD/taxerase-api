@@ -1,0 +1,339 @@
+{
+  "country_code": "NL",
+  "reports": [
+    {
+      "key": "btw_aangifte_kwartaal",
+      "name": "BTW aangifte",
+      "tax_year": 2026,
+      "tax_years": [2025, 2026, 2027],
+      "description": "Quarterly Dutch VAT return and payment for ordinary BTW filers in the 2026 calendar year.",
+      "workflows": [
+        {
+          "key": "reconcile_quarterly_btw",
+          "name": "Reconcile quarterly BTW",
+          "description": "Reconcile output BTW, deductible input BTW, corrections, and any prior-period adjustments before filing.",
+          "reference_url": "https://www.belastingdienst.nl/wps/wcm/connect/nl/btw/content/uiterste-aangifte-en-betaaldatums"
+        },
+        {
+          "key": "submit_btw_aangifte",
+          "name": "Submit BTW aangifte",
+          "description": "Submit the quarterly BTW return during the month after the quarter.",
+          "reference_url": "https://www.belastingdienst.nl/wps/wcm/connect/nl/btw/content/uiterste-aangifte-en-betaaldatums"
+        },
+        {
+          "key": "pay_quarterly_btw",
+          "name": "Pay quarterly BTW",
+          "description": "Pay the resulting BTW balance by the same deadline as the quarterly return.",
+          "reference_url": "https://www.belastingdienst.nl/wps/wcm/connect/nl/btw/content/uiterste-aangifte-en-betaaldatums"
+        }
+      ],
+      "events": [
+        {
+          "key": "q1_submission",
+          "title": "Q1 2026 BTW submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-04-30",
+          "window_start_date": "2026-04-01",
+          "window_end_date": "2026-04-30",
+          "description": "Quarterly BTW return for Q1 is submitted in April and due by 30 April."
+        },
+        {
+          "key": "q1_payment",
+          "title": "Q1 2026 BTW payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-04-30",
+          "description": "Any payable BTW for Q1 is due with the return by 30 April."
+        },
+        {
+          "key": "q2_submission",
+          "title": "Q2 2026 BTW submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-07-31",
+          "window_start_date": "2026-07-01",
+          "window_end_date": "2026-07-31",
+          "description": "Quarterly BTW return for Q2 is submitted in July and due by 31 July."
+        },
+        {
+          "key": "q2_payment",
+          "title": "Q2 2026 BTW payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-07-31",
+          "description": "Any payable BTW for Q2 is due with the return by 31 July."
+        },
+        {
+          "key": "q3_submission",
+          "title": "Q3 2026 BTW submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-10-31",
+          "window_start_date": "2026-10-01",
+          "window_end_date": "2026-10-31",
+          "description": "Quarterly BTW return for Q3 is submitted in October and due by 31 October."
+        },
+        {
+          "key": "q3_payment",
+          "title": "Q3 2026 BTW payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-10-31",
+          "description": "Any payable BTW for Q3 is due with the return by 31 October."
+        },
+        {
+          "key": "q4_submission",
+          "title": "Q4 2026 BTW submission deadline",
+          "event_type": "submission",
+          "event_date": "2027-01-31",
+          "window_start_date": "2027-01-01",
+          "window_end_date": "2027-01-31",
+          "description": "Quarterly BTW return for Q4 is submitted in January of the following year and due by 31 January."
+        },
+        {
+          "key": "q4_payment",
+          "title": "Q4 2026 BTW payment deadline",
+          "event_type": "payment",
+          "event_date": "2027-01-31",
+          "description": "Any payable BTW for Q4 is due with the return by 31 January of the following year."
+        }
+      ]
+    },
+    {
+      "key": "btw_aangifte_jaar",
+      "name": "Annual BTW aangifte",
+      "tax_year": 2026,
+      "tax_years": [2025, 2026, 2027],
+      "description": "Annual Dutch VAT return and payment path for BTW filers assigned to annual filing for the 2026 calendar year.",
+      "workflows": [
+        {
+          "key": "confirm_annual_btw_filing",
+          "name": "Confirm annual BTW filing",
+          "description": "Confirm the taxpayer has an annual BTW return period rather than monthly or quarterly filing.",
+          "reference_url": "https://www.belastingdienst.nl/wps/wcm/connect/nl/btw/content/uiterste-aangifte-en-betaaldatums"
+        },
+        {
+          "key": "reconcile_annual_btw",
+          "name": "Reconcile annual BTW",
+          "description": "Reconcile annual taxable turnover, deductible input BTW, and corrections before filing.",
+          "reference_url": "https://www.belastingdienst.nl/wps/wcm/connect/nl/btw/content/uiterste-aangifte-en-betaaldatums"
+        },
+        {
+          "key": "submit_and_pay_annual_btw",
+          "name": "Submit and pay annual BTW",
+          "description": "Submit the annual BTW return and pay the resulting balance before 1 April of the following year.",
+          "reference_url": "https://www.belastingdienst.nl/wps/wcm/connect/nl/btw/content/uiterste-aangifte-en-betaaldatums"
+        }
+      ],
+      "events": [
+        {
+          "key": "annual_submission",
+          "title": "2026 annual BTW submission deadline",
+          "event_type": "submission",
+          "event_date": "2027-03-31",
+          "window_start_date": "2027-01-01",
+          "window_end_date": "2027-03-31",
+          "description": "Annual BTW return for 2026 is due before 1 April of the following year."
+        },
+        {
+          "key": "annual_payment",
+          "title": "2026 annual BTW payment deadline",
+          "event_type": "payment",
+          "event_date": "2027-03-31",
+          "description": "Any payable annual BTW for 2026 is due by 31 March of the following year."
+        }
+      ]
+    },
+    {
+      "key": "opgaaf_icp",
+      "name": "Opgaaf ICP",
+      "tax_year": 2026,
+      "tax_years": [2025, 2026, 2027],
+      "description": "Recapitulative statement for qualifying intra-EU supplies in the 2026 calendar year.",
+      "workflows": [
+        {
+          "key": "review_intra_eu_activity",
+          "name": "Review intra-EU activity",
+          "description": "Review EU customer VAT IDs, intra-Community goods supplies, qualifying services, and transfers of own goods.",
+          "reference_url": "https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/zakelijk/btw/zakendoen_met_het_buitenland/goederen_en_diensten_naar_andere_eu_landen/opgaaf_icp/"
+        },
+        {
+          "key": "determine_icp_frequency",
+          "name": "Determine ICP frequency",
+          "description": "Confirm whether the taxpayer files ICP monthly, quarterly, or annually under a permit before relying on the quarterly window.",
+          "reference_url": "https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/zakelijk/btw/zakendoen_met_het_buitenland/goederen_en_diensten_naar_andere_eu_landen/opgaaf_icp/"
+        },
+        {
+          "key": "submit_opgaaf_icp",
+          "name": "Submit Opgaaf ICP",
+          "description": "Submit the ICP statement within two months after the applicable period when intra-EU supplies were made.",
+          "reference_url": "https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/zakelijk/btw/zakendoen_met_het_buitenland/goederen_en_diensten_naar_andere_eu_landen/opgaaf_icp/"
+        }
+      ],
+      "events": [
+        {
+          "key": "q1_submission",
+          "title": "Q1 2026 ICP submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-05-31",
+          "window_start_date": "2026-04-01",
+          "window_end_date": "2026-05-31",
+          "description": "Quarterly ICP statement for Q1 is available after the quarter and can be submitted within two months after the period."
+        },
+        {
+          "key": "q2_submission",
+          "title": "Q2 2026 ICP submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-08-31",
+          "window_start_date": "2026-07-01",
+          "window_end_date": "2026-08-31",
+          "description": "Quarterly ICP statement for Q2 is available after the quarter and can be submitted within two months after the period."
+        },
+        {
+          "key": "q3_submission",
+          "title": "Q3 2026 ICP submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-11-30",
+          "window_start_date": "2026-10-01",
+          "window_end_date": "2026-11-30",
+          "description": "Quarterly ICP statement for Q3 is available after the quarter and can be submitted within two months after the period."
+        },
+        {
+          "key": "q4_submission",
+          "title": "Q4 2026 ICP submission deadline",
+          "event_type": "submission",
+          "event_date": "2027-02-28",
+          "window_start_date": "2027-01-01",
+          "window_end_date": "2027-02-28",
+          "description": "Quarterly ICP statement for Q4 is available after the quarter and can be submitted within two months after the period."
+        }
+      ]
+    },
+    {
+      "key": "oss_btw_melding",
+      "name": "OSS BTW melding",
+      "tax_year": 2026,
+      "tax_years": [2025, 2026, 2027],
+      "description": "Quarterly One Stop Shop VAT notification and payment for covered cross-border B2C EU activity in the 2026 calendar year.",
+      "workflows": [
+        {
+          "key": "confirm_oss_scope",
+          "name": "Confirm OSS scope",
+          "description": "Confirm the activity is covered by the Union One Stop Shop and remains separate from ordinary domestic BTW filing.",
+          "reference_url": "https://www.belastingdienst.nl/e-commerce"
+        },
+        {
+          "key": "prepare_oss_country_totals",
+          "name": "Prepare OSS country totals",
+          "description": "Prepare country-level taxable turnover, rates, corrections, and nil-period status for the OSS quarter.",
+          "reference_url": "https://www.belastingdienst.nl/e-commerce"
+        },
+        {
+          "key": "submit_and_pay_oss",
+          "name": "Submit and pay OSS BTW",
+          "description": "Submit the OSS VAT notification in the month after the quarter and pay the balance in one payment.",
+          "reference_url": "https://www.belastingdienst.nl/e-commerce"
+        }
+      ],
+      "events": [
+        {
+          "key": "q1_submission",
+          "title": "Q1 2026 OSS submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-04-30",
+          "window_start_date": "2026-04-01",
+          "window_end_date": "2026-04-30",
+          "description": "OSS VAT for Q1 is reported in April and due by the last day of that month."
+        },
+        {
+          "key": "q1_payment",
+          "title": "Q1 2026 OSS payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-04-30",
+          "description": "Any payable OSS VAT for Q1 is due with the OSS notification."
+        },
+        {
+          "key": "q2_submission",
+          "title": "Q2 2026 OSS submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-07-31",
+          "window_start_date": "2026-07-01",
+          "window_end_date": "2026-07-31",
+          "description": "OSS VAT for Q2 is reported in July and due by the last day of that month."
+        },
+        {
+          "key": "q2_payment",
+          "title": "Q2 2026 OSS payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-07-31",
+          "description": "Any payable OSS VAT for Q2 is due with the OSS notification."
+        },
+        {
+          "key": "q3_submission",
+          "title": "Q3 2026 OSS submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-10-31",
+          "window_start_date": "2026-10-01",
+          "window_end_date": "2026-10-31",
+          "description": "OSS VAT for Q3 is reported in October and due by the last day of that month."
+        },
+        {
+          "key": "q3_payment",
+          "title": "Q3 2026 OSS payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-10-31",
+          "description": "Any payable OSS VAT for Q3 is due with the OSS notification."
+        },
+        {
+          "key": "q4_submission",
+          "title": "Q4 2026 OSS submission deadline",
+          "event_type": "submission",
+          "event_date": "2027-01-31",
+          "window_start_date": "2027-01-01",
+          "window_end_date": "2027-01-31",
+          "description": "OSS VAT for Q4 is reported in January of the following year and due by the last day of that month."
+        },
+        {
+          "key": "q4_payment",
+          "title": "Q4 2026 OSS payment deadline",
+          "event_type": "payment",
+          "event_date": "2027-01-31",
+          "description": "Any payable OSS VAT for Q4 is due with the OSS notification."
+        }
+      ]
+    },
+    {
+      "key": "inkomstenbelasting",
+      "name": "Inkomstenbelasting",
+      "tax_year": 2026,
+      "tax_years": [2025, 2026, 2027],
+      "description": "Annual Dutch personal income tax return workflow for the 2026 income year.",
+      "workflows": [
+        {
+          "key": "confirm_income_tax_obligation",
+          "name": "Confirm income tax obligation",
+          "description": "Confirm whether an income tax return letter or other filing trigger applies for the income year.",
+          "reference_url": "https://www.belastingdienst.nl/wps/wcm/connect/nl/belastingaangifte/content/wanneer-moet-ik-aangifte-doen"
+        },
+        {
+          "key": "prepare_income_tax_return",
+          "name": "Prepare income tax return",
+          "description": "Gather wage, business, deduction, partner, box 2, box 3, and pre-filled return data before submission.",
+          "reference_url": "https://www.belastingdienst.nl/wps/wcm/connect/nl/belastingaangifte/content/wanneer-moet-ik-aangifte-doen"
+        },
+        {
+          "key": "submit_income_tax_return",
+          "name": "Submit income tax return",
+          "description": "Submit before the date in the return letter; the general annual deadline is often 1 May.",
+          "reference_url": "https://www.belastingdienst.nl/wps/wcm/connect/nl/belastingaangifte/content/wanneer-moet-ik-aangifte-doen"
+        }
+      ],
+      "events": [
+        {
+          "key": "annual_submission",
+          "title": "2026 income tax submission deadline",
+          "event_type": "submission",
+          "event_date": "2027-05-01",
+          "window_start_date": "2027-03-01",
+          "window_end_date": "2027-05-01",
+          "description": "The annual income tax return is commonly submitted from March and is generally due by 1 May unless the return letter states another date."
+        }
+      ]
+    }
+  ]
+}

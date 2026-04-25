@@ -67,10 +67,10 @@ export function buildCalculationSignature({
 }
 
 function normalizeGrossIncomeForSignature(grossIncome) {
-  if (grossIncome === null || grossIncome === undefined) return grossIncome;
+  if (grossIncome === null || grossIncome === undefined) return 0;
 
   const rawValue = String(grossIncome).trim();
-  if (rawValue === "") return grossIncome;
+  if (rawValue === "") return 0;
 
   const numericValue = Number(rawValue);
   return Number.isFinite(numericValue) ? numericValue : grossIncome;
