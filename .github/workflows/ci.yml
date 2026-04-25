@@ -112,5 +112,8 @@ jobs:
       - name: Prepare test database
         run: bin/rails db:prepare
 
-      - name: Run RSpec
-        run: bundle exec rspec
+      - name: Run unit, request, and service specs
+        run: bundle exec rspec --exclude-pattern "spec/system/**/*_spec.rb"
+
+      - name: Run system specs
+        run: bundle exec rspec spec/system

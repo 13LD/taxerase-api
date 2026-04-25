@@ -29,7 +29,7 @@ RSpec.describe "Spain calculator selectors", type: :system, js: true do
 
     within(".assumptions-card") do
       expect(page).to have_text("Needs review")
-      expect(page).to have_text("No union dues, ascendants, joint filing")
+      expect(page).to have_text("Regional deductions")
     end
 
     expect_metric_card("Annual net income", /€\d[\d,]*\.\d{2}/)
@@ -137,7 +137,7 @@ RSpec.describe "Spain calculator selectors", type: :system, js: true do
 
     within_results_card do
       expect(page).to have_no_text("Calculating...", wait: 20)
-      expect(page).to have_text("€41,551.44")
+      expect(page).to have_text("€41,545.15")
     end
 
     expect(page.evaluate_script("window.__salaryCalcFetchCalls")).to eq([ "employee_madrid" ])
@@ -183,14 +183,41 @@ RSpec.describe "Spain calculator selectors", type: :system, js: true do
 
     expect_metric_card("State personal and family minimum", "€28,000.00")
     expect_metric_card("Madrid personal and family minimum", "€28,406.65")
-    expect(page).to have_text("Profile inputs: 75 or older, 2 children (1 under 3), taxpayer disability 65% or more")
+    expect(page).to have_text("Profile inputs: 75 or older, 2 children (1 under 3), no ascendants, taxpayer disability 65% or more")
+  end
+
+  it "recalculates when expanded Spain family and employee deduction controls change" do
+    visit root_path
+
+    within_calculator_card do
+      select "Madrid", from: "Region"
+      select "1", from: "Dependent ascendants"
+      select "1", from: "Ascendants over 75"
+      select "1", from: "Ascendants disability 65%+"
+      select "Married family unit", from: "Joint filing"
+      fill_in "Union dues", with: "240"
+      fill_in "Compulsory professional fees", with: "800"
+      fill_in "Labor legal-defense costs", with: "500"
+      select "65%+ or support needs", from: "Disabled worker expense"
+      check "Apply geographic mobility expense"
+      select "General category", from: "Large-family deduction"
+      select "12", from: "Maternity deduction months"
+      fill_in "Nursery expenses paid", with: "1500"
+    end
+
+    within_results_card do
+      expect(page).to have_text("Additional employee expenses", wait: 20)
+      expect(page).to have_text("Joint filing reduction")
+      expect(page).to have_text("National family deductions")
+      expect(page).to have_no_text("Calculating...", wait: 20)
+    end
   end
 
   it "recalculates automatically when gross income and salary period change" do
     visit root_path
 
     within_results_card do
-      expect(page).to have_text("€41,551.44")
+      expect(page).to have_text("€41,545.15")
     end
 
     within_calculator_card do
@@ -200,8 +227,8 @@ RSpec.describe "Spain calculator selectors", type: :system, js: true do
     end
 
     within_results_card do
-      expect(page).to have_text("€55,216.86", wait: 20)
-      expect(page).not_to have_text("€41,551.44")
+      expect(page).to have_text("€55,089.92", wait: 20)
+      expect(page).not_to have_text("€41,545.15")
     end
   end
 

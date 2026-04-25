@@ -1,35 +1,84 @@
 module Taxerase
   module Spain
     class PersonalFamilyMinimums
+      include InputNormalization
+
       AGE_BRACKETS = %w[under_65 from_65_to_74 age_75_plus].freeze
       DISABILITY_LEVELS = %w[none level_33_to_64 level_33_to_64_with_support level_65_plus].freeze
 
-      def self.call(regime:, age_bracket:, children_count:, children_under_three_count:, disability_level:)
+      def self.call(
+        regime:,
+        age_bracket:,
+        children_count:,
+        children_under_three_count:,
+        disability_level:,
+        ascendants_count: 0,
+        ascendants_over_75_count: 0,
+        ascendant_disability_33_count: 0,
+        ascendant_disability_65_count: 0,
+        ascendant_disability_support_count: 0
+      )
         new(
           regime:,
           age_bracket:,
           children_count:,
           children_under_three_count:,
-          disability_level:
+          disability_level:,
+          ascendants_count:,
+          ascendants_over_75_count:,
+          ascendant_disability_33_count:,
+          ascendant_disability_65_count:,
+          ascendant_disability_support_count:
         ).call
       end
 
-      def self.validation_errors(age_bracket:, children_count:, children_under_three_count:, disability_level:)
+      def self.validation_errors(
+        age_bracket:,
+        children_count:,
+        children_under_three_count:,
+        disability_level:,
+        ascendants_count: 0,
+        ascendants_over_75_count: 0,
+        ascendant_disability_33_count: 0,
+        ascendant_disability_65_count: 0,
+        ascendant_disability_support_count: 0
+      )
         new(
           regime: nil,
           age_bracket:,
           children_count:,
           children_under_three_count:,
-          disability_level:
+          disability_level:,
+          ascendants_count:,
+          ascendants_over_75_count:,
+          ascendant_disability_33_count:,
+          ascendant_disability_65_count:,
+          ascendant_disability_support_count:
         ).validation_errors
       end
 
-      def initialize(regime:, age_bracket:, children_count:, children_under_three_count:, disability_level:)
+      def initialize(
+        regime:,
+        age_bracket:,
+        children_count:,
+        children_under_three_count:,
+        disability_level:,
+        ascendants_count:,
+        ascendants_over_75_count:,
+        ascendant_disability_33_count:,
+        ascendant_disability_65_count:,
+        ascendant_disability_support_count:
+      )
         @regime = regime
         @age_bracket = age_bracket.to_s.presence || "under_65"
         @children_count = children_count
         @children_under_three_count = children_under_three_count
         @disability_level = disability_level.to_s.presence || "none"
+        @ascendants_count = ascendants_count
+        @ascendants_over_75_count = ascendants_over_75_count
+        @ascendant_disability_33_count = ascendant_disability_33_count
+        @ascendant_disability_65_count = ascendant_disability_65_count
+        @ascendant_disability_support_count = ascendant_disability_support_count
       end
 
       def validation_errors
@@ -38,6 +87,12 @@ module Taxerase
         errors << "disability_level is not supported" unless DISABILITY_LEVELS.include?(disability_level)
         errors << "children_count must be an integer between 0 and 12" unless parsed_children_count.between?(0, 12)
         errors << "children_under_three_count must be an integer between 0 and children_count" unless parsed_children_under_three_count.between?(0, parsed_children_count)
+        errors << "ascendants_count must be an integer between 0 and 12" unless parsed_ascendants_count.between?(0, 12)
+        errors << "ascendants_over_75_count must be an integer between 0 and ascendants_count" unless parsed_ascendants_over_75_count.between?(0, parsed_ascendants_count)
+        errors << "ascendant_disability_33_count must be an integer between 0 and ascendants_count" unless parsed_ascendant_disability_33_count.between?(0, parsed_ascendants_count)
+        errors << "ascendant_disability_65_count must be an integer between 0 and ascendants_count" unless parsed_ascendant_disability_65_count.between?(0, parsed_ascendants_count)
+        errors << "ascendant disability counts must not exceed ascendants_count" unless disabled_ascendants_count.between?(0, parsed_ascendants_count)
+        errors << "ascendant_disability_support_count must be an integer between 0 and disabled ascendants" unless parsed_ascendant_disability_support_count.between?(0, disabled_ascendants_count)
         errors
       end
 
@@ -48,6 +103,11 @@ module Taxerase
           age_bracket: age_bracket,
           children_count: parsed_children_count,
           children_under_three_count: parsed_children_under_three_count,
+          ascendants_count: parsed_ascendants_count,
+          ascendants_over_75_count: parsed_ascendants_over_75_count,
+          ascendant_disability_33_count: parsed_ascendant_disability_33_count,
+          ascendant_disability_65_count: parsed_ascendant_disability_65_count,
+          ascendant_disability_support_count: parsed_ascendant_disability_support_count,
           disability_level: disability_level,
           state_common_additions: state_common_additions,
           regional_common_additions: regional_common_additions,
@@ -57,20 +117,36 @@ module Taxerase
 
       private
 
-      attr_reader :regime, :age_bracket, :children_count, :children_under_three_count, :disability_level
+      attr_reader :regime, :age_bracket, :children_count, :children_under_three_count, :disability_level,
+        :ascendants_count, :ascendants_over_75_count, :ascendant_disability_33_count, :ascendant_disability_65_count,
+        :ascendant_disability_support_count
 
       def parsed_children_count
-        @parsed_children_count ||= begin
-          value = Integer(children_count, exception: false)
-          value.nil? ? -1 : value
-        end
+        @parsed_children_count ||= integer(children_count)
       end
 
       def parsed_children_under_three_count
-        @parsed_children_under_three_count ||= begin
-          value = Integer(children_under_three_count, exception: false)
-          value.nil? ? -1 : value
-        end
+        @parsed_children_under_three_count ||= integer(children_under_three_count)
+      end
+
+      def parsed_ascendants_count
+        @parsed_ascendants_count ||= integer(ascendants_count)
+      end
+
+      def parsed_ascendants_over_75_count
+        @parsed_ascendants_over_75_count ||= integer(ascendants_over_75_count)
+      end
+
+      def parsed_ascendant_disability_33_count
+        @parsed_ascendant_disability_33_count ||= integer(ascendant_disability_33_count)
+      end
+
+      def parsed_ascendant_disability_65_count
+        @parsed_ascendant_disability_65_count ||= integer(ascendant_disability_65_count)
+      end
+
+      def parsed_ascendant_disability_support_count
+        @parsed_ascendant_disability_support_count ||= integer(ascendant_disability_support_count)
       end
 
       def state_amount
@@ -82,7 +158,7 @@ module Taxerase
       end
 
       def state_common_additions
-        age_increment + descendant_minimum + disability_minimum
+        age_increment + descendant_minimum + ascendant_minimum + disability_minimum + ascendant_disability_minimum
       end
 
       alias regional_common_additions state_common_additions
@@ -120,6 +196,13 @@ module Taxerase
         total + (parameter_decimal!("descendant_under_three_minimum") * parsed_children_under_three_count)
       end
 
+      def ascendant_minimum
+        return BigDecimal("0") if parsed_ascendants_count.zero? && parsed_ascendants_over_75_count.zero?
+
+        (parameter_decimal!("ascendant_minimum") * parsed_ascendants_count) +
+          (parameter_decimal!("ascendant_over_75_increment") * parsed_ascendants_over_75_count)
+      end
+
       def disability_minimum
         case disability_level
         when "none"
@@ -135,10 +218,23 @@ module Taxerase
         end
       end
 
+      def ascendant_disability_minimum
+        return BigDecimal("0") if disabled_ascendants_count.zero? && parsed_ascendant_disability_support_count.zero?
+
+        (parameter_decimal!("ascendant_disability_33_minimum") * parsed_ascendant_disability_33_count) +
+          (parameter_decimal!("ascendant_disability_65_minimum") * parsed_ascendant_disability_65_count) +
+          (parameter_decimal!("ascendant_disability_support_increment") * parsed_ascendant_disability_support_count)
+      end
+
+      def disabled_ascendants_count
+        parsed_ascendant_disability_33_count + parsed_ascendant_disability_65_count
+      end
+
       def summary
         parts = []
         parts << age_summary
         parts << children_summary
+        parts << ascendants_summary
         parts << disability_summary
         parts.join(", ")
       end
@@ -188,6 +284,26 @@ module Taxerase
         when "level_65_plus"
           "taxpayer disability 65% or more"
         end
+      end
+
+      def ascendants_summary
+        label =
+          case parsed_ascendants_count
+          when 0
+            "no ascendants"
+          when 1
+            "1 ascendant"
+          else
+            "#{parsed_ascendants_count} ascendants"
+          end
+
+        details = []
+        details << "#{parsed_ascendants_over_75_count} over 75" if parsed_ascendants_over_75_count.positive?
+        details << "#{disabled_ascendants_count} disabled" if disabled_ascendants_count.positive?
+
+        return label if details.empty?
+
+        "#{label} (#{details.join(', ')})"
       end
 
       def parameter_decimal!(key)
