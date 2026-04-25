@@ -19,7 +19,7 @@ RSpec.describe Taxerase::Spain::PersonalFamilyMinimums do
 
       expect(result[:state_amount]).to eq(BigDecimal("28000"))
       expect(result[:regional_amount]).to eq(BigDecimal("28406.65"))
-      expect(result[:summary]).to eq("75 or older, 2 children (1 under 3), taxpayer disability 65% or more")
+      expect(result[:summary]).to eq("75 or older, 2 children (1 under 3), no ascendants, taxpayer disability 65% or more")
     end
   end
 
@@ -33,6 +33,22 @@ RSpec.describe Taxerase::Spain::PersonalFamilyMinimums do
       )
 
       expect(errors).to include("children_under_three_count must be an integer between 0 and children_count")
+    end
+
+    it "rejects overlapping ascendant disability buckets" do
+      errors = described_class.validation_errors(
+        age_bracket: "under_65",
+        children_count: 0,
+        children_under_three_count: 0,
+        disability_level: "none",
+        ascendants_count: 1,
+        ascendants_over_75_count: 0,
+        ascendant_disability_33_count: 1,
+        ascendant_disability_65_count: 1,
+        ascendant_disability_support_count: 1
+      )
+
+      expect(errors).to include("ascendant disability counts must not exceed ascendants_count")
     end
   end
 end

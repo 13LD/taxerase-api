@@ -30,7 +30,7 @@ RSpec.describe "Tax comparison", type: :system, js: true do
       expect(page).to have_text("Total tax")
       expect(page).to have_text(/Spain · Andalusia/i)
       expect(page).to have_text("Netherlands")
-      expect(page).to have_text("-3.60%")
+      expect(page).to have_text("-3.61%")
     end
 
     comparison_sides = all(".comparison-side")

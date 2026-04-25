@@ -95,6 +95,21 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
     end
   end
 
+  it "keeps Spain self-employed controls visible after leaving Beckham Law" do
+    visit root_path(country: "ES")
+
+    within(".calculator-card") do
+      check "Apply Beckham Law"
+      click_button "B2B contract"
+
+      expect(page).to have_text("Resident self-employed - Andalusia")
+      expect(page).to have_select("Self-employed estimation method")
+      expect(page).to have_field("Home-office supply expenses")
+      expect(page).to have_select("Dependent ascendants")
+      expect(page).not_to have_field("Apply Beckham Law")
+    end
+  end
+
   it "switches to Poland and loads Poland-specific controls and PLN output" do
     visit root_path
 

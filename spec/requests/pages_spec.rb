@@ -45,6 +45,37 @@ RSpec.describe "Pages", type: :request do
       expect(query_count).to be < 30
     end
 
+    it "renders the Spain home page when optional add-on parameter rows are stale" do
+      country = Country.find_by!(code: "ES")
+      regimes = TaxRegime.for_country_year(country:, tax_year: 2025).where(key: %w[employee_andalusia])
+      TaxParameter.where(
+        tax_regime: regimes,
+        key: %w[
+          employee_solidarity_rate
+          ascendant_minimum
+          ascendant_over_75_increment
+          ascendant_disability_33_minimum
+          ascendant_disability_65_minimum
+          ascendant_disability_support_increment
+          professional_fee_deduction_cap
+          legal_defense_deduction_cap
+          maternity_monthly_deduction
+          nursery_deduction_cap
+          large_family_general_deduction
+          large_family_special_deduction
+          large_family_extra_child_deduction
+          family_disability_deduction
+          spouse_disability_deduction
+        ]
+      ).delete_all
+
+      get root_path
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("Taxerase | Spain Tax Calculator")
+      expect(response.body).to include("employee_andalusia")
+    end
+
     it "renders the Andorra calculator page when requested" do
       get root_path, params: { country: "AD" }
 

@@ -14,7 +14,7 @@ function defaultValueForControl(control) {
 
 function isControlVisible(control, selectedCategory, controlValues) {
   if (control.categories && !control.categories.includes(selectedCategory)) return false;
-  if (control.visibleWhen && !control.visibleWhen(controlValues)) return false;
+  if (control.visibleWhen && !control.visibleWhen(controlValues, selectedCategory)) return false;
 
   return true;
 }

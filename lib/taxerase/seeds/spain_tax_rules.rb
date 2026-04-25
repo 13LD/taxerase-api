@@ -230,6 +230,7 @@ module Taxerase
             "monthly_min_contribution_base" => 1323.00,
             "monthly_max_contribution_base" => 4720.50,
             "employee_social_security_rate" => 0.0647,
+            "employee_solidarity_rate" => 0,
             "work_income_adjustment_mode" => "net_income_reduction_2024",
             "work_income_reduction_max" => 7302,
             "work_income_reduction_full_threshold" => 14_852,
@@ -244,6 +245,7 @@ module Taxerase
             "monthly_min_contribution_base" => 1381.20,
             "monthly_max_contribution_base" => 4909.50,
             "employee_social_security_rate" => 0.0648,
+            "employee_solidarity_rate" => 0.0092,
             "work_income_adjustment_mode" => "tax_credit_2025",
             "low_income_deduction_max" => 340,
             "low_income_deduction_full_threshold" => 16_576,
@@ -262,14 +264,29 @@ module Taxerase
           "regional_taxpayer_minimum" => region_config[:regional_taxpayer_minimum],
           "self_employed_social_security_generic_expense_rate" => 0.07,
           "difficult_to_justify_deduction_rate" => 0.05,
-          "difficult_to_justify_deduction_cap" => 2000
+          "difficult_to_justify_deduction_cap" => 2000,
+          "home_office_supply_deduction_rate" => 0.30,
+          "modules_net_income_rate" => 0.30,
+          "reta_reduced_monthly_quota" => 80,
+          "reta_reduced_special_following_monthly_quota" => 160,
+          "family_collaborator_reta_discount_rate" => 0.50,
+          "corporate_self_employed_reta_uplift_rate" => 0.10,
+          "corporate_self_employed_min_base" => 1000,
+          "pluriactivity_refund_rate" => 0.50,
+          "pluriactivity_refund_cap_rate" => 0.50
         }.merge(common_personal_family_minimum_parameters)
 
         case tax_year
         when 2024
-          base.merge("self_employed_social_security_rate" => 0.313)
+          base.merge(
+            "self_employed_social_security_rate" => 0.313,
+            "pluriactivity_refund_threshold" => 16_030.82
+          )
         when 2025
-          base.merge("self_employed_social_security_rate" => 0.314)
+          base.merge(
+            "self_employed_social_security_rate" => 0.314,
+            "pluriactivity_refund_threshold" => 16_672.66
+          )
         else
           raise ArgumentError, "Unsupported self-employed seed year #{tax_year}"
         end
@@ -316,9 +333,29 @@ module Taxerase
           "third_descendant_minimum" => 4000,
           "fourth_and_next_descendant_minimum" => 4500,
           "descendant_under_three_minimum" => 2800,
+          "ascendant_minimum" => 1150,
+          "ascendant_over_75_increment" => 1400,
           "taxpayer_disability_33_minimum" => 3000,
           "taxpayer_disability_65_minimum" => 9000,
-          "taxpayer_disability_support_increment" => 3000
+          "taxpayer_disability_support_increment" => 3000,
+          "ascendant_disability_33_minimum" => 3000,
+          "ascendant_disability_65_minimum" => 9000,
+          "ascendant_disability_support_increment" => 3000,
+          "joint_filing_married_reduction" => 3400,
+          "joint_filing_single_parent_reduction" => 2150,
+          "professional_fee_deduction_cap" => 500,
+          "legal_defense_deduction_cap" => 300,
+          "disabled_worker_expense" => 3500,
+          "disabled_worker_high_expense" => 7750,
+          "geographic_mobility_expense" => 2000,
+          "maternity_monthly_deduction" => 100,
+          "nursery_deduction_cap" => 1000,
+          "large_family_general_deduction" => 1200,
+          "large_family_special_deduction" => 2400,
+          "large_family_extra_child_deduction" => 600,
+          "single_parent_two_children_deduction" => 1200,
+          "family_disability_deduction" => 1200,
+          "spouse_disability_deduction" => 1200
         }
       end
 
