@@ -79,7 +79,7 @@ export function buildHeadlineMetrics({ pendingValue, result, resultMatchesSelect
       {
         label: "Effective tax rate",
         value: formatPercentage(result.breakdown.effective_tax_rate),
-        tone: "default"
+        tone: "danger"
       }
     ];
   }
@@ -87,7 +87,7 @@ export function buildHeadlineMetrics({ pendingValue, result, resultMatchesSelect
   return [
     { label: "Annual net income", value: pendingValue, tone: "primary" },
     { label: "Monthly net income", value: pendingValue, tone: "secondary" },
-    { label: "Effective tax rate", value: pendingValue, tone: "default" }
+    { label: "Effective tax rate", value: pendingValue, tone: "danger" }
   ];
 }
 

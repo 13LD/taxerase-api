@@ -7,17 +7,76 @@ const TAB_OPTIONS = [
   {
     key: "calculator",
     label: "Calculator",
-    description: "Single-country calculator with detailed regime context."
+    description: "Country tax estimate.",
+    iconLabel: "C"
   },
   {
     key: "comparison",
-    label: "Compare 2 countries or regions",
-    description: "Dedicated two-country comparison workspace."
+    label: "Comparison",
+    description: "Two-country workspace.",
+    iconLabel: "Co"
+  },
+  {
+    key: "calendar",
+    label: "Calendar",
+    description: "Filing dates workspace.",
+    iconLabel: "Ca"
+  },
+  {
+    key: "invoice",
+    label: "Invoice",
+    description: "Billing workspace.",
+    iconLabel: "In"
+  },
+  {
+    key: "expenses",
+    label: "Expenses",
+    description: "Expense tracking lane.",
+    iconLabel: "Ex"
+  },
+  {
+    key: "reports",
+    label: "Reports",
+    description: "Tax report workspace.",
+    iconLabel: "R"
+  }
+];
+
+const LEGACY_TAB_ALIASES = {
+  invoice_expenses: "invoice"
+};
+
+const PLACEHOLDER_PANELS = [
+  {
+    key: "calendar",
+    kicker: "Tax calendar",
+    title: "Calendar",
+    body: "Filing date tracking will live here."
+  },
+  {
+    key: "invoice",
+    kicker: "Invoice",
+    title: "Invoice",
+    body: "Invoice workflows will live here."
+  },
+  {
+    key: "expenses",
+    kicker: "Expenses",
+    title: "Expenses",
+    body: "Expense workflows will live here."
+  },
+  {
+    key: "reports",
+    kicker: "Reports",
+    title: "Reports",
+    body: "Tax report workflows will live here."
   }
 ];
 
 function normalizeTab(tab) {
-  return tab === "comparison" ? "comparison" : "calculator";
+  const normalizedTab = LEGACY_TAB_ALIASES[tab] || tab;
+
+  return TAB_OPTIONS.some((option) => option.key === normalizedTab) ? normalizedTab : "calculator";
 }
 
 function activeTabFromLocation() {
@@ -32,6 +91,7 @@ export default function CountryCalculatorApp(initialProps = {}) {
   const [activeTab, setActiveTab] = useState(() => activeTabFromLocation());
   const [countrySwitchErrors, setCountrySwitchErrors] = useState([]);
   const [isCountrySwitching, setIsCountrySwitching] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const requestAbortControllerRef = useRef(null);
   const activeTabRef = useRef(activeTab);
 
@@ -64,6 +124,7 @@ export default function CountryCalculatorApp(initialProps = {}) {
   const handleTabChange = useCallback((nextTab) => {
     const normalizedTab = normalizeTab(nextTab);
     setActiveTab(normalizedTab);
+    setIsSidebarOpen(false);
     updateUrl((searchParams) => {
       searchParams.set("tab", normalizedTab);
     });
@@ -118,17 +179,33 @@ export default function CountryCalculatorApp(initialProps = {}) {
 
   return (
     <section className="tabbed-calculator-shell">
-      <section className="liquid-card calculator-tabs-card">
-        <div className="section-head">
-          <div>
-            <p className="section-kicker">Tax Workspace</p>
-            <h2>Select a mode</h2>
+      <aside
+        className={`workspace-sidebar${isSidebarOpen ? " is-open" : ""}`}
+        aria-label="Taxerase workspace navigation"
+      >
+        <div className="workspace-sidebar__brand">
+          <div className="workspace-sidebar__brand-lockup">
+            <span className="workspace-sidebar__brand-mark" aria-hidden="true">T</span>
+            <span>Taxerase</span>
           </div>
+          <button
+            aria-controls="workspace-sidebar-menu"
+            aria-expanded={isSidebarOpen}
+            aria-label="Toggle workspace navigation"
+            className="workspace-sidebar__toggle"
+            onClick={() => setIsSidebarOpen((currentValue) => !currentValue)}
+            type="button"
+          >
+            <span aria-hidden="true" />
+            <span aria-hidden="true" />
+            <span aria-hidden="true" />
+          </button>
         </div>
 
         <div
           aria-label="Tax workspace tabs"
           className="calculator-tabs"
+          id="workspace-sidebar-menu"
           role="tablist"
         >
           {TAB_OPTIONS.map((tab) => (
@@ -142,38 +219,66 @@ export default function CountryCalculatorApp(initialProps = {}) {
               role="tab"
               type="button"
             >
+              <span className="calculator-tabs__icon" aria-hidden="true">{tab.iconLabel}</span>
               <span>{tab.label}</span>
               <small>{tab.description}</small>
             </button>
           ))}
         </div>
-      </section>
 
-      <div
-        aria-hidden={activeTab !== "calculator"}
-        className="tabbed-calculator-shell__panel"
-        hidden={activeTab !== "calculator"}
-        id="calculator-panel"
-        role="tabpanel"
-      >
-        <CalculatorHomeTab
-          key={calculatorProps.country?.code || "calculator"}
-          calculatorProps={calculatorProps}
-          countrySwitchErrors={countrySwitchErrors}
-          isCountrySwitching={isCountrySwitching}
-          onCountryChangeRequest={handleCountryChangeRequest}
-        />
-      </div>
+        <div className="workspace-sidebar__profile" aria-label="User profile">
+          <span className="workspace-sidebar__avatar" aria-hidden="true">U</span>
+          <div>
+            <strong>User profile</strong>
+            <span>Account space</span>
+          </div>
+        </div>
+      </aside>
 
-      <div
-        aria-hidden={activeTab !== "comparison"}
-        className="tabbed-calculator-shell__panel"
-        hidden={activeTab !== "comparison"}
-        id="comparison-panel"
-        role="tabpanel"
-      >
-        <ComparisonTab calculatorProps={calculatorProps} enabled={activeTab === "comparison"} />
-      </div>
+      <main className="workspace-main">
+        <div
+          aria-hidden={activeTab !== "calculator"}
+          className="tabbed-calculator-shell__panel"
+          hidden={activeTab !== "calculator"}
+          id="calculator-panel"
+          role="tabpanel"
+        >
+          <CalculatorHomeTab
+            key={calculatorProps.country?.code || "calculator"}
+            calculatorProps={calculatorProps}
+            countrySwitchErrors={countrySwitchErrors}
+            isCountrySwitching={isCountrySwitching}
+            onCountryChangeRequest={handleCountryChangeRequest}
+          />
+        </div>
+
+        <div
+          aria-hidden={activeTab !== "comparison"}
+          className="tabbed-calculator-shell__panel"
+          hidden={activeTab !== "comparison"}
+          id="comparison-panel"
+          role="tabpanel"
+        >
+          <ComparisonTab calculatorProps={calculatorProps} enabled={activeTab === "comparison"} />
+        </div>
+
+        {PLACEHOLDER_PANELS.map((panel) => (
+          <div
+            aria-hidden={activeTab !== panel.key}
+            className="tabbed-calculator-shell__panel"
+            hidden={activeTab !== panel.key}
+            id={`${panel.key}-panel`}
+            key={panel.key}
+            role="tabpanel"
+          >
+            <section className="liquid-card workspace-placeholder">
+              <p className="section-kicker">{panel.kicker}</p>
+              <h2>{panel.title}</h2>
+              <p>{panel.body}</p>
+            </section>
+          </div>
+        ))}
+      </main>
     </section>
   );
 }
