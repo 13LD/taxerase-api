@@ -3,7 +3,7 @@ require "rails_helper"
 RSpec.describe "Tax workspace tabs", type: :system, js: true do
   def open_compare_tab
     within(".calculator-tabs") do
-      click_button "Compare 2 countries or regions"
+      click_button "Comparison"
     end
 
     expect(page).to have_css(".comparison-card", visible: true)
@@ -20,6 +20,17 @@ RSpec.describe "Tax workspace tabs", type: :system, js: true do
   it "defaults to the calculator tab and syncs the tab query param" do
     visit root_path
 
+    within(".workspace-sidebar") do
+      expect(page).to have_text("Taxerase")
+      expect(page).to have_button("Calculator")
+      expect(page).to have_button("Comparison")
+      expect(page).to have_button("Calendar")
+      expect(page).to have_button("Invoice")
+      expect(page).to have_button("Expenses")
+      expect(page).to have_button("Reports")
+      expect(page).to have_text("User profile")
+    end
+
     expect(page).to have_css(".calculator-card", visible: true)
     expect(page).to have_no_css(".comparison-card", visible: true)
 
@@ -28,6 +39,81 @@ RSpec.describe "Tax workspace tabs", type: :system, js: true do
 
     open_calculator_tab
     expect(page).to have_current_path(/tab=calculator/, url: true)
+  end
+
+  it "shows placeholder calendar, invoice, expenses, and reports workspaces from the sidebar" do
+    visit root_path
+
+    within(".calculator-tabs") do
+      click_button "Calendar"
+    end
+
+    expect(page).to have_current_path(/tab=calendar/, url: true)
+    expect(page).to have_css("#calendar-panel", visible: true)
+    expect(page).to have_text("Filing date tracking will live here.")
+
+    within(".calculator-tabs") do
+      click_button "Invoice"
+    end
+
+    expect(page).to have_current_path(/tab=invoice/, url: true)
+    expect(page).to have_css("#invoice-panel", visible: true)
+    expect(page).to have_text("Invoice workflows will live here.")
+
+    within(".calculator-tabs") do
+      click_button "Expenses"
+    end
+
+    expect(page).to have_current_path(/tab=expenses/, url: true)
+    expect(page).to have_css("#expenses-panel", visible: true)
+    expect(page).to have_text("Expense workflows will live here.")
+
+    within(".calculator-tabs") do
+      click_button "Reports"
+    end
+
+    expect(page).to have_current_path(/tab=reports/, url: true)
+    expect(page).to have_css("#reports-panel", visible: true)
+    expect(page).to have_text("Tax report workflows will live here.")
+  end
+
+  it "collapses and expands the sidebar navigation on mobile" do
+    page.driver.browser.execute_cdp(
+      "Emulation.setDeviceMetricsOverride",
+      width: 390,
+      height: 844,
+      deviceScaleFactor: 1,
+      mobile: true
+    )
+    visit root_path
+
+    expect(page.evaluate_script("window.innerWidth")).to be <= 720
+
+    within(".workspace-sidebar") do
+      expect(page).to have_text("Taxerase")
+      toggle = find(".workspace-sidebar__toggle", visible: true)
+      expect(toggle["aria-label"]).to eq("Toggle workspace navigation")
+      expect(toggle["aria-expanded"]).to eq("false")
+      expect(page).to have_no_button("Reports", visible: true)
+
+      toggle.click
+      expect(toggle["aria-expanded"]).to eq("true")
+      expect(page).to have_button("Reports", visible: true)
+
+      click_button "Reports"
+      expect(page).to have_no_button("Reports", visible: true)
+    end
+
+    expect(page).to have_current_path(/tab=reports/, url: true)
+    expect(page).to have_css("#reports-panel", visible: true)
+  ensure
+    page.driver.browser.execute_cdp("Emulation.clearDeviceMetricsOverride")
+  end
+
+  it "maps the old invoice expenses tab query param to invoice" do
+    visit root_path(tab: "invoice_expenses")
+
+    expect(page).to have_css("#invoice-panel", visible: true)
   end
 
   it "respects the comparison tab query param on first load" do
