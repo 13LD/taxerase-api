@@ -44,7 +44,10 @@ RSpec.describe Taxerase::Seeds::TaxData do
       modelo_303 = spain.tax_reports.find_by!(key: "modelo_303", tax_year: 2026)
       modelo_100 = spain.tax_reports.find_by!(key: "modelo_100", tax_year: 2026)
 
-      expect(modelo_130.report_workflows.pluck(:name)).to include("Quarterly IRPF payment workflow")
+      expect(modelo_130.report_workflows.pluck(:name)).to include("Submit Modelo 130")
+      expect(modelo_100.report_workflows.pluck(:name)).to include("Choose Renta payment method")
+      expect(workflow_for(modelo_130, "submit_modelo_130").reference_url).to eq(modelo_130_reference_url)
+      expect(workflow_for(modelo_100, "choose_renta_payment_method").reference_url).to eq(renta_payment_reference_url)
       expect(modelo_130.report_events.pluck(:event_type)).to include("submission", "payment")
       expect(modelo_130.report_events.find_by!(key: "q1_submission").window_start_date).to eq(Date.new(2026, 4, 1))
       expect(modelo_303.report_events.find_by!(key: "q4_payment").event_date).to eq(Date.new(2027, 1, 30))
@@ -55,6 +58,18 @@ RSpec.describe Taxerase::Seeds::TaxData do
 
   def regime_for(country, key, tax_year)
     TaxRegime.for_country_year(country:, tax_year:).find_by!(key:)
+  end
+
+  def workflow_for(report, key)
+    report.report_workflows.find_by!(key:)
+  end
+
+  def modelo_130_reference_url
+    "https://sede.agenciatributaria.gob.es/Sede/procedimientoini/G601.shtml"
+  end
+
+  def renta_payment_reference_url
+    "https://sede.agenciatributaria.gob.es/Sede/ayuda/manuales-videos-folletos/manuales-ayuda-presentacion/irpf-2025/3-cuestiones-generales/3_3-declaracion-irpf/3_3_4-fraccionamiento-pago-domiciliacion.html"
   end
 
   def source_mismatches_for(country)

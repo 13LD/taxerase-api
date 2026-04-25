@@ -9,16 +9,21 @@ RSpec.describe "Api::V1::ReportCalendars", type: :request do
 
       json = JSON.parse(response.body)
       reports = json.fetch("reports")
-      modelo_130 = reports.find { |report| report["key"] == "modelo_130" }
-      modelo_303 = reports.find { |report| report["key"] == "modelo_303" }
-      modelo_390 = reports.find { |report| report["key"] == "modelo_390" }
-      modelo_349 = reports.find { |report| report["key"] == "modelo_349" }
-      modelo_100 = reports.find { |report| report["key"] == "modelo_100" }
+      modelo_130 = report_by_key(reports, "modelo_130")
+      modelo_303 = report_by_key(reports, "modelo_303")
+      modelo_390 = report_by_key(reports, "modelo_390")
+      modelo_349 = report_by_key(reports, "modelo_349")
+      modelo_100 = report_by_key(reports, "modelo_100")
 
       expect(json.dig("country", "code")).to eq("ES")
       expect(json["tax_year"]).to eq(2026)
       expect(reports.map { |report| report["name"] }).to include("Modelo 100", "Modelo 130", "Modelo 303", "Modelo 390", "Modelo 349")
-      expect(modelo_130["workflows"].first["description"]).to include("submit Modelo 130")
+      expect(modelo_130["workflows"].map { |workflow| workflow["name"] }).to include(
+        "Prepare quarterly IRPF inputs",
+        "Submit Modelo 130",
+        "Settle the quarterly IRPF payment"
+      )
+      expect(workflow_by_key(modelo_130, "submit_modelo_130")["reference_url"]).to eq(modelo_130_reference_url)
       expect(modelo_130["events"]).to include(
         hash_including(
           "event_type" => "submission",
@@ -35,7 +40,12 @@ RSpec.describe "Api::V1::ReportCalendars", type: :request do
         hash_including("event_type" => "submission", "event_date" => "2027-01-30")
       )
       expect(modelo_349["events"].map { |event| event["event_type"] }).to all(eq("submission"))
-      expect(modelo_100["workflows"].first["description"]).to include("60/40 split payment")
+      expect(modelo_100["workflows"].map { |workflow| workflow["name"] }).to include(
+        "Review Renta taxpayer data",
+        "Submit Modelo 100",
+        "Choose Renta payment method"
+      )
+      expect(workflow_by_key(modelo_100, "choose_renta_payment_method")["reference_url"]).to eq(renta_payment_reference_url)
       expect(modelo_100["events"]).to include(
         hash_including(
           "event_type" => "submission",
@@ -58,5 +68,21 @@ RSpec.describe "Api::V1::ReportCalendars", type: :request do
       expect(json.dig("country", "code")).to eq("AD")
       expect(json["reports"]).to eq([])
     end
+  end
+
+  def report_by_key(reports, key)
+    reports.find { |report| report["key"] == key }
+  end
+
+  def workflow_by_key(report, key)
+    report.fetch("workflows").find { |workflow| workflow["key"] == key }
+  end
+
+  def modelo_130_reference_url
+    "https://sede.agenciatributaria.gob.es/Sede/procedimientoini/G601.shtml"
+  end
+
+  def renta_payment_reference_url
+    "https://sede.agenciatributaria.gob.es/Sede/ayuda/manuales-videos-folletos/manuales-ayuda-presentacion/irpf-2025/3-cuestiones-generales/3_3-declaracion-irpf/3_3_4-fraccionamiento-pago-domiciliacion.html"
   end
 end

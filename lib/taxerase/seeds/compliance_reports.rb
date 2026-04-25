@@ -1,4 +1,5 @@
 require "json"
+require "uri"
 
 module Taxerase
   module Seeds
@@ -56,6 +57,11 @@ module Taxerase
               key: workflow.fetch("key"),
               name: workflow.fetch("name"),
               description: workflow.fetch("description"),
+              reference_url: validated_reference_url!(
+                workflow["reference_url"],
+                report_key: report.key,
+                workflow_key: workflow.fetch("key")
+              ),
               position: workflow.fetch("position", index + 1),
               created_at: timestamp,
               updated_at: timestamp
@@ -96,6 +102,22 @@ module Taxerase
         return nil if value.blank?
 
         Date.iso8601(value)
+      end
+
+      def validated_reference_url!(value, report_key:, workflow_key:)
+        return nil if value.blank?
+
+        uri = URI.parse(value)
+        return value if uri.is_a?(URI::HTTP) && uri.host.present? && uri.to_s == value
+
+        raise_invalid_reference_url!(report_key:, workflow_key:, value:)
+      rescue URI::InvalidURIError
+        raise_invalid_reference_url!(report_key:, workflow_key:, value:)
+      end
+
+      def raise_invalid_reference_url!(report_key:, workflow_key:, value:)
+        raise ArgumentError,
+              "Invalid reference_url for report #{report_key} workflow #{workflow_key}: #{value.inspect}"
       end
     end
   end

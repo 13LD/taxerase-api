@@ -8,9 +8,22 @@
       "description": "IRPF quarterly payment on account for self-employed professionals under direct estimation.",
       "workflows": [
         {
-          "key": "quarterly_direct_estimation_payment",
-          "name": "Quarterly IRPF payment workflow",
-          "description": "Prepare the quarterly income and deductible expense figures, submit Modelo 130, and pay the installment by the quarterly deadline."
+          "key": "prepare_quarterly_irpf_inputs",
+          "name": "Prepare quarterly IRPF inputs",
+          "description": "Collect quarterly revenue, deductible expenses, withholdings, and prior-period payment data before opening Modelo 130.",
+          "reference_url": "https://sede.agenciatributaria.gob.es/Sede/procedimientoini/G601.shtml"
+        },
+        {
+          "key": "submit_modelo_130",
+          "name": "Submit Modelo 130",
+          "description": "Submit the quarterly payment-on-account return during the applicable submission window.",
+          "reference_url": "https://sede.agenciatributaria.gob.es/Sede/procedimientoini/G601.shtml"
+        },
+        {
+          "key": "settle_quarterly_irpf_payment",
+          "name": "Settle the quarterly IRPF payment",
+          "description": "Pay the resulting installment by the same quarterly deadline or confirm that no payment is due.",
+          "reference_url": "https://sede.agenciatributaria.gob.es/Sede/procedimientoini/G601.shtml"
         }
       ],
       "events": [
@@ -87,9 +100,22 @@
       "description": "Quarterly IVA self-assessment return for ordinary VAT filers.",
       "workflows": [
         {
-          "key": "quarterly_vat_return",
-          "name": "Quarterly IVA return workflow",
-          "description": "Reconcile output and input IVA, submit Modelo 303, and settle any payable VAT by the quarterly deadline."
+          "key": "reconcile_quarterly_iva",
+          "name": "Reconcile quarterly IVA",
+          "description": "Reconcile output IVA, deductible input IVA, corrections, and prior-period balances before filing.",
+          "reference_url": "https://sede.agenciatributaria.gob.es/Sede/iva/presentar-declaracion-iva-modelo-303/plazo-presentacion-modelo-303.html"
+        },
+        {
+          "key": "submit_modelo_303",
+          "name": "Submit Modelo 303",
+          "description": "Submit the quarterly IVA self-assessment during the applicable submission window.",
+          "reference_url": "https://sede.agenciatributaria.gob.es/Sede/iva/presentar-declaracion-iva-modelo-303/plazo-presentacion-modelo-303.html"
+        },
+        {
+          "key": "settle_quarterly_iva",
+          "name": "Settle payable IVA",
+          "description": "Pay the resulting IVA balance by the quarterly deadline or preserve the refund/offset position.",
+          "reference_url": "https://sede.agenciatributaria.gob.es/Sede/iva/presentar-declaracion-iva-modelo-303/plazo-presentacion-modelo-303.html"
         }
       ],
       "events": [
@@ -166,9 +192,22 @@
       "description": "Annual IVA summary return, where required, submitted with the final VAT return window.",
       "workflows": [
         {
-          "key": "annual_vat_summary",
-          "name": "Annual IVA summary workflow",
-          "description": "Confirm whether the taxpayer is required to file Modelo 390, reconcile annual IVA totals, and submit during the January annual summary window."
+          "key": "confirm_modelo_390_requirement",
+          "name": "Confirm Modelo 390 requirement",
+          "description": "Determine whether the taxpayer must file the annual IVA summary or is covered by an exemption.",
+          "reference_url": "https://sede.agenciatributaria.gob.es/Sede/todas-gestiones/impuestos-tasas/iva/modelo-390-iva-declaracion-resumen-anual_/plazos-presentacion.html"
+        },
+        {
+          "key": "reconcile_annual_iva_totals",
+          "name": "Reconcile annual IVA totals",
+          "description": "Compare annual totals against quarterly Modelo 303 filings and accounting records.",
+          "reference_url": "https://sede.agenciatributaria.gob.es/Sede/todas-gestiones/impuestos-tasas/iva/modelo-390-iva-declaracion-resumen-anual_/plazos-presentacion.html"
+        },
+        {
+          "key": "submit_modelo_390",
+          "name": "Submit Modelo 390",
+          "description": "Submit the annual IVA summary during the January annual-summary window when required.",
+          "reference_url": "https://sede.agenciatributaria.gob.es/Sede/todas-gestiones/impuestos-tasas/iva/modelo-390-iva-declaracion-resumen-anual_/plazos-presentacion.html"
         }
       ],
       "events": [
@@ -190,9 +229,22 @@
       "description": "Recapitulative statement for intra-Community transactions.",
       "workflows": [
         {
-          "key": "intra_community_statement",
-          "name": "Intra-Community operations workflow",
-          "description": "Review ROI/intra-Community activity, determine monthly or quarterly filing frequency, and submit the recapitulative statement for the applicable period."
+          "key": "review_intra_community_activity",
+          "name": "Review intra-Community activity",
+          "description": "Review ROI status, customer and supplier VAT numbers, and intra-Community transaction records.",
+          "reference_url": "https://sede.agenciatributaria.gob.es/Sede/todas-gestiones/impuestos-tasas/declaraciones-informativas/modelo-349-decla_____n-recapitulativa-operaciones-intracomunitarias_/plazos-presentacion.html"
+        },
+        {
+          "key": "determine_modelo_349_frequency",
+          "name": "Determine Modelo 349 frequency",
+          "description": "Confirm whether the taxpayer files monthly, quarterly, or under another applicable frequency.",
+          "reference_url": "https://sede.agenciatributaria.gob.es/Sede/todas-gestiones/impuestos-tasas/declaraciones-informativas/modelo-349-decla_____n-recapitulativa-operaciones-intracomunitarias_/plazos-presentacion.html"
+        },
+        {
+          "key": "submit_modelo_349",
+          "name": "Submit Modelo 349",
+          "description": "Submit the recapitulative statement for the applicable period by the submission deadline.",
+          "reference_url": "https://sede.agenciatributaria.gob.es/Sede/todas-gestiones/impuestos-tasas/declaraciones-informativas/modelo-349-decla_____n-recapitulativa-operaciones-intracomunitarias_/plazos-presentacion.html"
         }
       ],
       "events": [
@@ -241,9 +293,22 @@
       "description": "Annual IRPF Renta return for the 2025 income year, filed during the 2026 Renta campaign.",
       "workflows": [
         {
-          "key": "annual_renta_return",
-          "name": "Annual Renta return workflow",
-          "description": "Review taxpayer data, deductions, and family circumstances, submit Modelo 100 during the Renta campaign window, and choose single payment or the 60/40 split payment option when the return is payable."
+          "key": "review_renta_taxpayer_data",
+          "name": "Review Renta taxpayer data",
+          "description": "Review draft taxpayer data, employment/self-employment income, deductions, family circumstances, and regional items.",
+          "reference_url": "https://sede.agenciatributaria.gob.es/Sede/ayuda/manuales-videos-folletos/manuales-ayuda-presentacion/irpf-2025/3-cuestiones-generales/3_3-declaracion-irpf/3_3_2-plazo-presentacion-declaraciones.html"
+        },
+        {
+          "key": "submit_modelo_100",
+          "name": "Submit Modelo 100",
+          "description": "Submit the annual Renta return during the campaign window after confirming the final calculation.",
+          "reference_url": "https://sede.agenciatributaria.gob.es/Sede/ayuda/manuales-videos-folletos/manuales-ayuda-presentacion/irpf-2025/3-cuestiones-generales/3_3-declaracion-irpf/3_3_2-plazo-presentacion-declaraciones.html"
+        },
+        {
+          "key": "choose_renta_payment_method",
+          "name": "Choose Renta payment method",
+          "description": "If the return is payable, choose single payment or the special 60/40 split payment option and track both payment dates.",
+          "reference_url": "https://sede.agenciatributaria.gob.es/Sede/ayuda/manuales-videos-folletos/manuales-ayuda-presentacion/irpf-2025/3-cuestiones-generales/3_3-declaracion-irpf/3_3_4-fraccionamiento-pago-domiciliacion.html"
         }
       ],
       "events": [

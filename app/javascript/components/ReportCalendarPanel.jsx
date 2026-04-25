@@ -17,6 +17,7 @@ const monthFormatter = new Intl.DateTimeFormat("en", {
 });
 
 const CALENDAR_MONTH_COUNT = 12;
+const MOBILE_CALENDAR_MEDIA_QUERY = "(max-width: 720px)";
 
 function parseDate(value) {
   return new Date(`${value}T00:00:00`);
@@ -188,6 +189,7 @@ export default function ReportCalendarPanel({ active, countryCode, taxYear }) {
 
   useEffect(() => {
     if (!active || status !== "success" || !focusedMonthKey) return;
+    if (!window.matchMedia(MOBILE_CALENDAR_MEDIA_QUERY).matches) return;
 
     window.requestAnimationFrame(() => {
       chartRef.current
@@ -196,18 +198,18 @@ export default function ReportCalendarPanel({ active, countryCode, taxYear }) {
     });
   }, [active, focusedMonthKey, status]);
 
+  if (status === "idle" || status === "loading") return null;
+
   return (
     <section className="liquid-card report-calendar-card">
       <div className="section-head">
         <div>
-          <p className="section-kicker">Tax calendar</p>
-          <h2>{calendar?.country?.name || "Report deadlines"}</h2>
+          {calendar?.country?.name ? (
+            <p className="section-kicker">{calendar.country.name}</p>
+          ) : null}
+          <h2>Tax calendar</h2>
         </div>
       </div>
-
-      {status === "loading" ? (
-        <div className="micro-note">Loading report deadlines...</div>
-      ) : null}
 
       {status === "error" ? (
         <div className="error-panel">{errors.join(" ")}</div>
@@ -270,22 +272,44 @@ export default function ReportCalendarPanel({ active, countryCode, taxYear }) {
             </span>
           </div>
 
-          <div className="report-calendar-workflows" aria-label="Report workflow notes">
+          <div className="report-calendar-workflows" aria-label="Report workflows">
             {reports.map((report) => (
-              <article className="report-calendar-workflow" key={report.key}>
-                <div>
-                  <p className="mini-label">{report.tax_year}</p>
-                  <h3>{report.name}</h3>
-                  <p>{report.description}</p>
-                </div>
+              <details className="report-calendar-workflow" key={report.key}>
+                <summary className="report-calendar-workflow__summary">
+                  <span>
+                    <span className="mini-label">{report.tax_year}</span>
+                    <strong>{report.name}</strong>
+                    <small>{report.description}</small>
+                  </span>
+                  <span className="report-calendar-workflow__meta">
+                    {report.workflows.length} steps
+                  </span>
+                </summary>
 
-                {report.workflows.map((workflow) => (
-                  <div className="report-calendar-workflow__step" key={workflow.key}>
-                    <strong>{workflow.name}</strong>
-                    <p>{workflow.description}</p>
-                  </div>
-                ))}
-              </article>
+                <ol className="report-calendar-workflow__steps">
+                  {report.workflows.map((workflow, index) => (
+                    <li className="report-calendar-workflow__step" key={workflow.key}>
+                      <span className="report-calendar-workflow__step-number">
+                        {index + 1}
+                      </span>
+                      <span>
+                        <strong>{workflow.name}</strong>
+                        <p>{workflow.description}</p>
+                        {workflow.reference_url ? (
+                          <a
+                            className="report-calendar-workflow__reference"
+                            href={workflow.reference_url}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            Official tax agency reference
+                          </a>
+                        ) : null}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </details>
             ))}
           </div>
         </>
