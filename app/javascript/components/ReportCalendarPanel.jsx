@@ -99,6 +99,7 @@ export default function ReportCalendarPanel({ active, countryCode, taxYear }) {
     const abortController = new AbortController();
     requestAbortControllerRef.current = abortController;
     setStatus("loading");
+    setCalendar(null);
     setErrors([]);
 
     requestReportCalendar({
