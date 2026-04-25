@@ -95,3 +95,17 @@ export async function requestCountryCalculator({ countryCode, signal }) {
     }
   });
 }
+
+export async function requestReportCalendar({ countryCode, signal, taxYear }) {
+  const url = new URL(`/api/v1/countries/${encodeURIComponent(countryCode)}/report_calendar`, window.location.origin);
+  if (taxYear) url.searchParams.set("tax_year", taxYear);
+
+  return fetch(url.toString(), {
+    method: "GET",
+    signal,
+    headers: {
+      Accept: "application/json",
+      "X-CSRF-Token": csrfToken()
+    }
+  });
+}

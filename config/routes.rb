@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       get "countries/:country_code/calculator", to: "country_calculators#show", as: :country_calculator
+      get "countries/:country_code/report_calendar", to: "report_calendars#show", as: :country_report_calendar
 
       resources :comparisons, only: :create
 

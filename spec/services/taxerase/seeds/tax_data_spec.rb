@@ -39,6 +39,17 @@ RSpec.describe Taxerase::Seeds::TaxData do
       expect(poland_source_mismatches).to be_empty
       expect(czech_source_mismatches).to be_empty
       expect(portugal_source_mismatches).to be_empty
+
+      modelo_130 = spain.tax_reports.find_by!(key: "modelo_130", tax_year: 2026)
+      modelo_303 = spain.tax_reports.find_by!(key: "modelo_303", tax_year: 2026)
+      modelo_100 = spain.tax_reports.find_by!(key: "modelo_100", tax_year: 2026)
+
+      expect(modelo_130.report_workflows.pluck(:name)).to include("Quarterly IRPF payment workflow")
+      expect(modelo_130.report_events.pluck(:event_type)).to include("submission", "payment")
+      expect(modelo_130.report_events.find_by!(key: "q1_submission").window_start_date).to eq(Date.new(2026, 4, 1))
+      expect(modelo_303.report_events.find_by!(key: "q4_payment").event_date).to eq(Date.new(2027, 1, 30))
+      expect(modelo_100.report_events.find_by!(key: "annual_submission").window_start_date).to eq(Date.new(2026, 4, 8))
+      expect(modelo_100.report_events.find_by!(key: "second_split_payment").event_date).to eq(Date.new(2026, 11, 5))
     end
   end
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_16_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_25_143000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -56,6 +56,35 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_16_000000) do
     t.index ["key"], name: "index_official_tax_sources_on_key", unique: true
   end
 
+  create_table "report_events", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.date "event_date", null: false
+    t.string "event_type", null: false
+    t.string "key", null: false
+    t.integer "position", default: 1, null: false
+    t.bigint "tax_report_id", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.date "window_end_date"
+    t.date "window_start_date"
+    t.index ["event_date"], name: "index_report_events_on_event_date"
+    t.index ["tax_report_id", "key"], name: "index_report_events_on_tax_report_id_and_key", unique: true
+    t.index ["tax_report_id"], name: "index_report_events_on_tax_report_id"
+  end
+
+  create_table "report_workflows", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "description", null: false
+    t.string "key", null: false
+    t.string "name", null: false
+    t.integer "position", default: 1, null: false
+    t.bigint "tax_report_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tax_report_id", "key"], name: "index_report_workflows_on_tax_report_id_and_key", unique: true
+    t.index ["tax_report_id"], name: "index_report_workflows_on_tax_report_id"
+  end
+
   create_table "tax_brackets", force: :cascade do |t|
     t.decimal "base_max", precision: 12, scale: 2
     t.decimal "base_min", precision: 12, scale: 2
@@ -97,6 +126,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_16_000000) do
     t.index ["tax_rule_set_id"], name: "index_tax_regimes_on_tax_rule_set_id"
   end
 
+  create_table "tax_reports", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.bigint "country_id", null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.string "key", null: false
+    t.string "name", null: false
+    t.integer "tax_year", null: false
+    t.datetime "updated_at", null: false
+    t.index ["country_id", "tax_year", "key"], name: "index_tax_reports_on_country_id_and_tax_year_and_key", unique: true
+    t.index ["country_id"], name: "index_tax_reports_on_country_id"
+  end
+
   create_table "tax_rule_sets", force: :cascade do |t|
     t.boolean "active", default: true, null: false
     t.bigint "country_id", null: false
@@ -129,9 +171,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_16_000000) do
   end
 
   add_foreign_key "official_tax_sources", "countries"
+  add_foreign_key "report_events", "tax_reports"
+  add_foreign_key "report_workflows", "tax_reports"
   add_foreign_key "tax_brackets", "tax_regimes"
   add_foreign_key "tax_parameters", "tax_regimes"
   add_foreign_key "tax_regimes", "tax_rule_sets"
+  add_foreign_key "tax_reports", "countries"
   add_foreign_key "tax_rule_sets", "countries"
   add_foreign_key "tax_source_usages", "official_tax_sources"
   add_foreign_key "tax_source_usages", "tax_regimes"

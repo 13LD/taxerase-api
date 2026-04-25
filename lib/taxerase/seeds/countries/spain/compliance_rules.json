@@ -1,0 +1,276 @@
+{
+  "country_code": "ES",
+  "reports": [
+    {
+      "key": "modelo_130",
+      "name": "Modelo 130",
+      "tax_year": 2026,
+      "description": "IRPF quarterly payment on account for self-employed professionals under direct estimation.",
+      "workflows": [
+        {
+          "key": "quarterly_direct_estimation_payment",
+          "name": "Quarterly IRPF payment workflow",
+          "description": "Prepare the quarterly income and deductible expense figures, submit Modelo 130, and pay the installment by the quarterly deadline."
+        }
+      ],
+      "events": [
+        {
+          "key": "q1_submission",
+          "title": "Q1 2026 submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-04-20",
+          "window_start_date": "2026-04-01",
+          "window_end_date": "2026-04-20",
+          "description": "Submission window runs from 1 to 20 April for the first quarter."
+        },
+        {
+          "key": "q1_payment",
+          "title": "Q1 2026 payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-04-20",
+          "description": "Payment on account is due with the first-quarter filing."
+        },
+        {
+          "key": "q2_submission",
+          "title": "Q2 2026 submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-07-20",
+          "window_start_date": "2026-07-01",
+          "window_end_date": "2026-07-20",
+          "description": "Submission window runs from 1 to 20 July for the second quarter."
+        },
+        {
+          "key": "q2_payment",
+          "title": "Q2 2026 payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-07-20",
+          "description": "Payment on account is due with the second-quarter filing."
+        },
+        {
+          "key": "q3_submission",
+          "title": "Q3 2026 submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-10-20",
+          "window_start_date": "2026-10-01",
+          "window_end_date": "2026-10-20",
+          "description": "Submission window runs from 1 to 20 October for the third quarter."
+        },
+        {
+          "key": "q3_payment",
+          "title": "Q3 2026 payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-10-20",
+          "description": "Payment on account is due with the third-quarter filing."
+        },
+        {
+          "key": "q4_submission",
+          "title": "Q4 2026 submission deadline",
+          "event_type": "submission",
+          "event_date": "2027-01-30",
+          "window_start_date": "2027-01-01",
+          "window_end_date": "2027-01-30",
+          "description": "Submission window runs from 1 to 30 January of the following year for the fourth quarter."
+        },
+        {
+          "key": "q4_payment",
+          "title": "Q4 2026 payment deadline",
+          "event_type": "payment",
+          "event_date": "2027-01-30",
+          "description": "Payment on account is due with the fourth-quarter filing."
+        }
+      ]
+    },
+    {
+      "key": "modelo_303",
+      "name": "Modelo 303",
+      "tax_year": 2026,
+      "description": "Quarterly IVA self-assessment return for ordinary VAT filers.",
+      "workflows": [
+        {
+          "key": "quarterly_vat_return",
+          "name": "Quarterly IVA return workflow",
+          "description": "Reconcile output and input IVA, submit Modelo 303, and settle any payable VAT by the quarterly deadline."
+        }
+      ],
+      "events": [
+        {
+          "key": "q1_submission",
+          "title": "Q1 2026 submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-04-20",
+          "window_start_date": "2026-04-01",
+          "window_end_date": "2026-04-20",
+          "description": "Quarterly IVA return for Q1 is due by 20 April."
+        },
+        {
+          "key": "q1_payment",
+          "title": "Q1 2026 payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-04-20",
+          "description": "Any payable IVA for Q1 is due with the return."
+        },
+        {
+          "key": "q2_submission",
+          "title": "Q2 2026 submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-07-20",
+          "window_start_date": "2026-07-01",
+          "window_end_date": "2026-07-20",
+          "description": "Quarterly IVA return for Q2 is due by 20 July."
+        },
+        {
+          "key": "q2_payment",
+          "title": "Q2 2026 payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-07-20",
+          "description": "Any payable IVA for Q2 is due with the return."
+        },
+        {
+          "key": "q3_submission",
+          "title": "Q3 2026 submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-10-20",
+          "window_start_date": "2026-10-01",
+          "window_end_date": "2026-10-20",
+          "description": "Quarterly IVA return for Q3 is due by 20 October."
+        },
+        {
+          "key": "q3_payment",
+          "title": "Q3 2026 payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-10-20",
+          "description": "Any payable IVA for Q3 is due with the return."
+        },
+        {
+          "key": "q4_submission",
+          "title": "Q4 2026 submission deadline",
+          "event_type": "submission",
+          "event_date": "2027-01-30",
+          "window_start_date": "2027-01-01",
+          "window_end_date": "2027-01-30",
+          "description": "Quarterly IVA return for Q4 is due by 30 January of the following year."
+        },
+        {
+          "key": "q4_payment",
+          "title": "Q4 2026 payment deadline",
+          "event_type": "payment",
+          "event_date": "2027-01-30",
+          "description": "Any payable IVA for Q4 is due with the return."
+        }
+      ]
+    },
+    {
+      "key": "modelo_390",
+      "name": "Modelo 390",
+      "tax_year": 2026,
+      "description": "Annual IVA summary return, where required, submitted with the final VAT return window.",
+      "workflows": [
+        {
+          "key": "annual_vat_summary",
+          "name": "Annual IVA summary workflow",
+          "description": "Confirm whether the taxpayer is required to file Modelo 390, reconcile annual IVA totals, and submit during the January annual summary window."
+        }
+      ],
+      "events": [
+        {
+          "key": "annual_submission",
+          "title": "2026 annual summary submission deadline",
+          "event_type": "submission",
+          "event_date": "2027-01-30",
+          "window_start_date": "2027-01-01",
+          "window_end_date": "2027-01-30",
+          "description": "Annual IVA summary is submitted during the 1 to 30 January final VAT window where required."
+        }
+      ]
+    },
+    {
+      "key": "modelo_349",
+      "name": "Modelo 349",
+      "tax_year": 2026,
+      "description": "Recapitulative statement for intra-Community transactions.",
+      "workflows": [
+        {
+          "key": "intra_community_statement",
+          "name": "Intra-Community operations workflow",
+          "description": "Review ROI/intra-Community activity, determine monthly or quarterly filing frequency, and submit the recapitulative statement for the applicable period."
+        }
+      ],
+      "events": [
+        {
+          "key": "q1_submission",
+          "title": "Q1 2026 quarterly submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-04-20",
+          "window_start_date": "2026-04-01",
+          "window_end_date": "2026-04-20",
+          "description": "Quarterly Modelo 349 is due during the first 20 calendar days after the quarter."
+        },
+        {
+          "key": "q2_submission",
+          "title": "Q2 2026 quarterly submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-07-20",
+          "window_start_date": "2026-07-01",
+          "window_end_date": "2026-07-20",
+          "description": "Quarterly Modelo 349 is due during the first 20 calendar days after the quarter."
+        },
+        {
+          "key": "q3_submission",
+          "title": "Q3 2026 quarterly submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-10-20",
+          "window_start_date": "2026-10-01",
+          "window_end_date": "2026-10-20",
+          "description": "Quarterly Modelo 349 is due during the first 20 calendar days after the quarter."
+        },
+        {
+          "key": "q4_submission",
+          "title": "Q4 2026 quarterly submission deadline",
+          "event_type": "submission",
+          "event_date": "2027-01-30",
+          "window_start_date": "2027-01-01",
+          "window_end_date": "2027-01-30",
+          "description": "Fourth-quarter Modelo 349 is due during the first 30 calendar days of January."
+        }
+      ]
+    },
+    {
+      "key": "modelo_100",
+      "name": "Modelo 100",
+      "tax_year": 2026,
+      "description": "Annual IRPF Renta return for the 2025 income year, filed during the 2026 Renta campaign.",
+      "workflows": [
+        {
+          "key": "annual_renta_return",
+          "name": "Annual Renta return workflow",
+          "description": "Review taxpayer data, deductions, and family circumstances, submit Modelo 100 during the Renta campaign window, and choose single payment or the 60/40 split payment option when the return is payable."
+        }
+      ],
+      "events": [
+        {
+          "key": "annual_submission",
+          "title": "2025 Renta submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-06-30",
+          "window_start_date": "2026-04-08",
+          "window_end_date": "2026-06-30",
+          "description": "Modelo 100 for the 2025 IRPF campaign may be filed from 8 April to 30 June 2026."
+        },
+        {
+          "key": "single_or_first_split_payment",
+          "title": "Single payment or first split payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-06-30",
+          "description": "If the Renta result is payable, the single payment is due by the filing deadline. When using the special split option, 60% is paid when the declaration is submitted."
+        },
+        {
+          "key": "second_split_payment",
+          "title": "Second split payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-11-05",
+          "description": "When the special split payment option is selected, the remaining 40% is due by 5 November 2026."
+        }
+      ]
+    }
+  ]
+}

@@ -41,7 +41,7 @@ RSpec.describe "Tax workspace tabs", type: :system, js: true do
     expect(page).to have_current_path(/tab=calculator/, url: true)
   end
 
-  it "shows placeholder calendar, invoice, expenses, and reports workspaces from the sidebar" do
+  it "shows the report calendar and placeholder invoice, expenses, and reports workspaces from the sidebar" do
     visit root_path
 
     within(".calculator-tabs") do
@@ -50,7 +50,22 @@ RSpec.describe "Tax workspace tabs", type: :system, js: true do
 
     expect(page).to have_current_path(/tab=calendar/, url: true)
     expect(page).to have_css("#calendar-panel", visible: true)
-    expect(page).to have_text("Filing date tracking will live here.")
+    expect(page).to have_text("Modelo 130", wait: 20)
+    expect(page).to have_text("Modelo 100")
+    expect(page).to have_css(".report-calendar-period", count: 13)
+    expect(page).to have_css(".report-calendar-period__head", text: "Apr")
+    expect(page).to have_css(".report-calendar-period__head", text: "Nov")
+    expect(page).to have_css(".report-calendar-period__head", text: "Jan")
+    expect(page).to have_no_css(".report-calendar-period__head", text: "2025")
+    expect(page).to have_text("Apr 8 - Jun 30, 2026")
+    expect(page).to have_text("Nov 5, 2026")
+    expect(page).to have_text("Apr 1 - Apr 20, 2026")
+    expect(page).to have_text("Jan 1 - Jan 30, 2027")
+    expect(page).to have_text("Report submission", count: 1)
+    expect(page).to have_text("Tax payment", count: 1)
+    expect(find(".report-calendar-chart__item", text: "Modelo 130", match: :first)["title"]).to include(
+      "Submission window runs from 1 to 20 April"
+    )
 
     within(".calculator-tabs") do
       click_button "Invoice"
