@@ -52,9 +52,17 @@ module Taxerase
           name: report.name,
           tax_year: report.tax_year,
           description: report.description,
-          workflows: report.report_workflows.ordered.map { |workflow| workflow_payload(workflow) },
-          events: report.report_events.ordered.map { |event| event_payload(event) }
+          workflows: ordered_workflows(report).map { |workflow| workflow_payload(workflow) },
+          events: ordered_events(report).map { |event| event_payload(event) }
         }
+      end
+
+      def ordered_workflows(report)
+        report.report_workflows.sort_by { |workflow| [workflow.position, workflow.name] }
+      end
+
+      def ordered_events(report)
+        report.report_events.sort_by { |event| [event.event_date, event.position, event.title] }
       end
 
       def workflow_payload(workflow)
