@@ -159,8 +159,6 @@ module Taxerase
       end
 
       def self.advanced_input_has_effect?(key, value)
-        return true if value.blank?
-
         default = ADVANCED_INPUT_DEFAULTS.fetch(key, false)
         if [ true, false ].include?(default)
           ActiveModel::Type::Boolean.new.cast(value) != default

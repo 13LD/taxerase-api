@@ -453,6 +453,24 @@ RSpec.describe "Api::V1::Netherlands::SalaryCalculations", type: :request do
       )
     end
 
+    it "accepts explicit false advanced booleans for unsupported 2024 rules" do
+      post api_v1_netherlands_salary_calculation_path,
+        params: {
+          calculation: {
+            gross_income: 60_000,
+            deductible_expenses: 10_000,
+            tax_year: 2024,
+            salary_period: "YEAR",
+            tax_regime_key: "self_employed_netherlands",
+            age_bracket: "under_aow_age",
+            fiscal_partner: false
+          }
+        },
+        as: :json
+
+      expect(response).to have_http_status(:ok)
+    end
+
     it "returns validation errors for invalid input" do
       post api_v1_netherlands_salary_calculation_path,
         params: {
