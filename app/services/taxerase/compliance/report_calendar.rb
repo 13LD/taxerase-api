@@ -58,11 +58,11 @@ module Taxerase
       end
 
       def ordered_workflows(report)
-        report.report_workflows.sort_by { |workflow| [workflow.position, workflow.name] }
+        report.report_workflows.sort_by { |workflow| [ workflow.position, workflow.name ] }
       end
 
       def ordered_events(report)
-        report.report_events.sort_by { |event| [event.event_date, event.position, event.title] }
+        report.report_events.sort_by { |event| [ event.event_date, event.position, event.title ] }
       end
 
       def workflow_payload(workflow)
