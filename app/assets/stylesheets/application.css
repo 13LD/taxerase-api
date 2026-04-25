@@ -80,7 +80,7 @@ a {
   position: relative;
   overflow: hidden;
   border: 1px solid var(--line);
-  background: linear-gradient(180deg, var(--panel-strong), var(--panel-subtle));
+  background: linear-gradient(0deg, var(--panel-strong), var(--panel-subtle));
   box-shadow: var(--shadow);
   backdrop-filter: blur(24px) saturate(145%);
   -webkit-backdrop-filter: blur(24px) saturate(145%);
@@ -91,7 +91,7 @@ a {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), transparent 36%, transparent 76%, rgba(18, 116, 255, 0.08));
+  background: linear-gradient(315deg, rgba(255, 255, 255, 0.12), transparent 36%, transparent 76%, rgba(18, 116, 255, 0.08));
   pointer-events: none;
 }
 
@@ -966,7 +966,7 @@ a {
 .metric-card--primary {
   border-color: rgba(114, 170, 255, 0.32);
   background:
-    linear-gradient(145deg, rgba(18, 116, 255, 0.42), rgba(65, 149, 255, 0.18) 48%, rgba(255, 255, 255, 0.06)),
+    linear-gradient(325deg, rgba(18, 116, 255, 0.42), rgba(65, 149, 255, 0.18) 48%, rgba(255, 255, 255, 0.06)),
     var(--panel);
   box-shadow: 0 18px 44px rgba(18, 116, 255, 0.18);
 }
@@ -974,7 +974,7 @@ a {
 .metric-card--secondary {
   border-color: rgba(47, 201, 143, 0.32);
   background:
-    linear-gradient(145deg, rgba(47, 201, 143, 0.4), rgba(18, 160, 117, 0.18) 48%, rgba(255, 255, 255, 0.06)),
+    linear-gradient(325deg, rgba(47, 201, 143, 0.4), rgba(18, 160, 117, 0.18) 48%, rgba(255, 255, 255, 0.06)),
     var(--panel);
   box-shadow: 0 18px 44px rgba(47, 201, 143, 0.16);
 }
@@ -983,7 +983,7 @@ a {
   grid-column: 1 / -1;
   border-color: rgba(255, 107, 133, 0.34);
   background:
-    linear-gradient(145deg, rgba(255, 107, 133, 0.38), rgba(185, 43, 74, 0.2) 50%, rgba(255, 255, 255, 0.06)),
+    linear-gradient(325deg, rgba(255, 107, 133, 0.38), rgba(185, 43, 74, 0.2) 50%, rgba(255, 255, 255, 0.06)),
     var(--panel);
   box-shadow: 0 18px 44px rgba(255, 107, 133, 0.14);
 }
