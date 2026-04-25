@@ -12,6 +12,9 @@ module Taxerase
         spouse_general_income:,
         disabled_dependents_count:,
         mortgage_interest:,
+        home_acquisition_investment: 0,
+        affordable_rental_housing_investment: 0,
+        higher_education_tuition: 0,
         pension_contributions:,
         alimony_paid:
       )
@@ -23,6 +26,11 @@ module Taxerase
         errors << "spouse_without_income must be true or false" unless BOOLEAN_VALUES.include?(spouse_without_income)
         errors << "spouse_general_income must be 0 or greater" if parse_amount(spouse_general_income).negative?
         errors << "mortgage_interest must be 0 or greater" if parse_amount(mortgage_interest).negative?
+        errors << "home_acquisition_investment must be 0 or greater" if parse_amount(home_acquisition_investment).negative?
+        if parse_amount(affordable_rental_housing_investment).negative?
+          errors << "affordable_rental_housing_investment must be 0 or greater"
+        end
+        errors << "higher_education_tuition must be 0 or greater" if parse_amount(higher_education_tuition).negative?
         errors << "pension_contributions must be 0 or greater" if parse_amount(pension_contributions).negative?
         errors << "alimony_paid must be 0 or greater" if parse_amount(alimony_paid).negative?
         errors
@@ -38,6 +46,9 @@ module Taxerase
         spouse_general_income:,
         disabled_dependents_count:,
         mortgage_interest:,
+        home_acquisition_investment: 0,
+        affordable_rental_housing_investment: 0,
+        higher_education_tuition: 0,
         pension_contributions:,
         alimony_paid:,
         net_general_income:,
@@ -56,26 +67,47 @@ module Taxerase
 
         dependent_reduction = parse_count(children_count) * parameter_decimal.call("dependent_reduction")
         dependent_disability_uplift = parse_count(disabled_dependents_count) * parameter_decimal.call("family_member_disability_extra")
+        habitual_home_investment_reduction = [
+          home_investment_amount(mortgage_interest:, home_acquisition_investment:) *
+            parameter_decimal.call("habitual_home_investment_reduction_rate"),
+          parameter_decimal.call("habitual_home_investment_reduction_cap")
+        ].min
+        affordable_rental_housing_investment_reduction = [
+          parse_amount(affordable_rental_housing_investment) *
+            parameter_decimal.call("affordable_rental_housing_investment_reduction_rate"),
+          parameter_decimal.call("affordable_rental_housing_investment_reduction_cap")
+        ].min
+        higher_education_tuition_reduction = [
+          parse_amount(higher_education_tuition),
+          parameter_decimal.call("higher_education_tuition_reduction_cap")
+        ].min
         pension_reduction = [
           parse_amount(pension_contributions),
           parameter_decimal.call("pension_contribution_reduction_cap"),
           [ net_general_income, BigDecimal("0") ].max * parameter_decimal.call("pension_contribution_income_rate_cap")
         ].min
         alimony_reduction = parse_amount(alimony_paid)
-        mortgage_interest_credit = [
-          parse_amount(mortgage_interest) * parameter_decimal.call("mortgage_interest_credit_rate"),
-          parameter_decimal.call("mortgage_interest_credit_cap")
-        ].min
+        total_base_reductions =
+          taxpayer_reduction +
+          dependent_reduction +
+          dependent_disability_uplift +
+          habitual_home_investment_reduction +
+          affordable_rental_housing_investment_reduction +
+          higher_education_tuition_reduction +
+          pension_reduction +
+          alimony_reduction
 
         {
           taxpayer_reduction: taxpayer_reduction,
           spouse_phase_in_increment: spouse_phase_in_increment,
           dependent_reduction: dependent_reduction,
           dependent_disability_uplift: dependent_disability_uplift,
+          habitual_home_investment_reduction: habitual_home_investment_reduction,
+          affordable_rental_housing_investment_reduction: affordable_rental_housing_investment_reduction,
+          higher_education_tuition_reduction: higher_education_tuition_reduction,
           pension_reduction: pension_reduction,
           alimony_reduction: alimony_reduction,
-          total_base_reductions: taxpayer_reduction + dependent_reduction + dependent_disability_uplift + pension_reduction + alimony_reduction,
-          mortgage_interest_credit: mortgage_interest_credit
+          total_base_reductions: total_base_reductions
         }
       end
 
@@ -107,6 +139,13 @@ module Taxerase
 
       def self.parse_amount(value)
         BigDecimal(value.to_s.presence || "0")
+      end
+
+      def self.home_investment_amount(mortgage_interest:, home_acquisition_investment:)
+        parsed_home_acquisition_investment = parse_amount(home_acquisition_investment)
+        return parsed_home_acquisition_investment if parsed_home_acquisition_investment.positive?
+
+        parse_amount(mortgage_interest)
       end
 
       def self.boolean_value?(value)

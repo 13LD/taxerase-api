@@ -72,7 +72,7 @@ module Api
         end
 
         def render_validation_error(error)
-          render json: { errors: error.errors }, status: :unprocessable_content
+          render json: validation_error_payload(error), status: :unprocessable_content
         end
       end
     end

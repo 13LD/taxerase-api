@@ -26,9 +26,24 @@ function isControlActive(control, controlValues) {
   return false;
 }
 
-function serializeSignatureValue(value) {
+function normalizeNumericSignatureValue(value) {
+  if (value === null || value === undefined) return value;
+
+  const rawValue = String(value).trim();
+  if (rawValue === "") return value;
+
+  const numericValue = Number(rawValue);
+  return Number.isFinite(numericValue) ? numericValue : value;
+}
+
+function serializeSignatureValue(value, control) {
   if (value === true) return "1";
   if (value === false) return "0";
+
+  if (control.type === "currency" || control.type === "number") {
+    return String(normalizeNumericSignatureValue(value) ?? "");
+  }
+
   return value == null ? "" : String(value);
 }
 
@@ -87,7 +102,7 @@ export function buildSelectedControlSignatureParts({
     controlValues
   })
     .filter((control) => Boolean(control.resultInputKey))
-    .map((control) => serializeSignatureValue(controlValues[control.key]));
+    .map((control) => serializeSignatureValue(controlValues[control.key], control));
 }
 
 export function buildResultControlSignatureParts({ result, regimeControls, selectedCategory, controlValues }) {
@@ -97,5 +112,5 @@ export function buildResultControlSignatureParts({ result, regimeControls, selec
     controlValues
   })
     .filter((control) => Boolean(control.resultInputKey))
-    .map((control) => serializeSignatureValue(result?.input?.[control.resultInputKey]));
+    .map((control) => serializeSignatureValue(result?.input?.[control.resultInputKey], control));
 }

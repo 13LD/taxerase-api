@@ -33,6 +33,9 @@ module Taxerase
         spouse_without_income: false,
         spouse_general_income: 0,
         mortgage_interest: 0,
+        home_acquisition_investment: 0,
+        affordable_rental_housing_investment: 0,
+        higher_education_tuition: 0,
         pension_contributions: 0,
         alimony_paid: 0,
         self_employed_social_security_regime: "standard",
@@ -56,6 +59,9 @@ module Taxerase
           spouse_without_income: spouse_without_income,
           spouse_general_income: spouse_general_income,
           mortgage_interest: mortgage_interest,
+          home_acquisition_investment: home_acquisition_investment,
+          affordable_rental_housing_investment: affordable_rental_housing_investment,
+          higher_education_tuition: higher_education_tuition,
           pension_contributions: pension_contributions,
           alimony_paid: alimony_paid,
           self_employed_social_security_regime: self_employed_social_security_regime,
@@ -80,6 +86,9 @@ module Taxerase
         spouse_without_income:,
         spouse_general_income:,
         mortgage_interest:,
+        home_acquisition_investment:,
+        affordable_rental_housing_investment:,
+        higher_education_tuition:,
         pension_contributions:,
         alimony_paid:,
         self_employed_social_security_regime:,
@@ -102,6 +111,9 @@ module Taxerase
         @spouse_without_income = spouse_without_income
         @spouse_general_income = spouse_general_income
         @mortgage_interest = mortgage_interest
+        @home_acquisition_investment = home_acquisition_investment
+        @affordable_rental_housing_investment = affordable_rental_housing_investment
+        @higher_education_tuition = higher_education_tuition
         @pension_contributions = pension_contributions
         @alimony_paid = alimony_paid
         @self_employed_social_security_regime = self_employed_social_security_regime
@@ -130,7 +142,7 @@ module Taxerase
           base_income_tax * parameter_decimal("earned_income_bonus_rate"),
           parameter_decimal("earned_income_bonus_cap")
         ].min
-        annual_income_tax = [ base_income_tax - reductions[:mortgage_interest_credit] - earned_income_bonus, BigDecimal("0") ].max
+        annual_income_tax = [ base_income_tax - earned_income_bonus, BigDecimal("0") ].max
         total_tax = annual_social_security + annual_income_tax
         annual_net_income = annual_gross_income - annual_deductible_expenses - total_tax
 
@@ -151,13 +163,15 @@ module Taxerase
             spouse_phase_in_increment: round_currency(reductions[:spouse_phase_in_increment]),
             dependent_reduction: round_currency(reductions[:dependent_reduction]),
             dependent_disability_uplift: round_currency(reductions[:dependent_disability_uplift]),
+            habitual_home_investment_reduction: round_currency(reductions[:habitual_home_investment_reduction]),
+            affordable_rental_housing_investment_reduction: round_currency(reductions[:affordable_rental_housing_investment_reduction]),
+            higher_education_tuition_reduction: round_currency(reductions[:higher_education_tuition_reduction]),
             pension_contribution_reduction: round_currency(reductions[:pension_reduction]),
             alimony_reduction: round_currency(reductions[:alimony_reduction]),
             total_base_reductions: round_currency(reductions[:total_base_reductions]),
             taxable_income: round_currency(taxable_income),
             annual_income_tax_before_credits: round_currency(base_income_tax),
             earned_income_bonus: round_currency(earned_income_bonus),
-            mortgage_interest_credit: round_currency(reductions[:mortgage_interest_credit]),
             annual_income_tax: round_currency(annual_income_tax),
             total_tax: round_currency(total_tax),
             annual_net_income: round_currency(annual_net_income),
@@ -171,11 +185,13 @@ module Taxerase
             { label: "Monthly CASS contribution base", value: round_currency(contribution_base[:monthly_base]) },
             { label: "Spouse phase-in increment", value: round_currency(reductions[:spouse_phase_in_increment]) },
             { label: "Dependent disability uplift", value: round_currency(reductions[:dependent_disability_uplift]) },
+            { label: "Habitual-home investment base reduction", value: round_currency(reductions[:habitual_home_investment_reduction]) },
+            { label: "Affordable-rental housing investment base reduction", value: round_currency(reductions[:affordable_rental_housing_investment_reduction]) },
+            { label: "Higher-education tuition reduction", value: round_currency(reductions[:higher_education_tuition_reduction]) },
             { label: "Base reductions", value: round_currency(reductions[:total_base_reductions]) },
             { label: "Taxable activity income", value: round_currency(taxable_income) },
             { label: "Andorran IRPF before credits", value: round_currency(base_income_tax) },
             { label: "Earned-income bonus", value: round_currency(earned_income_bonus) },
-            { label: "Mortgage-interest credit", value: round_currency(reductions[:mortgage_interest_credit]) },
             { label: "Andorran IRPF", value: round_currency(annual_income_tax) },
             { label: "Total tax", value: round_currency(total_tax) },
             { label: "Housing rent support estimate (non-tax)", value: round_currency(housing_support[:annual_support_estimate]) }
@@ -190,6 +206,7 @@ module Taxerase
       attr_reader :gross_income, :salary_period, :tax_regime_key, :tax_year, :deductible_expenses,
         :children_count, :children_under_three_count, :disability_level, :ascendants_count, :disabled_dependents_count,
         :has_spouse_or_partner, :spouse_without_income, :spouse_general_income, :mortgage_interest,
+        :home_acquisition_investment, :affordable_rental_housing_investment, :higher_education_tuition,
         :pension_contributions, :alimony_paid, :self_employed_social_security_regime,
         :apply_housing_rent_support, :housing_support_priority_group, :housing_rent
 
@@ -225,6 +242,7 @@ module Taxerase
         base_assumptions = [
           "Andorra, tax year #{tax_year}.",
           "Self-employed income is treated as economic-activity income under IRPF with a flat 10% rate after supported reductions and credits.",
+          "Habitual-home, affordable-rental housing, and higher-education reductions are applied as tax-base reductions with the selected year's seeded caps.",
           supported_reductions_assumption(include_taxpayer_disability: false)
         ]
 

@@ -1,14 +1,7 @@
 module Taxerase
   module Spain2025
     class CalculationRouter
-      class UnsupportedRegimeError < StandardError
-        attr_reader :errors
-
-        def initialize(errors)
-          @errors = errors
-          super(errors.join(", "))
-        end
-      end
+      class UnsupportedRegimeError < Taxerase::UnsupportedRegimeError; end
 
       SUPPORTED_CATEGORIES = {
         "employee" => EmployeeSalaryCalculator,
@@ -20,7 +13,7 @@ module Taxerase
         regime = regime_for!(tax_regime_key.presence || default_regime_key)
         calculator = SUPPORTED_CATEGORIES[regime.category]
 
-        raise UnsupportedRegimeError.new([ unsupported_message_for(regime) ]) unless calculator
+        raise unsupported_regime_error_for(regime) unless calculator
 
         case regime.category
         when "employee"
@@ -28,7 +21,7 @@ module Taxerase
         when "self_employed"
           calculator.call(gross_income:, salary_period:, tax_regime_key: regime.key, deductible_expenses:)
         else
-          raise UnsupportedRegimeError.new([ unsupported_message_for(regime) ])
+          raise unsupported_regime_error_for(regime)
         end
       end
 
@@ -38,6 +31,7 @@ module Taxerase
 
       def self.regime_options
         TaxRegime
+          .includes(:official_tax_sources)
           .for_country_year(country:, tax_year: EmployeeSalaryCalculator::TAX_YEAR)
           .order(:category, :region, :name)
           .map do |regime|
@@ -48,7 +42,8 @@ module Taxerase
               category: regime.category,
               description: regime.description,
               supported: supported?(regime),
-              status: supported?(regime) ? "Live" : "Research"
+              status: supported?(regime) ? "Live" : "Research",
+              rule_statuses: supported?(regime) ? [] : unsupported_rule_statuses_for(regime)
             }
           end
       end
@@ -85,6 +80,24 @@ module Taxerase
           .find_by!(key: regime_key)
       rescue ActiveRecord::RecordNotFound
         raise UnsupportedRegimeError.new([ "#{regime_key} is not available for Spain 2025." ])
+      end
+
+      def self.unsupported_regime_error_for(regime)
+        UnsupportedRegimeError.new(
+          [ unsupported_message_for(regime) ],
+          rule_statuses: unsupported_rule_statuses_for(regime)
+        )
+      end
+
+      def self.unsupported_rule_statuses_for(regime)
+        [
+          Taxerase::RuleStatus.not_implemented(
+            rule_key: "#{regime.key}:#{EmployeeSalaryCalculator::TAX_YEAR}:calculator_flow",
+            label: "#{regime.name} calculator flow",
+            message: unsupported_message_for(regime),
+            source_keys: regime.official_tax_sources.map(&:key)
+          )
+        ]
       end
 
       def self.country

@@ -1,0 +1,289 @@
+{
+  "live_years": [
+    2025,
+    2026
+  ],
+  "regime_keys": [
+    "employee_poland",
+    "self_employed_poland"
+  ],
+  "pit_scale_brackets": [
+    [
+      120000,
+      0.12
+    ],
+    [
+      null,
+      0.32
+    ]
+  ],
+  "year_rules": {
+    "2025": {
+      "monthly_minimum_wage": 4666,
+      "monthly_standard_social_base": 5203.8,
+      "monthly_preferential_social_base": 1399.8,
+      "monthly_small_zus_plus_min_base": 1399.8,
+      "monthly_small_zus_plus_max_base": 5203.8,
+      "monthly_general_health_minimum": 314.96,
+      "monthly_lump_sum_health_base_low": 5129.51,
+      "monthly_lump_sum_health_base_mid": 8549.18,
+      "monthly_lump_sum_health_base_high": 15388.53
+    },
+    "2026": {
+      "monthly_minimum_wage": 4806,
+      "monthly_standard_social_base": 5652,
+      "monthly_preferential_social_base": 1441.8,
+      "monthly_small_zus_plus_min_base": 1441.8,
+      "monthly_small_zus_plus_max_base": 5652,
+      "monthly_general_health_minimum": 432.54,
+      "monthly_lump_sum_health_base_low": 5537.18,
+      "monthly_lump_sum_health_base_mid": 9228.64,
+      "monthly_lump_sum_health_base_high": 16611.55
+    }
+  },
+  "source_definitions": {
+    "pl_2025_pit_scale": {
+      "title": "Podatki.gov.pl: general tax scale settlement",
+      "authority_name": "Podatki.gov.pl",
+      "country_code": "PL",
+      "jurisdiction": "Poland",
+      "source_type": "guidance",
+      "tax_year": 2025,
+      "url": "https://www.podatki.gov.pl/podatki-firmowe/pit/informacje-podstawowe/co-jest-opodatkowane/rozliczenie-dochodow-opodatkowanych-skala-podatkowa/"
+    },
+    "pl_2025_pit_rates": {
+      "title": "Podatki.gov.pl: general tax scale settlement",
+      "authority_name": "Podatki.gov.pl",
+      "country_code": "PL",
+      "jurisdiction": "Poland",
+      "source_type": "guidance",
+      "tax_year": 2025,
+      "url": "https://www.podatki.gov.pl/podatki-firmowe/pit/informacje-podstawowe/co-jest-opodatkowane/rozliczenie-dochodow-opodatkowanych-skala-podatkowa/"
+    },
+    "pl_2025_flat_tax": {
+      "title": "Podatki.gov.pl: personal income tax rates",
+      "authority_name": "Podatki.gov.pl",
+      "country_code": "PL",
+      "jurisdiction": "Poland",
+      "source_type": "guidance",
+      "tax_year": 2025,
+      "url": "https://www.podatki.gov.pl/en/residents/personal-income-tax-rates/"
+    },
+    "pl_2025_lump_sum": {
+      "title": "Podatki.gov.pl: lump-sum taxation of recorded revenue",
+      "authority_name": "Podatki.gov.pl",
+      "country_code": "PL",
+      "jurisdiction": "Poland",
+      "source_type": "guidance",
+      "tax_year": 2025,
+      "url": "https://www.podatki.gov.pl/pit/abc-pit/ryczalt-od-przychodow-ewidencjonowanych/?altTemplate=ArticlePdf&download=True"
+    },
+    "pl_2025_employee_costs": {
+      "title": "Podatki.gov.pl: employee deductible costs",
+      "authority_name": "Podatki.gov.pl",
+      "country_code": "PL",
+      "jurisdiction": "Poland",
+      "source_type": "guidance",
+      "tax_year": 2025,
+      "url": "https://www.podatki.gov.pl/pit/koszty-uzyskania-przychodow/"
+    },
+    "pl_2025_child_relief": {
+      "title": "Podatki.gov.pl: child relief",
+      "authority_name": "Podatki.gov.pl",
+      "country_code": "PL",
+      "jurisdiction": "Poland",
+      "source_type": "guidance",
+      "tax_year": 2025,
+      "url": "https://www.podatki.gov.pl/ulgi-i-odliczenia/ulga-na-dziecko-pit/"
+    },
+    "pl_2025_relief_for_young": {
+      "title": "Podatki.gov.pl: relief for young people",
+      "authority_name": "Podatki.gov.pl",
+      "country_code": "PL",
+      "jurisdiction": "Poland",
+      "source_type": "guidance",
+      "tax_year": 2025,
+      "url": "https://www.podatki.gov.pl/ulgi/ulga-dla-mlodych-pit/"
+    },
+    "pl_2025_return_relief": {
+      "title": "Podatki.gov.pl: return relief",
+      "authority_name": "Podatki.gov.pl",
+      "country_code": "PL",
+      "jurisdiction": "Poland",
+      "source_type": "guidance",
+      "tax_year": 2025,
+      "url": "https://www.podatki.gov.pl/ulgi/ulga-na-powrot-pit/"
+    },
+    "pl_2025_family_4plus_relief": {
+      "title": "Podatki.gov.pl: family 4+ relief",
+      "authority_name": "Podatki.gov.pl",
+      "country_code": "PL",
+      "jurisdiction": "Poland",
+      "source_type": "guidance",
+      "tax_year": 2025,
+      "url": "https://www.podatki.gov.pl/ulgi/ulga-dla-rodzin-4plus-pit/"
+    },
+    "pl_2025_working_senior_relief": {
+      "title": "Podatki.gov.pl: working senior relief",
+      "authority_name": "Podatki.gov.pl",
+      "country_code": "PL",
+      "jurisdiction": "Poland",
+      "source_type": "guidance",
+      "tax_year": 2025,
+      "url": "https://www.podatki.gov.pl/ulgi/ulga-dla-pracujacych-seniorow-pit/"
+    },
+    "pl_2025_ppk": {
+      "title": "MojePPK.pl: basic employee and employer PPK contribution rates",
+      "authority_name": "MojePPK.pl",
+      "country_code": "PL",
+      "jurisdiction": "Poland",
+      "source_type": "guidance",
+      "tax_year": 2025,
+      "url": "https://www.mojeppk.pl/faq.html"
+    },
+    "pl_2025_zus_social": {
+      "title": "ZUS: social contribution amounts for entrepreneurs in 2025",
+      "authority_name": "ZUS",
+      "country_code": "PL",
+      "jurisdiction": "Poland",
+      "source_type": "guidance",
+      "tax_year": 2025,
+      "url": "https://www.zus.pl/en/-/nowe-wysoko%C5%9Bci-sk%C5%82adek-na-ubezpieczenia-spo%C5%82eczne-w-2025-r."
+    },
+    "pl_2025_zus_health_general": {
+      "title": "ZUS: changes in entrepreneur health contributions from 1 January 2025",
+      "authority_name": "ZUS",
+      "country_code": "PL",
+      "jurisdiction": "Poland",
+      "source_type": "guidance",
+      "tax_year": 2025,
+      "url": "https://www.zus.pl/-/zmiany-w-sk%C5%82adce-zdrowotnej-op%C5%82acanej-przez-przedsi%C4%99biorc%C3%B3w-od-1-stycznia-2025-r."
+    },
+    "pl_2025_zus_health_lump_sum": {
+      "title": "ZUS: health contribution thresholds for lump-sum entrepreneurs in 2025",
+      "authority_name": "ZUS",
+      "country_code": "PL",
+      "jurisdiction": "Poland",
+      "source_type": "guidance",
+      "tax_year": 2025,
+      "url": "https://www.zus.pl/en/-/informacja-w-sprawie-podstawy-wymiaru-sk%C5%82adki-oraz-kwoty-sk%C5%82adki-na-ubezpieczenie-zdrowotne-w-2025-r.-dla-niekt%C3%B3rych-grup-ubezpieczonych"
+    },
+    "pl_2026_pit_rates": {
+      "title": "Podatki.gov.pl: how to calculate PIT",
+      "authority_name": "Podatki.gov.pl",
+      "country_code": "PL",
+      "jurisdiction": "Poland",
+      "source_type": "guidance",
+      "tax_year": 2026,
+      "url": "https://www.podatki.gov.pl/pit/abc-pit/jak-obliczyc-podatek/"
+    },
+    "pl_2026_employee_costs": {
+      "title": "Podatki.gov.pl: employee deductible-cost amounts",
+      "authority_name": "Podatki.gov.pl",
+      "country_code": "PL",
+      "jurisdiction": "Poland",
+      "source_type": "guidance",
+      "tax_year": 2026,
+      "url": "https://www.podatki.gov.pl/twoj-e-pit/pytania-i-odpowiedzi/koszty-uzyskania-przychodow/71-ile-wynosza-koszty-uzyskania-przychodow-w-rozliczeniu-pit-za-2025-rok/"
+    },
+    "pl_2026_child_relief": {
+      "title": "Podatki.gov.pl: child relief",
+      "authority_name": "Podatki.gov.pl",
+      "country_code": "PL",
+      "jurisdiction": "Poland",
+      "source_type": "guidance",
+      "tax_year": 2026,
+      "url": "https://www.podatki.gov.pl/ulgi-i-odliczenia/ulga-na-dziecko-pit/"
+    },
+    "pl_2026_relief_for_young": {
+      "title": "Podatki.gov.pl: relief for young people",
+      "authority_name": "Podatki.gov.pl",
+      "country_code": "PL",
+      "jurisdiction": "Poland",
+      "source_type": "guidance",
+      "tax_year": 2026,
+      "url": "https://www.podatki.gov.pl/pit/osoba-nieprowadzaca-dzialalnosci-gospodarczej/mam-mniej-niz-26-lat/"
+    },
+    "pl_2026_return_relief": {
+      "title": "Podatki.gov.pl: return relief",
+      "authority_name": "Podatki.gov.pl",
+      "country_code": "PL",
+      "jurisdiction": "Poland",
+      "source_type": "guidance",
+      "tax_year": 2026,
+      "url": "https://www.podatki.gov.pl/ulgi/ulga-na-powrot-pit/"
+    },
+    "pl_2026_family_4plus_relief": {
+      "title": "Podatki.gov.pl: family 4+ relief declaration",
+      "authority_name": "Podatki.gov.pl",
+      "country_code": "PL",
+      "jurisdiction": "Poland",
+      "source_type": "guidance",
+      "tax_year": 2026,
+      "url": "https://www.podatki.gov.pl/podatki-osobiste/pit/wzor-oswiadczenia-ulga-dla-rodzin-4plus/"
+    },
+    "pl_2026_working_senior_relief": {
+      "title": "Podatki.gov.pl: working senior relief",
+      "authority_name": "Podatki.gov.pl",
+      "country_code": "PL",
+      "jurisdiction": "Poland",
+      "source_type": "guidance",
+      "tax_year": 2026,
+      "url": "https://www.podatki.gov.pl/ulgi/ulga-dla-pracujacych-seniorow-pit/"
+    },
+    "pl_2026_ppk": {
+      "title": "MojePPK.pl: basic employee and employer PPK contribution rates",
+      "authority_name": "MojePPK.pl",
+      "country_code": "PL",
+      "jurisdiction": "Poland",
+      "source_type": "guidance",
+      "tax_year": 2026,
+      "url": "https://www.mojeppk.pl/faq.html"
+    },
+    "pl_2026_zus_social_rates": {
+      "title": "ZUS: social-security contribution rates in Poland",
+      "authority_name": "ZUS",
+      "country_code": "PL",
+      "jurisdiction": "Poland",
+      "source_type": "guidance",
+      "tax_year": 2026,
+      "url": "https://www.zus.pl/documents/10182/167567/Zabezpieczenie%2Bspo%C5%82eczne%2Bw%2BPolsce.pdf/387eb8f7-0522-4f74-ace3-907cd6b1e80f?t=1706611640758"
+    },
+    "pl_2026_zus_health_general": {
+      "title": "ZUS: minimum entrepreneur health contribution in 2026",
+      "authority_name": "ZUS",
+      "country_code": "PL",
+      "jurisdiction": "Poland",
+      "source_type": "guidance",
+      "tax_year": 2026,
+      "url": "https://www.zus.pl/-/przedsi%C4%99biorcy-opodatkowani-na-zasadach-og%C3%B3lnych-lub-w-formie-karty-podatkowej.-minimalna-sk%C5%82adka-na-ubezpieczenie-zdrowotne-w-2026-r.?redirect=%2F"
+    },
+    "pl_2026_zus_health_lump_sum": {
+      "title": "ZUS: health contribution calculator for entrepreneurs",
+      "authority_name": "ZUS",
+      "country_code": "PL",
+      "jurisdiction": "Poland",
+      "source_type": "guidance",
+      "tax_year": 2026,
+      "url": "https://www.zus.pl/firmy/przedsiebiorco-przeczytaj-wazne/kalkulator-skladki-zdrowotnej"
+    },
+    "pl_2026_flat_tax": {
+      "title": "Podatki.gov.pl: personal income tax rates",
+      "authority_name": "Podatki.gov.pl",
+      "country_code": "PL",
+      "jurisdiction": "Poland",
+      "source_type": "guidance",
+      "tax_year": 2026,
+      "url": "https://www.podatki.gov.pl/en/residents/personal-income-tax-rates/"
+    },
+    "pl_2026_lump_sum": {
+      "title": "Podatki.gov.pl: lump-sum taxation of recorded revenue",
+      "authority_name": "Podatki.gov.pl",
+      "country_code": "PL",
+      "jurisdiction": "Poland",
+      "source_type": "guidance",
+      "tax_year": 2026,
+      "url": "https://www.podatki.gov.pl/pit/abc-pit/ryczalt-od-przychodow-ewidencjonowanych/?altTemplate=ArticlePdf&download=True"
+    }
+  }
+}

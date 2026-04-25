@@ -27,6 +27,11 @@ RSpec.describe "Spain calculator selectors", type: :system, js: true do
       expect(page).to have_text("Employee social security")
     end
 
+    within(".assumptions-card") do
+      expect(page).to have_text("Needs review")
+      expect(page).to have_text("No union dues, ascendants, joint filing")
+    end
+
     expect_metric_card("Annual net income", /€\d[\d,]*\.\d{2}/)
     expect_metric_card("Monthly net income", /€\d[\d,]*\.\d{2}/)
     expect_metric_card("Effective tax rate", /\d+\.\d{2}%/)

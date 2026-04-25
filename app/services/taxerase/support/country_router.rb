@@ -93,8 +93,27 @@ module Taxerase
           description: regime.description,
           supported: supported,
           status: supported ? "Live" : "Research",
+          rule_statuses: supported ? [] : unsupported_rule_statuses_for(regime),
           sources: regime.source_links
         }
+      end
+
+      def unsupported_regime_error_for(regime)
+        self::UnsupportedRegimeError.new(
+          [ unsupported_message_for(regime) ],
+          rule_statuses: unsupported_rule_statuses_for(regime)
+        )
+      end
+
+      def unsupported_rule_statuses_for(regime)
+        [
+          Taxerase::RuleStatus.not_implemented(
+            rule_key: "#{regime.key}:#{regime.tax_year}:calculator_flow",
+            label: "#{regime.name} calculator flow",
+            message: unsupported_message_for(regime),
+            source_keys: regime.official_tax_sources.map(&:key)
+          )
+        ]
       end
 
       def supported_method_keys

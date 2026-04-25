@@ -136,6 +136,26 @@ RSpec.describe "Pages", type: :request do
         .to include("employee_andorra", "self_employed_andorra")
     end
 
+    it "returns Andorra calculator props when local Andorra seed rows are stale" do
+      country = Country.find_by!(code: "AD")
+      regime = TaxRegime.for_country_year(country:, tax_year: 2026).find_by!(key: "employee_andorra")
+      TaxParameter.where(
+        tax_regime: regime,
+        key: %w[
+          habitual_home_investment_reduction_rate
+          habitual_home_investment_reduction_cap
+          affordable_rental_housing_investment_reduction_rate
+          affordable_rental_housing_investment_reduction_cap
+          higher_education_tuition_reduction_cap
+        ]
+      ).delete_all
+
+      get api_v1_country_calculator_path(country_code: "AD")
+
+      expect(response).to have_http_status(:ok)
+      expect(JSON.parse(response.body).dig("calculator_props", "country", "code")).to eq("AD")
+    end
+
     it "returns not found for an unknown country code" do
       get api_v1_country_calculator_path(country_code: "IT")
 
