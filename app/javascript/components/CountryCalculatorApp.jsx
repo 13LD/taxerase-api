@@ -1,6 +1,7 @@
 import React, { startTransition, useCallback, useEffect, useRef, useState } from "react";
 import CalculatorHomeTab from "./CalculatorHomeTab";
 import ComparisonTab from "./ComparisonTab";
+import ReportCalendarPanel from "./ReportCalendarPanel";
 import { requestCountryCalculator } from "./taxCalculator/api";
 
 const TAB_OPTIONS = [
@@ -47,12 +48,6 @@ const LEGACY_TAB_ALIASES = {
 };
 
 const PLACEHOLDER_PANELS = [
-  {
-    key: "calendar",
-    kicker: "Tax calendar",
-    title: "Calendar",
-    body: "Filing date tracking will live here."
-  },
   {
     key: "invoice",
     kicker: "Invoice",
@@ -260,6 +255,19 @@ export default function CountryCalculatorApp(initialProps = {}) {
           role="tabpanel"
         >
           <ComparisonTab calculatorProps={calculatorProps} enabled={activeTab === "comparison"} />
+        </div>
+
+        <div
+          aria-hidden={activeTab !== "calendar"}
+          className="tabbed-calculator-shell__panel"
+          hidden={activeTab !== "calendar"}
+          id="calendar-panel"
+          role="tabpanel"
+        >
+          <ReportCalendarPanel
+            active={activeTab === "calendar"}
+            countryCode={calculatorProps.country?.code}
+          />
         </div>
 
         {PLACEHOLDER_PANELS.map((panel) => (

@@ -8,7 +8,8 @@ module Taxerase
         NetherlandsTaxRules,
         PolandTaxRules,
         CzechRepublicTaxRules,
-        PortugalTaxRules
+        PortugalTaxRules,
+        ComplianceReports
       ].freeze
 
       def self.call
