@@ -2,6 +2,13 @@ function csrfToken() {
   return document.querySelector("meta[name='csrf-token']")?.getAttribute("content");
 }
 
+function normalizeBlankNumericValue(value) {
+  if (value === null || value === undefined) return 0;
+  if (String(value).trim() === "") return 0;
+
+  return value;
+}
+
 export function buildCalculationPayload({
   grossIncome,
   inputCurrencyCode,
@@ -17,9 +24,9 @@ export function buildCalculationPayload({
 }) {
   return {
     calculation: {
-      gross_income: grossIncome,
+      gross_income: normalizeBlankNumericValue(grossIncome),
       input_currency_code: inputCurrencyCode,
-      deductible_expenses: deductibleExpenses,
+      deductible_expenses: normalizeBlankNumericValue(deductibleExpenses),
       salary_period: salaryPeriod,
       tax_year: selectedTaxYear,
       tax_regime_key: selectedRegimeKey,
@@ -45,8 +52,8 @@ export function buildComparisonPayload({
 }) {
   return {
     comparison: {
-      deductible_expenses: deductibleExpenses,
-      gross_income: grossIncome,
+      deductible_expenses: normalizeBlankNumericValue(deductibleExpenses),
+      gross_income: normalizeBlankNumericValue(grossIncome),
       input_currency_code: inputCurrencyCode,
       left_country_code: leftCountryCode,
       left_tax_regime_key: leftTaxRegimeKey,

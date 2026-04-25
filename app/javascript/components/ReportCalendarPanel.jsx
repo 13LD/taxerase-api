@@ -17,7 +17,6 @@ const monthFormatter = new Intl.DateTimeFormat("en", {
 });
 
 const CALENDAR_MONTH_COUNT = 12;
-const MOBILE_CALENDAR_MEDIA_QUERY = "(max-width: 720px)";
 
 function parseDate(value) {
   return new Date(`${value}T00:00:00`);
@@ -62,10 +61,6 @@ function eventSortDate(event) {
   return event.window_start_date || event.event_date;
 }
 
-function isFutureSpilloverMonth(key, taxYear) {
-  return monthDateForKey(key) > monthDateForKey(`${taxYear}-12`);
-}
-
 function currentMonthKey() {
   const today = new Date();
 
@@ -82,6 +77,27 @@ function itemDateText(event) {
 
 function tooltipText(report, event) {
   return `${report.name}: ${event.description || event.title}`;
+}
+
+function calendarYearBounds(calendar, fallbackYear) {
+  return {
+    startYear: calendar?.start_year || fallbackYear,
+    endYear: calendar?.end_year || fallbackYear
+  };
+}
+
+function monthsForYearRange(startYear, endYear) {
+  const monthCount = ((endYear - startYear) + 1) * CALENDAR_MONTH_COUNT;
+
+  return new Map(
+    Array.from({ length: monthCount }, (_, index) => {
+      const year = startYear + Math.floor(index / CALENDAR_MONTH_COUNT);
+      const monthValue = String((index % CALENDAR_MONTH_COUNT) + 1).padStart(2, "0");
+      const month = monthForDate(`${year}-${monthValue}-01`);
+
+      return [ month.key, month ];
+    })
+  );
 }
 
 export default function ReportCalendarPanel({ active, countryCode, taxYear }) {
@@ -134,24 +150,20 @@ export default function ReportCalendarPanel({ active, countryCode, taxYear }) {
   }, [active, countryCode, year]);
 
   const reports = useMemo(() => calendar?.reports || [], [calendar]);
-  const chartMonths = useMemo(() => {
-    const taxYear = calendar?.tax_year || year;
-    const months = new Map(
-      Array.from({ length: CALENDAR_MONTH_COUNT }, (_, index) => {
-        const monthValue = String(index + 1).padStart(2, "0");
-        const month = monthForDate(`${taxYear}-${monthValue}-01`);
+  const workflowReports = useMemo(() => {
+    const workflowTaxYear = calendar?.tax_year || year;
 
-        return [ month.key, month ];
-      })
-    );
+    return reports.filter((report) => report.tax_year === workflowTaxYear);
+  }, [calendar?.tax_year, reports, year]);
+  const chartMonths = useMemo(() => {
+    const { startYear, endYear } = calendarYearBounds(calendar, year);
+    const months = monthsForYearRange(startYear, endYear);
 
     reports.forEach((report) => {
       report.events.forEach((event) => {
         const key = monthKeyForEvent(event);
 
         if (!months.has(key)) {
-          if (!isFutureSpilloverMonth(key, taxYear)) return;
-
           months.set(key, monthForDate(eventSortDate(event)));
         }
 
@@ -178,7 +190,7 @@ export default function ReportCalendarPanel({ active, countryCode, taxYear }) {
     });
 
     return calendarMonths;
-  }, [calendar?.tax_year, reports, year]);
+  }, [calendar, reports, year]);
   const focusedMonthKey = useMemo(() => {
     if (chartMonths.some((month) => month.key === browserCurrentMonthKey)) {
       return browserCurrentMonthKey;
@@ -189,7 +201,6 @@ export default function ReportCalendarPanel({ active, countryCode, taxYear }) {
 
   useEffect(() => {
     if (!active || status !== "success" || !focusedMonthKey) return;
-    if (!window.matchMedia(MOBILE_CALENDAR_MEDIA_QUERY).matches) return;
 
     window.requestAnimationFrame(() => {
       chartRef.current
@@ -245,7 +256,7 @@ export default function ReportCalendarPanel({ active, countryCode, taxYear }) {
                     <button
                       aria-label={tooltipText(report, event)}
                       className={`report-calendar-chart__item report-calendar-chart__item--${event.event_type}`}
-                      key={`${report.key}-${event.key}`}
+                      key={`${report.tax_year}-${report.key}-${event.key}`}
                       title={tooltipText(report, event)}
                       type="button"
                     >
@@ -273,8 +284,8 @@ export default function ReportCalendarPanel({ active, countryCode, taxYear }) {
           </div>
 
           <div className="report-calendar-workflows" aria-label="Report workflows">
-            {reports.map((report) => (
-              <details className="report-calendar-workflow" key={report.key}>
+            {workflowReports.map((report) => (
+              <details className="report-calendar-workflow" key={`${report.tax_year}-${report.key}`}>
                 <summary className="report-calendar-workflow__summary">
                   <span>
                     <span className="mini-label">{report.tax_year}</span>

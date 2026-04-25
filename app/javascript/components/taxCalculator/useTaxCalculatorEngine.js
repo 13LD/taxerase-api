@@ -115,18 +115,20 @@ export default function useTaxCalculatorEngine({
       buildVisibleRegimeControls({
         regimeControls,
         selectedCategory,
-        controlValues: regimeControlValues
+        controlValues: regimeControlValues,
+        selectedTaxYear
       }),
-    [regimeControlValues, regimeControls, selectedCategory]
+    [regimeControlValues, regimeControls, selectedCategory, selectedTaxYear]
   );
   const regimeControlEffects = useMemo(
     () =>
       resolveRegimeControlEffects({
         regimeControls,
         selectedCategory,
-        controlValues: regimeControlValues
+        controlValues: regimeControlValues,
+        selectedTaxYear
       }),
-    [regimeControlValues, regimeControls, selectedCategory]
+    [regimeControlValues, regimeControls, selectedCategory, selectedTaxYear]
   );
   const regimeCategoryOverride = regimeControlEffects.regimeCategoryOverride || null;
 
@@ -152,9 +154,10 @@ export default function useTaxCalculatorEngine({
       buildSelectedControlSignatureParts({
         regimeControls,
         selectedCategory,
-        controlValues: regimeControlValues
+        controlValues: regimeControlValues,
+        selectedTaxYear
       }),
-    [regimeControlValues, regimeControls, selectedCategory]
+    [regimeControlValues, regimeControls, selectedCategory, selectedTaxYear]
   );
 
   const selectedCalculationRequestSignature = useMemo(
@@ -215,9 +218,10 @@ export default function useTaxCalculatorEngine({
         result,
         regimeControls,
         selectedCategory,
-        controlValues: regimeControlValues
+        controlValues: regimeControlValues,
+        selectedTaxYear
       }),
-    [regimeControlValues, regimeControls, result, selectedCategory]
+    [regimeControlValues, regimeControls, result, selectedCategory, selectedTaxYear]
   );
   const resultCalculationSignature = useMemo(() => {
     const resultInputCurrencyCode = result?.input?.input_currency_code || countryCurrencyCode;
@@ -405,7 +409,9 @@ export default function useTaxCalculatorEngine({
           disabilityLevel,
           regimeControlPayload: buildRegimeControlPayload({
             regimeControls,
-            controlValues: regimeControlValues
+            selectedCategory,
+            controlValues: regimeControlValues,
+            selectedTaxYear
           })
         }),
         signal: abortController.signal
@@ -462,6 +468,7 @@ export default function useTaxCalculatorEngine({
     regimeControlValues,
     regimeControls,
     salaryPeriod,
+    selectedCategory,
     selectedInputCurrencyCode,
     selectedCalculationRequestSignature,
     selectedRegime,

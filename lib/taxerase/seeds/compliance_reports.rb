@@ -18,11 +18,70 @@ module Taxerase
 
       def seed_country_reports(data)
         country = Country.find_by!(code: data.fetch("country_code"))
-        live_report_ids = data.fetch("reports", []).map do |report_data|
-          seed_report(country, report_data)
+        live_report_ids = data.fetch("reports", []).flat_map do |report_data|
+          report_years(report_data).map do |tax_year|
+            seed_report(country, materialize_report_for_year(report_data, tax_year))
+          end
         end
 
         TaxReport.where(country:).where.not(id: live_report_ids).find_each(&:destroy!)
+      end
+
+      def report_years(report_data)
+        report_data.fetch("tax_years", [ report_data.fetch("tax_year") ])
+      end
+
+      def materialize_report_for_year(report_data, tax_year)
+        source_year = report_data.fetch("tax_year")
+        year_offset = tax_year - source_year
+        materialized_report = deep_copy(report_data)
+        materialized_report["tax_year"] = tax_year
+
+        shift_report_text!(materialized_report, year_offset)
+        shift_event_dates!(materialized_report, year_offset)
+        apply_workflow_reference_urls!(materialized_report, tax_year)
+
+        materialized_report
+      end
+
+      def deep_copy(value)
+        JSON.parse(JSON.generate(value))
+      end
+
+      def shift_report_text!(report_data, year_offset)
+        shift_years_in!(report_data, "description", year_offset)
+
+        report_data.fetch("events", []).each do |event|
+          shift_years_in!(event, "title", year_offset)
+          shift_years_in!(event, "description", year_offset)
+        end
+      end
+
+      def shift_event_dates!(report_data, year_offset)
+        report_data.fetch("events", []).each do |event|
+          %w[event_date window_start_date window_end_date].each do |date_key|
+            event[date_key] = shifted_date(event[date_key], year_offset) if event[date_key].present?
+          end
+        end
+      end
+
+      def shift_years_in!(data, key, year_offset)
+        return if year_offset.zero? || data[key].blank?
+
+        data[key] = data[key].gsub(/\b\d{4}\b/) { |year| (year.to_i + year_offset).to_s }
+      end
+
+      def shifted_date(value, year_offset)
+        (Date.iso8601(value) >> (year_offset * 12)).iso8601
+      end
+
+      def apply_workflow_reference_urls!(report_data, tax_year)
+        report_data.fetch("workflows", []).each do |workflow|
+          reference_urls_by_tax_year = workflow.delete("reference_urls_by_tax_year")
+          next if reference_urls_by_tax_year.blank?
+
+          workflow["reference_url"] = reference_urls_by_tax_year[tax_year.to_s]
+        end
       end
 
       def seed_report(country, report_data)

@@ -8,6 +8,9 @@ module Taxerase
       GENERAL_TAX_CREDIT_BANDS = year_keyed_hash(tax_rule_data.fetch("general_tax_credit_bands"), symbolize_values: true).freeze
       LABOUR_TAX_CREDIT_BANDS = year_keyed_hash(tax_rule_data.fetch("labour_tax_credit_bands"), symbolize_values: true).freeze
       SELF_EMPLOYED_RULES = year_keyed_hash(tax_rule_data.fetch("self_employed_rules"), symbolize_values: true).freeze
+      ADDITIONAL_TAX_CREDIT_RULES = year_keyed_hash(tax_rule_data.fetch("additional_tax_credit_rules"), symbolize_values: true).freeze
+      PERSONAL_DEDUCTION_RULES = year_keyed_hash(tax_rule_data.fetch("personal_deduction_rules"), symbolize_values: true).freeze
+      ENTREPRENEUR_RELIEF_RULES = year_keyed_hash(tax_rule_data.fetch("entrepreneur_relief_rules"), symbolize_values: true).freeze
       THIRTY_PERCENT_RULING_RULES = year_keyed_hash(tax_rule_data.fetch("thirty_percent_ruling_rules"), symbolize_values: true).freeze
       SOURCE_DEFINITIONS = source_definitions_from(tax_rule_data.fetch("source_definitions")).freeze
 
@@ -70,7 +73,8 @@ module Taxerase
           "thirty_percent_ruling_standard_threshold" => THIRTY_PERCENT_RULING_RULES.fetch(tax_year).fetch(:standard_threshold),
           "thirty_percent_ruling_under_30_master_threshold" => THIRTY_PERCENT_RULING_RULES.fetch(tax_year).fetch(:under_30_master_threshold),
           "thirty_percent_ruling_salary_cap" => THIRTY_PERCENT_RULING_RULES.fetch(tax_year).fetch(:salary_cap)
-        })
+        }.merge(year_parameters(ADDITIONAL_TAX_CREDIT_RULES, tax_year))
+          .merge(year_parameters(PERSONAL_DEDUCTION_RULES, tax_year)))
         replace_brackets!(regime, "box_1_under_aow", BOX_1_RATES.fetch(tax_year).fetch(:under_aow))
         replace_brackets!(regime, "box_1_aow", BOX_1_RATES.fetch(tax_year).fetch(:aow))
         replace_formula_brackets!(regime, "general_tax_credit_under_aow", GENERAL_TAX_CREDIT_BANDS.fetch(tax_year).fetch(:under_aow))
@@ -100,7 +104,9 @@ module Taxerase
             "sme_profit_exemption_rate" => SELF_EMPLOYED_RULES.fetch(tax_year).fetch(:sme_profit_exemption_rate),
             "zvw_self_assessed_rate" => SELF_EMPLOYED_RULES.fetch(tax_year).fetch(:zvw_self_assessed_rate),
             "zvw_max_contribution_income" => SELF_EMPLOYED_RULES.fetch(tax_year).fetch(:zvw_max_contribution_income)
-          }
+          }.merge(year_parameters(ADDITIONAL_TAX_CREDIT_RULES, tax_year))
+            .merge(year_parameters(PERSONAL_DEDUCTION_RULES, tax_year))
+            .merge(year_parameters(ENTREPRENEUR_RELIEF_RULES, tax_year))
         )
         replace_brackets!(regime, "box_1_under_aow", BOX_1_RATES.fetch(tax_year).fetch(:under_aow))
         replace_brackets!(regime, "box_1_aow", BOX_1_RATES.fetch(tax_year).fetch(:aow))
@@ -159,6 +165,10 @@ module Taxerase
         else
           raise ArgumentError, "Unsupported Netherlands self-employed source year #{tax_year}"
         end
+      end
+
+      def year_parameters(rule_set, tax_year)
+        rule_set.fetch(tax_year, {}).transform_keys(&:to_s)
       end
     end
   end

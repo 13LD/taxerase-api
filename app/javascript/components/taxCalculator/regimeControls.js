@@ -12,9 +12,9 @@ function defaultValueForControl(control) {
   return "";
 }
 
-function isControlVisible(control, selectedCategory, controlValues) {
+function isControlVisible(control, selectedCategory, controlValues, selectedTaxYear) {
   if (control.categories && !control.categories.includes(selectedCategory)) return false;
-  if (control.visibleWhen && !control.visibleWhen(controlValues, selectedCategory)) return false;
+  if (control.visibleWhen && !control.visibleWhen(controlValues, selectedCategory, selectedTaxYear)) return false;
 
   return true;
 }
@@ -27,10 +27,10 @@ function isControlActive(control, controlValues) {
 }
 
 function normalizeNumericSignatureValue(value) {
-  if (value === null || value === undefined) return value;
+  if (value === null || value === undefined) return 0;
 
   const rawValue = String(value).trim();
-  if (rawValue === "") return value;
+  if (rawValue === "") return 0;
 
   const numericValue = Number(rawValue);
   return Number.isFinite(numericValue) ? numericValue : value;
@@ -47,6 +47,12 @@ function serializeSignatureValue(value, control) {
   return value == null ? "" : String(value);
 }
 
+function normalizePayloadValue(value, control) {
+  if (control.type !== "currency" && control.type !== "number") return value;
+
+  return normalizeNumericSignatureValue(value);
+}
+
 export function buildInitialRegimeControlValues({ defaultInput, regimeControls }) {
   return flattenControls(regimeControls).reduce((values, control) => {
     values[control.key] = defaultInput[control.key] ?? control.defaultValue ?? defaultValueForControl(control);
@@ -54,26 +60,38 @@ export function buildInitialRegimeControlValues({ defaultInput, regimeControls }
   }, {});
 }
 
-export function buildVisibleRegimeControls({ regimeControls, selectedCategory, controlValues }) {
+export function buildVisibleRegimeControls({
+  regimeControls,
+  selectedCategory,
+  controlValues,
+  selectedTaxYear
+}) {
   return regimeControls.flatMap((control) => {
-    if (!isControlVisible(control, selectedCategory, controlValues)) return [];
+    if (!isControlVisible(control, selectedCategory, controlValues, selectedTaxYear)) return [];
 
     return [
       control,
       ...buildVisibleRegimeControls({
         regimeControls: control.children || [],
         selectedCategory,
-        controlValues
+        controlValues,
+        selectedTaxYear
       })
     ];
   });
 }
 
-export function resolveRegimeControlEffects({ regimeControls, selectedCategory, controlValues }) {
+export function resolveRegimeControlEffects({
+  regimeControls,
+  selectedCategory,
+  controlValues,
+  selectedTaxYear
+}) {
   return buildVisibleRegimeControls({
     regimeControls,
     selectedCategory,
-    controlValues
+    controlValues,
+    selectedTaxYear
   }).reduce((effects, control) => {
     if (!isControlActive(control, controlValues) || !control.effects) return effects;
 
@@ -84,9 +102,19 @@ export function resolveRegimeControlEffects({ regimeControls, selectedCategory, 
   }, {});
 }
 
-export function buildRegimeControlPayload({ regimeControls, controlValues }) {
-  return flattenControls(regimeControls).reduce((payload, control) => {
-    payload[control.key] = controlValues[control.key];
+export function buildRegimeControlPayload({
+  regimeControls,
+  selectedCategory,
+  controlValues,
+  selectedTaxYear
+}) {
+  return buildVisibleRegimeControls({
+    regimeControls,
+    selectedCategory,
+    controlValues,
+    selectedTaxYear
+  }).reduce((payload, control) => {
+    payload[control.key] = normalizePayloadValue(controlValues[control.key], control);
     return payload;
   }, {});
 }
@@ -94,22 +122,31 @@ export function buildRegimeControlPayload({ regimeControls, controlValues }) {
 export function buildSelectedControlSignatureParts({
   regimeControls,
   selectedCategory,
-  controlValues
+  controlValues,
+  selectedTaxYear
 }) {
   return buildVisibleRegimeControls({
     regimeControls,
     selectedCategory,
-    controlValues
+    controlValues,
+    selectedTaxYear
   })
     .filter((control) => Boolean(control.resultInputKey))
     .map((control) => serializeSignatureValue(controlValues[control.key], control));
 }
 
-export function buildResultControlSignatureParts({ result, regimeControls, selectedCategory, controlValues }) {
+export function buildResultControlSignatureParts({
+  result,
+  regimeControls,
+  selectedCategory,
+  controlValues,
+  selectedTaxYear
+}) {
   return buildVisibleRegimeControls({
     regimeControls,
     selectedCategory,
-    controlValues
+    controlValues,
+    selectedTaxYear
   })
     .filter((control) => Boolean(control.resultInputKey))
     .map((control) => serializeSignatureValue(result?.input?.[control.resultInputKey], control));
