@@ -1,77 +1,11 @@
 module Taxerase
   module Seeds
     class CzechRepublicTaxRules < BaseCountryTaxRules
-      LIVE_YEARS = [ 2025 ].freeze
-      REGIME_KEYS = %w[employee_czech_republic self_employed_czech_republic].freeze
-      INCOME_TAX_BRACKETS = [
-        [ 1_676_052, 0.15 ],
-        [ nil, 0.23 ]
-      ].freeze
-      SOURCE_DEFINITIONS = {
-        "cz_2025_income_tax" => {
-          title: "Finanční správa: personal income tax updates for 2025",
-          authority_name: "Finanční správa",
-          country_code: "CZ",
-          jurisdiction: "Czech Republic",
-          source_type: "guidance",
-          tax_year: 2025,
-          url: "https://financnisprava.gov.cz/cs/dane/dane/dan-z-prijmu/dotazy-a-odpovedi/dan-z-prijmu-fyzickych-osob/aktualne-k-dani-z-prijmu-fyzickych-osob-2025"
-        },
-        "cz_2025_entrepreneur_tax" => {
-          title: "Finanční správa: entrepreneur (OSVČ) tax page",
-          authority_name: "Finanční správa",
-          country_code: "CZ",
-          jurisdiction: "Czech Republic",
-          source_type: "guidance",
-          tax_year: 2025,
-          url: "https://financnisprava.gov.cz/cs/dane/dane/dan-z-prijmu/fyzicke-osoby/podnikatel-osvc"
-        },
-        "cz_2025_social_insurance" => {
-          title: "MPSV: social insurance in 2025",
-          authority_name: "MPSV",
-          country_code: "CZ",
-          jurisdiction: "Czech Republic",
-          source_type: "guidance",
-          tax_year: 2025,
-          url: "https://mpsv.gov.cz/socialni-pojisteni-v-roce-2025"
-        },
-        "cz_2025_osvc_social" => {
-          title: "ČSSZ: OSVČ pension insurance advances",
-          authority_name: "ČSSZ",
-          country_code: "CZ",
-          jurisdiction: "Czech Republic",
-          source_type: "guidance",
-          tax_year: 2025,
-          url: "https://www.cssz.cz/web/cz/zalohy-na-pojistne-na-duchodove-pojisteni"
-        },
-        "cz_2025_employee_health" => {
-          title: "VZP: employer health insurance calculation",
-          authority_name: "VZP",
-          country_code: "CZ",
-          jurisdiction: "Czech Republic",
-          source_type: "guidance",
-          tax_year: 2025,
-          url: "https://www.vzp.cz/platci/informace/zamestnavatel/vymerovaci-zaklad-a-vypocet-pojistneho"
-        },
-        "cz_2025_osvc_health_base" => {
-          title: "VZP: OSVČ assessment base and contribution calculation",
-          authority_name: "VZP",
-          country_code: "CZ",
-          jurisdiction: "Czech Republic",
-          source_type: "guidance",
-          tax_year: 2025,
-          url: "https://www.vzp.cz/platci/informace/osvc/vymerovaci-zaklad-a-vypocet-pojistneho"
-        },
-        "cz_2025_osvc_health_advance" => {
-          title: "VZP: OSVČ health advances",
-          authority_name: "VZP",
-          country_code: "CZ",
-          jurisdiction: "Czech Republic",
-          source_type: "guidance",
-          tax_year: 2025,
-          url: "https://www.vzp.cz/platci/informace/osvc/zalohy-na-pojistne/vypocet-zaloh-na-pojistne"
-        }
-      }.freeze
+      tax_rule_data = load_country_tax_data("czech_republic")
+      LIVE_YEARS = tax_rule_data.fetch("live_years").freeze
+      REGIME_KEYS = tax_rule_data.fetch("regime_keys").freeze
+      INCOME_TAX_BRACKETS = tax_rule_data.fetch("income_tax_brackets").freeze
+      SOURCE_DEFINITIONS = source_definitions_from(tax_rule_data.fetch("source_definitions")).freeze
 
       def country_code
         "CZ"

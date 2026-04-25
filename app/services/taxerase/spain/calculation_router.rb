@@ -3,14 +3,7 @@ module Taxerase
     class CalculationRouter
       extend Taxerase::Support::CountryRouter
 
-      class UnsupportedRegimeError < StandardError
-        attr_reader :errors
-
-        def initialize(errors)
-          @errors = errors
-          super(errors.join(", "))
-        end
-      end
+      class UnsupportedRegimeError < Taxerase::UnsupportedRegimeError; end
 
       SUPPORTED_METHODS = {
         CommonRegimeEmployeeCalculator::CALCULATION_METHOD => CommonRegimeEmployeeCalculator,
@@ -42,7 +35,7 @@ module Taxerase
         regime = regime_for!(tax_regime_key.presence || default_regime_key(tax_year), tax_year)
         calculator = SUPPORTED_METHODS[regime.parameter_text("calculation_method")]
 
-        raise UnsupportedRegimeError.new([ unsupported_message_for(regime) ]) unless calculator
+        raise unsupported_regime_error_for(regime) unless calculator
 
         result = if calculator == CommonRegimeSelfEmployedCalculator
           calculator.call(

@@ -3,14 +3,7 @@ module Taxerase
     class CalculationRouter
       extend Taxerase::Support::CountryRouter
 
-      class UnsupportedRegimeError < StandardError
-        attr_reader :errors
-
-        def initialize(errors)
-          @errors = errors
-          super(errors.join(", "))
-        end
-      end
+      class UnsupportedRegimeError < Taxerase::UnsupportedRegimeError; end
 
       COUNTRY_CODE = "AD".freeze
       NATIVE_CURRENCY_CODE = "EUR".freeze
@@ -37,6 +30,9 @@ module Taxerase
         spouse_without_income: false,
         spouse_general_income: 0,
         mortgage_interest: 0,
+        home_acquisition_investment: 0,
+        affordable_rental_housing_investment: 0,
+        higher_education_tuition: 0,
         pension_contributions: 0,
         alimony_paid: 0,
         self_employed_social_security_regime: "standard",
@@ -50,6 +46,9 @@ module Taxerase
         normalized_deductible_expenses = input_currency_handler.convert_amount(deductible_expenses, input_currency_code: resolved_input_currency_code)
         normalized_spouse_general_income = input_currency_handler.convert_amount(spouse_general_income, input_currency_code: resolved_input_currency_code)
         normalized_mortgage_interest = input_currency_handler.convert_amount(mortgage_interest, input_currency_code: resolved_input_currency_code)
+        normalized_home_acquisition_investment = input_currency_handler.convert_amount(home_acquisition_investment, input_currency_code: resolved_input_currency_code)
+        normalized_affordable_rental_housing_investment = input_currency_handler.convert_amount(affordable_rental_housing_investment, input_currency_code: resolved_input_currency_code)
+        normalized_higher_education_tuition = input_currency_handler.convert_amount(higher_education_tuition, input_currency_code: resolved_input_currency_code)
         normalized_pension_contributions = input_currency_handler.convert_amount(pension_contributions, input_currency_code: resolved_input_currency_code)
         normalized_alimony_paid = input_currency_handler.convert_amount(alimony_paid, input_currency_code: resolved_input_currency_code)
         normalized_housing_rent = input_currency_handler.convert_amount(housing_rent, input_currency_code: resolved_input_currency_code)
@@ -58,7 +57,7 @@ module Taxerase
         raise UnsupportedRegimeError.new([ "#{tax_regime_key} is not available for Andorra #{tax_year}." ]) if regime.nil?
 
         calculator = SUPPORTED_METHODS[regime.parameter_text("calculation_method")]
-        raise UnsupportedRegimeError.new([ unsupported_message_for(regime) ]) if calculator.nil?
+        raise unsupported_regime_error_for(regime) if calculator.nil?
 
         kwargs = {
           gross_income: normalized_gross_income,
@@ -74,6 +73,9 @@ module Taxerase
           spouse_without_income: spouse_without_income,
           spouse_general_income: normalized_spouse_general_income,
           mortgage_interest: normalized_mortgage_interest,
+          home_acquisition_investment: normalized_home_acquisition_investment,
+          affordable_rental_housing_investment: normalized_affordable_rental_housing_investment,
+          higher_education_tuition: normalized_higher_education_tuition,
           pension_contributions: normalized_pension_contributions,
           alimony_paid: normalized_alimony_paid,
           self_employed_social_security_regime: self_employed_social_security_regime.presence || "standard",

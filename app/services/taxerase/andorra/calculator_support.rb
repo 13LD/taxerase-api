@@ -5,6 +5,9 @@ module Taxerase
       ZERO_VALUE_DETAIL_CARD_LABELS = [
         "Spouse phase-in increment",
         "Dependent disability uplift",
+        "Habitual-home investment base reduction",
+        "Affordable-rental housing investment base reduction",
+        "Higher-education tuition reduction",
         "Housing rent support estimate (non-tax)"
       ].freeze
       HOUSING_SUPPORT_ASSUMPTION = "Housing rent support is shown as a separate sourced estimate outside IRPF and CASS totals. Use it only when the selected-year housing-support conditions are met.".freeze
@@ -28,6 +31,9 @@ module Taxerase
           spouse_general_income: spouse_general_income,
           disabled_dependents_count: parsed_disabled_dependents_count,
           mortgage_interest: mortgage_interest,
+          home_acquisition_investment: home_acquisition_investment,
+          affordable_rental_housing_investment: affordable_rental_housing_investment,
+          higher_education_tuition: higher_education_tuition,
           pension_contributions: pension_contributions,
           alimony_paid: alimony_paid
         ))
@@ -69,6 +75,9 @@ module Taxerase
           spouse_without_income: spouse_without_income?,
           spouse_general_income: round_currency(parsed_spouse_general_income),
           mortgage_interest: round_currency(parsed_mortgage_interest),
+          home_acquisition_investment: round_currency(parsed_home_acquisition_investment),
+          affordable_rental_housing_investment: round_currency(parsed_affordable_rental_housing_investment),
+          higher_education_tuition: round_currency(parsed_higher_education_tuition),
           pension_contributions: round_currency(parsed_pension_contributions),
           alimony_paid: round_currency(parsed_alimony_paid),
           apply_housing_rent_support: apply_housing_rent_support?,
@@ -91,6 +100,9 @@ module Taxerase
             spouse_general_income: spouse_general_income,
             disabled_dependents_count: parsed_disabled_dependents_count,
             mortgage_interest: mortgage_interest,
+            home_acquisition_investment: home_acquisition_investment,
+            affordable_rental_housing_investment: affordable_rental_housing_investment,
+            higher_education_tuition: higher_education_tuition,
             pension_contributions: pension_contributions,
             alimony_paid: alimony_paid,
             net_general_income: net_general_income,
@@ -134,6 +146,18 @@ module Taxerase
 
       def parsed_mortgage_interest
         @parsed_mortgage_interest ||= TaxRelief.parse_amount(mortgage_interest)
+      end
+
+      def parsed_home_acquisition_investment
+        @parsed_home_acquisition_investment ||= TaxRelief.parse_amount(home_acquisition_investment)
+      end
+
+      def parsed_affordable_rental_housing_investment
+        @parsed_affordable_rental_housing_investment ||= TaxRelief.parse_amount(affordable_rental_housing_investment)
+      end
+
+      def parsed_higher_education_tuition
+        @parsed_higher_education_tuition ||= TaxRelief.parse_amount(higher_education_tuition)
       end
 
       def parsed_spouse_general_income
@@ -182,9 +206,36 @@ module Taxerase
 
       def parameter_decimal(key)
         value = regime.tax_parameters.find { |parameter| parameter.key == key }&.value_decimal
-        raise KeyError, "Missing tax parameter #{key} for #{regime.key}" if value.nil?
+        return value.to_d if value.present?
 
-        value.to_d
+        seeded_default_parameter_decimal(key)
+      end
+
+      def seeded_default_parameter_decimal(key)
+        values =
+          if tax_year.to_i >= 2025
+            {
+              "dependent_reduction" => BigDecimal("1000"),
+              "family_member_disability_extra" => BigDecimal("500"),
+              "habitual_home_investment_reduction_rate" => BigDecimal("0.50"),
+              "habitual_home_investment_reduction_cap" => BigDecimal("5000"),
+              "affordable_rental_housing_investment_reduction_rate" => BigDecimal("0.50"),
+              "affordable_rental_housing_investment_reduction_cap" => BigDecimal("5000"),
+              "higher_education_tuition_reduction_cap" => BigDecimal("300")
+            }
+          else
+            {
+              "dependent_reduction" => BigDecimal("750"),
+              "family_member_disability_extra" => BigDecimal("375"),
+              "habitual_home_investment_reduction_rate" => BigDecimal("0.25"),
+              "habitual_home_investment_reduction_cap" => BigDecimal("1000"),
+              "affordable_rental_housing_investment_reduction_rate" => BigDecimal("0"),
+              "affordable_rental_housing_investment_reduction_cap" => BigDecimal("0"),
+              "higher_education_tuition_reduction_cap" => BigDecimal("0")
+            }
+          end
+
+        values.fetch(key) { raise KeyError, "Missing tax parameter #{key} for #{regime.key}" }
       end
 
       def round_currency(amount)
@@ -201,9 +252,11 @@ module Taxerase
           "spouse or partner no-income or partial-income personal-minimum phase-in",
           "dependents",
           "dependent disability uplift",
+          "habitual-home investment base reduction",
+          "affordable-rental housing investment base reduction",
+          "higher-education tuition reduction",
           "pension contributions",
-          "alimony paid",
-          "habitual-home mortgage credit"
+          "alimony paid"
         ].compact.join(", ")
 
         "Supported reductions in this calculator: #{reduction_labels}."

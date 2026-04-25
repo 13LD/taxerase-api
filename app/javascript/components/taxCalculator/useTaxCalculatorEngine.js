@@ -12,6 +12,7 @@ import {
   buildDetailCards,
   buildDisplayedSources,
   buildHeadlineMetrics,
+  buildRuleStatusItems,
   pendingOutputValue
 } from "./display";
 import { buildCountOptions, buildProfileOptions } from "./options";
@@ -298,6 +299,16 @@ export default function useTaxCalculatorEngine({
       }),
     [isSupportedRegime, result, resultMatchesSelection, selectedRegime]
   );
+  const ruleStatusItems = useMemo(
+    () =>
+      buildRuleStatusItems({
+        isSupportedRegime,
+        result,
+        resultMatchesSelection,
+        selectedRegime
+      }),
+    [isSupportedRegime, result, resultMatchesSelection, selectedRegime]
+  );
   const childrenCountOptions = useMemo(() => buildCountOptions(6), []);
   const childrenUnderThreeOptions = useMemo(
     () => buildCountOptions(childrenCountNumber),
@@ -512,8 +523,8 @@ export default function useTaxCalculatorEngine({
   return {
     assumptionItems,
     detailCards,
-      displayStatus,
-      displayedSources,
+    displayStatus,
+    displayedSources,
     formProps: {
       ageBracket,
       childrenCount,
@@ -573,6 +584,7 @@ export default function useTaxCalculatorEngine({
       taxYearOptions
     },
     headlineMetrics,
+    ruleStatusItems,
     selectedRegime,
     selectedTaxYear
   };

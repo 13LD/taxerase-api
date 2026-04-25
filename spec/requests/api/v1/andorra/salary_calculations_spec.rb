@@ -98,6 +98,45 @@ RSpec.describe "Api::V1::Andorra::SalaryCalculations", type: :request do
       expect(json.dig("assumptions").join(" ")).to include("outside IRPF and CASS totals")
     end
 
+    it "applies 2025 housing and education IRPF reductions before tax" do
+      post api_v1_andorra_salary_calculation_path,
+        params: {
+          calculation: {
+            gross_income: 80_000,
+            tax_year: 2025,
+            salary_period: "YEAR",
+            tax_regime_key: "employee_andorra",
+            children_count: 1,
+            disabled_dependents_count: 1,
+            home_acquisition_investment: 12_000,
+            affordable_rental_housing_investment: 20_000,
+            higher_education_tuition: 450
+          }
+        },
+        as: :json
+
+      expect(response).to have_http_status(:ok)
+
+      json = JSON.parse(response.body)
+
+      expect(json.dig("breakdown", "dependent_reduction")).to eq(1_000.0)
+      expect(json.dig("breakdown", "dependent_disability_uplift")).to eq(500.0)
+      expect(json.dig("breakdown", "habitual_home_investment_reduction")).to eq(5_000.0)
+      expect(json.dig("breakdown", "affordable_rental_housing_investment_reduction")).to eq(5_000.0)
+      expect(json.dig("breakdown", "higher_education_tuition_reduction")).to eq(300.0)
+      expect(json.dig("detail_cards").map { |card| card["label"] }).to include(
+        "Habitual-home investment base reduction",
+        "Affordable-rental housing investment base reduction",
+        "Higher-education tuition reduction"
+      )
+      expect(json["sources"].map { |source| source["usage_type"] }).to include(
+        "housing_family_reductions",
+        "filing",
+        "filing_catalogue",
+        "indirect_tax"
+      )
+    end
+
     it "returns a self-employed breakdown" do
       post api_v1_andorra_salary_calculation_path,
         params: {
@@ -162,6 +201,9 @@ RSpec.describe "Api::V1::Andorra::SalaryCalculations", type: :request do
             children_under_three_count: 0,
             disability_level: "invalid",
             ascendants_count: -1,
+            home_acquisition_investment: -1,
+            affordable_rental_housing_investment: -1,
+            higher_education_tuition: -1,
             self_employed_social_security_regime: "invalid"
           }
         },
@@ -176,6 +218,9 @@ RSpec.describe "Api::V1::Andorra::SalaryCalculations", type: :request do
       expect(json["errors"]).to include("salary_period must be YEAR or MONTH")
       expect(json["errors"]).to include("children_count must be 0 or greater")
       expect(json["errors"]).to include("disability_level must be one of: none, recognized_disability")
+      expect(json["errors"]).to include("home_acquisition_investment must be 0 or greater")
+      expect(json["errors"]).to include("affordable_rental_housing_investment must be 0 or greater")
+      expect(json["errors"]).to include("higher_education_tuition must be 0 or greater")
       expect(json["errors"]).to include("self_employed_social_security_regime must be one of: standard, under_35_first_12_months, under_35_month_13_to_24")
     end
 

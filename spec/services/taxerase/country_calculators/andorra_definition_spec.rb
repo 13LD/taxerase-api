@@ -41,12 +41,36 @@ RSpec.describe Taxerase::CountryCalculators::AndorraDefinition do
         disabled_dependents_count: 0,
         has_spouse_or_partner: false,
         spouse_general_income: 0,
+        home_acquisition_investment: 0,
+        affordable_rental_housing_investment: 0,
+        higher_education_tuition: 0,
         self_employed_social_security_regime: "standard",
         apply_housing_rent_support: false,
         housing_rent: 0
       )
       expect(props[:initial_result].dig(:metadata, :country_code)).to eq("AD")
       expect(props[:initial_result].dig(:metadata, :tax_regime_key)).to eq(expected_default_regime_key)
+    end
+
+    it "keeps the country-switch payload available when Andorra seed rows are stale" do
+      country = Country.find_by!(code: "AD")
+      regime = TaxRegime.for_country_year(country:, tax_year: 2026).find_by!(key: "employee_andorra")
+      TaxParameter.where(
+        tax_regime: regime,
+        key: %w[
+          habitual_home_investment_reduction_rate
+          habitual_home_investment_reduction_cap
+          affordable_rental_housing_investment_reduction_rate
+          affordable_rental_housing_investment_reduction_cap
+          higher_education_tuition_reduction_cap
+        ]
+      ).delete_all
+      regime.association(:tax_parameters).reset
+
+      props = definition.build_props
+
+      expect(props[:initial_result].dig(:metadata, :country_code)).to eq("AD")
+      expect(props[:initial_result].dig(:breakdown, :annual_income_tax)).to be_a(Float)
     end
   end
 end

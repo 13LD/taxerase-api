@@ -1,0 +1,177 @@
+{
+  "live_years": [
+    2024,
+    2025,
+    2026
+  ],
+  "regime_keys": [
+    "employee_andorra",
+    "self_employed_andorra"
+  ],
+  "shared_parameters": {
+    "income_tax_rate": 0.1,
+    "irpf_rate": 0.1,
+    "personal_minimum_base": 24000,
+    "personal_minimum_disability": 30000,
+    "personal_reduction_default": 24000,
+    "personal_reduction_disability": 30000,
+    "personal_reduction_spouse_without_income": 40000,
+    "pension_contribution_reduction_cap": 5000,
+    "pension_contribution_income_rate_cap": 0.3,
+    "earned_income_bonus_rate": 0.5,
+    "earned_income_bonus_cap": 800
+  },
+  "source_definitions": {
+    "ad_irpf_rate": {
+      "title": "Govern d'Andorra: Quin % hauré de pagar?",
+      "authority_name": "Govern d'Andorra",
+      "country_code": "AD",
+      "jurisdiction": "Andorra",
+      "source_type": "guidance",
+      "url": "https://www.govern.ad/ca/l/4191537"
+    },
+    "ad_irpf_reductions": {
+      "title": "Govern d'Andorra: Quines reduccions puc obtenir en funció de la meva situació personal, familiar i econòmica?",
+      "authority_name": "Govern d'Andorra",
+      "country_code": "AD",
+      "jurisdiction": "Andorra",
+      "source_type": "guidance",
+      "url": "https://www.govern.ad/ca/l/4191244"
+    },
+    "ad_irpf_work_deduction": {
+      "title": "Govern d'Andorra: De les rendes íntegres del treball i en concepte d’altres despeses, quines quantitats em puc deduir?",
+      "authority_name": "Govern d'Andorra",
+      "country_code": "AD",
+      "jurisdiction": "Andorra",
+      "source_type": "guidance",
+      "url": "https://www.govern.ad/ca/l/4191480"
+    },
+    "ad_irpf_spouse_phase_in": {
+      "title": "Govern d'Andorra: spouse-income phase-in for the personal minimum",
+      "authority_name": "Govern d'Andorra",
+      "country_code": "AD",
+      "jurisdiction": "Andorra",
+      "source_type": "guidance",
+      "url": "https://www.govern.ad/ca/l/4190956"
+    },
+    "ad_irpf_habitual_home_investment": {
+      "title": "Govern d'Andorra: habitual-home investment reduction",
+      "authority_name": "Govern d'Andorra",
+      "country_code": "AD",
+      "jurisdiction": "Andorra",
+      "source_type": "guidance",
+      "url": "https://www.govern.ad/ca/l/4191296"
+    },
+    "ad_2025_housing_family_reductions": {
+      "title": "Govern d'Andorra: 2025 IRPF housing and family reduction changes",
+      "authority_name": "Govern d'Andorra",
+      "country_code": "AD",
+      "jurisdiction": "Andorra",
+      "source_type": "guidance",
+      "tax_year": 2025,
+      "url": "https://www.govern.ad/ca/w/s-inicia-la-campanya-de-la-declaracio-de-l-irpf-corresponent-al-2025"
+    },
+    "ad_irpf_activity_income": {
+      "title": "Govern d'Andorra: Com es determina la base de tributació de l’impost?",
+      "authority_name": "Govern d'Andorra",
+      "country_code": "AD",
+      "jurisdiction": "Andorra",
+      "source_type": "guidance",
+      "url": "https://www.govern.ad/ca/l/4191408"
+    },
+    "ad_cass_employee_rates": {
+      "title": "CASS: Cobertura sanitària i incorporació al món laboral",
+      "authority_name": "Caixa Andorrana de Seguretat Social",
+      "country_code": "AD",
+      "jurisdiction": "Andorra",
+      "source_type": "guidance",
+      "url": "https://www.cass.ad/sites/default/files/documentsvaris/CASS_Triptic_Cobertura%20sanitaria_pro_02_interactiu.pdf"
+    },
+    "ad_2024_self_employed_social_security": {
+      "title": "CASS: own-account contribution bases and quotas (2024)",
+      "authority_name": "Caixa Andorrana de Seguretat Social",
+      "country_code": "AD",
+      "jurisdiction": "Andorra",
+      "source_type": "guidance",
+      "tax_year": 2024,
+      "url": "https://www.cass.ad/cotitzacions-del-treballadors-per-compte-propi2024"
+    },
+    "ad_2025_self_employed_social_security": {
+      "title": "CASS: own-account contribution bases and quotas (2025)",
+      "authority_name": "Caixa Andorrana de Seguretat Social",
+      "country_code": "AD",
+      "jurisdiction": "Andorra",
+      "source_type": "guidance",
+      "tax_year": 2025,
+      "url": "https://www.cass.ad/base-de-cotitzacio-de-persona-que-realitza-una-activitat-compte-propi"
+    },
+    "ad_2026_self_employed_social_security": {
+      "title": "CASS: own-account contribution base complement guidance (2026)",
+      "authority_name": "Caixa Andorrana de Seguretat Social",
+      "country_code": "AD",
+      "jurisdiction": "Andorra",
+      "source_type": "guidance",
+      "tax_year": 2026,
+      "url": "https://www.cass.ad/sites/default/files/arxius/CASS_COMPLEMENT%20ART99%20COMPTE%20PROPI%20fitxa%2002-02-2026.pdf"
+    },
+    "ad_cass_under_35_special_regime": {
+      "title": "CASS: special regime for people under 35 in the first 24 months of own-account activity",
+      "authority_name": "Caixa Andorrana de Seguretat Social",
+      "country_code": "AD",
+      "jurisdiction": "Andorra",
+      "source_type": "guidance",
+      "url": "https://www.cass.ad/regims-especials"
+    },
+    "ad_2024_housing_rent_support": {
+      "title": "Govern d'Andorra: 2024 housing-rent support conditions",
+      "authority_name": "Govern d'Andorra",
+      "country_code": "AD",
+      "jurisdiction": "Andorra",
+      "source_type": "guidance",
+      "tax_year": 2024,
+      "url": "https://www.govern.ad/ca/w/el-govern-prorroga-la-flexibilitzacio-dels-ajuts-a-l-habitatge-de-lloguer-durant-el-2024-1"
+    },
+    "ad_2025_housing_rent_support": {
+      "title": "Govern d'Andorra: 2025 housing-rent support conditions",
+      "authority_name": "Govern d'Andorra",
+      "country_code": "AD",
+      "jurisdiction": "Andorra",
+      "source_type": "guidance",
+      "tax_year": 2025,
+      "url": "https://www.govern.ad/ca/w/es-modifica-el-reglament-de-les-prestacions-economiques-dels-serveis-socials-i-sociosanitaris"
+    },
+    "ad_2026_housing_rent_support": {
+      "title": "Govern d'Andorra: 2026 housing-rent support and youth emancipation programs",
+      "authority_name": "Govern d'Andorra",
+      "country_code": "AD",
+      "jurisdiction": "Andorra",
+      "source_type": "guidance",
+      "tax_year": 2026,
+      "url": "https://www.govern.ad/ca/tematiques/ajuts-i-subvencions/llar-i-habitatge-de-lloguer"
+    },
+    "ad_etr_irpf_filing": {
+      "title": "e-Tràmits: IRPF declaration",
+      "authority_name": "Govern d'Andorra",
+      "country_code": "AD",
+      "jurisdiction": "Andorra",
+      "source_type": "filing",
+      "url": "https://www.e-tramits.ad/tramits/ca/declaracio-de-limpost-sobre-la-renda-de-les-persones-fisiques-irpf/p/tr-irpf"
+    },
+    "ad_etr_tax_catalogue": {
+      "title": "e-Tràmits: taxes catalogue",
+      "authority_name": "Govern d'Andorra",
+      "country_code": "AD",
+      "jurisdiction": "Andorra",
+      "source_type": "filing",
+      "url": "https://www.e-tramits.ad/tramits/impostos"
+    },
+    "ad_etr_igi": {
+      "title": "e-Tràmits: IGI declaration and rates",
+      "authority_name": "Govern d'Andorra",
+      "country_code": "AD",
+      "jurisdiction": "Andorra",
+      "source_type": "guidance",
+      "url": "https://www.e-tramits.ad/tramits/impostos/igi"
+    }
+  }
+}

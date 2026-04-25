@@ -23,6 +23,14 @@ RSpec.describe "Api::V1::Spain::SalaryCalculations", type: :request do
       expect(json.dig("metadata", "tax_year")).to eq(2025)
       expect(json.dig("breakdown", "annual_net_income")).to be_within(0.01).of(42_236.36)
       expect(json["sources"]).not_to be_empty
+      expect(json["rule_statuses"]).to include(
+        a_hash_including(
+          "status" => "needs_review",
+          "status_label" => "Needs review",
+          "label" => "Documented rule needs review",
+          "message" => include("No union dues, ascendants, joint filing")
+        )
+      )
     end
 
     it "applies age, children, and disability inputs to the employee profile" do
@@ -221,6 +229,15 @@ RSpec.describe "Api::V1::Spain::SalaryCalculations", type: :request do
       expect(json["errors"]).to include(
         "Resident employee - Navarre has official sources linked for 2024, but its calculator flow is not implemented yet."
       )
+      expect(json["rule_statuses"]).to contain_exactly(
+        a_hash_including(
+          "status" => "not_implemented",
+          "status_label" => "Not implemented",
+          "rule_key" => "employee_navarre:2024:calculator_flow",
+          "label" => "Resident employee - Navarre calculator flow",
+          "message" => "Resident employee - Navarre has official sources linked for 2024, but its calculator flow is not implemented yet."
+        )
+      )
     end
 
     it "returns validation errors for invalid input" do
@@ -264,6 +281,13 @@ RSpec.describe "Api::V1::Spain::SalaryCalculations", type: :request do
 
       expect(json["errors"]).to include(
         "Corporate income tax - general is stored in the rules database, but its calculator flow is not implemented yet."
+      )
+      expect(json["rule_statuses"]).to contain_exactly(
+        a_hash_including(
+          "status" => "not_implemented",
+          "rule_key" => "corporate_income_general:2025:calculator_flow",
+          "label" => "Corporate income tax - general calculator flow"
+        )
       )
     end
   end

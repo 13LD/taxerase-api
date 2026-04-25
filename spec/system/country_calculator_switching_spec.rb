@@ -325,4 +325,22 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
       expect(page).to have_text("under-35 special CASS regime is applied for the first 12 months", wait: 20)
     end
   end
+
+  it "does not get stuck calculating for decimal Andorra regime-control currency inputs" do
+    visit root_path(country: "AD")
+
+    within(".calculator-card") do
+      check "Include spouse or stable partner"
+      fill_in "Spouse/partner annual general-base income", with: "10980.00"
+      check "Estimate housing rent support"
+      fill_in "Annual housing rent", with: "12000.50"
+      click_button "Recalculate"
+    end
+
+    within(".results-card") do
+      expect(page).to have_no_text("Calculating...", wait: 20)
+      expect(page).to have_text("Spouse phase-in increment")
+      expect(page).to have_text("Housing rent support estimate (non-tax)")
+    end
+  end
 end

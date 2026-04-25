@@ -25,6 +25,9 @@ module Api
             spouse_without_income: calculation_params[:spouse_without_income],
             spouse_general_income: calculation_params[:spouse_general_income],
             mortgage_interest: calculation_params[:mortgage_interest],
+            home_acquisition_investment: calculation_params[:home_acquisition_investment],
+            affordable_rental_housing_investment: calculation_params[:affordable_rental_housing_investment],
+            higher_education_tuition: calculation_params[:higher_education_tuition],
             pension_contributions: calculation_params[:pension_contributions],
             alimony_paid: calculation_params[:alimony_paid],
             self_employed_social_security_regime: calculation_params[:self_employed_social_security_regime],
@@ -54,6 +57,9 @@ module Api
             :spouse_without_income,
             :spouse_general_income,
             :mortgage_interest,
+            :home_acquisition_investment,
+            :affordable_rental_housing_investment,
+            :higher_education_tuition,
             :pension_contributions,
             :alimony_paid,
             :self_employed_social_security_regime,
@@ -64,7 +70,7 @@ module Api
         end
 
         def render_validation_error(error)
-          render json: { errors: error.errors }, status: :unprocessable_content
+          render json: validation_error_payload(error), status: :unprocessable_content
         end
       end
     end

@@ -1,6 +1,38 @@
+require "json"
+
 module Taxerase
   module Seeds
     class BaseCountryTaxRules
+      def self.load_country_tax_data(country_key)
+        JSON.parse(File.read(File.join(__dir__, "countries", country_key, "tax_rules.json")))
+      end
+
+      def self.year_keyed_hash(values, symbolize_values: false)
+        values.to_h do |year, value|
+          normalized_value = symbolize_values ? deep_symbolize_keys(value) : value
+          [ Integer(year), normalized_value ]
+        end
+      end
+
+      def self.source_definitions_from(values)
+        values.transform_values { |attributes| deep_symbolize_keys(attributes) }
+      end
+
+      def self.deep_symbolize_keys(value)
+        case value
+        when Array
+          value.map { |entry| deep_symbolize_keys(entry) }
+        when Hash
+          value.to_h { |key, entry| [ key.to_sym, deep_symbolize_keys(entry) ] }
+        else
+          value
+        end
+      end
+      private_class_method :load_country_tax_data,
+        :year_keyed_hash,
+        :source_definitions_from,
+        :deep_symbolize_keys
+
       def self.call
         new.call
       end

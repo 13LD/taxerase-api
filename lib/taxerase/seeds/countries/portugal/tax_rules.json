@@ -1,0 +1,305 @@
+{
+  "live_years": [
+    2024,
+    2025,
+    2026
+  ],
+  "regime_keys": [
+    "employee_portugal",
+    "self_employed_portugal"
+  ],
+  "income_tax_brackets": {
+    "2024": [
+      [
+        7703,
+        0.13
+      ],
+      [
+        11623,
+        0.165
+      ],
+      [
+        16472,
+        0.22
+      ],
+      [
+        21321,
+        0.25
+      ],
+      [
+        27146,
+        0.32
+      ],
+      [
+        39791,
+        0.355
+      ],
+      [
+        43000,
+        0.435
+      ],
+      [
+        80000,
+        0.45
+      ],
+      [
+        null,
+        0.48
+      ]
+    ],
+    "2025": [
+      [
+        8059,
+        0.13
+      ],
+      [
+        12160,
+        0.165
+      ],
+      [
+        17233,
+        0.22
+      ],
+      [
+        22306,
+        0.25
+      ],
+      [
+        28400,
+        0.32
+      ],
+      [
+        41629,
+        0.355
+      ],
+      [
+        44987,
+        0.435
+      ],
+      [
+        83696,
+        0.45
+      ],
+      [
+        null,
+        0.48
+      ]
+    ],
+    "2026": [
+      [
+        8342,
+        0.125
+      ],
+      [
+        12587,
+        0.157
+      ],
+      [
+        17838,
+        0.212
+      ],
+      [
+        23089,
+        0.241
+      ],
+      [
+        29397,
+        0.311
+      ],
+      [
+        43090,
+        0.349
+      ],
+      [
+        46566,
+        0.431
+      ],
+      [
+        86634,
+        0.446
+      ],
+      [
+        null,
+        0.48
+      ]
+    ]
+  },
+  "year_parameters": {
+    "2024": {
+      "specific_deduction_floor": 4350.24,
+      "taxpayer_disability_deduction": 2037.04
+    },
+    "2025": {
+      "specific_deduction_floor": 4462.15,
+      "taxpayer_disability_deduction": 2090.0
+    },
+    "2026": {
+      "specific_deduction_floor": 4587.09,
+      "taxpayer_disability_deduction": 2148.52
+    }
+  },
+  "source_definitions": {
+    "pt_2024_irs_summary": {
+      "title": "Autoridade Tributária: IRS 2024 deductions, benefits, and rates",
+      "authority_name": "Autoridade Tributária e Aduaneira",
+      "country_code": "PT",
+      "jurisdiction": "Portugal",
+      "source_type": "guidance",
+      "tax_year": 2024,
+      "url": "https://info.portaldasfinancas.gov.pt/pt/apoio_contribuinte/IRS/IRS_2024/Paginas/5_Deducoes_beneficios_taxas.aspx"
+    },
+    "pt_2025_irs_rates": {
+      "title": "Autoridade Tributária: CIRS article 68 general rates (2025 version)",
+      "authority_name": "Autoridade Tributária e Aduaneira",
+      "country_code": "PT",
+      "jurisdiction": "Portugal",
+      "source_type": "tax_code",
+      "tax_year": 2025,
+      "url": "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/cirs_rep/ra/Pages/irs68_ra202507.aspx"
+    },
+    "pt_2026_irs_rates": {
+      "title": "Autoridade Tributária: CIRS article 68 general rates",
+      "authority_name": "Autoridade Tributária e Aduaneira",
+      "country_code": "PT",
+      "jurisdiction": "Portugal",
+      "source_type": "tax_code",
+      "tax_year": 2026,
+      "url": "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/cirs_rep/Pages/irs68.aspx"
+    },
+    "pt_2025_employee_deductions": {
+      "title": "Autoridade Tributária: CIRS article 25 work-income deductions",
+      "authority_name": "Autoridade Tributária e Aduaneira",
+      "country_code": "PT",
+      "jurisdiction": "Portugal",
+      "source_type": "tax_code",
+      "tax_year": 2025,
+      "url": "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/cirs_rep/Pages/irs25.aspx"
+    },
+    "pt_2026_employee_deductions": {
+      "title": "Autoridade Tributária: CIRS article 25 work-income deductions",
+      "authority_name": "Autoridade Tributária e Aduaneira",
+      "country_code": "PT",
+      "jurisdiction": "Portugal",
+      "source_type": "tax_code",
+      "tax_year": 2026,
+      "url": "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/cirs_rep/Pages/irs25.aspx"
+    },
+    "pt_2024_self_employed_regime": {
+      "title": "Autoridade Tributária: CIRS article 31 simplified regime",
+      "authority_name": "Autoridade Tributária e Aduaneira",
+      "country_code": "PT",
+      "jurisdiction": "Portugal",
+      "source_type": "tax_code",
+      "tax_year": 2024,
+      "url": "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/cirs_rep/Pages/irs31.aspx"
+    },
+    "pt_2025_self_employed_regime": {
+      "title": "Autoridade Tributária: CIRS article 31 simplified regime",
+      "authority_name": "Autoridade Tributária e Aduaneira",
+      "country_code": "PT",
+      "jurisdiction": "Portugal",
+      "source_type": "tax_code",
+      "tax_year": 2025,
+      "url": "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/cirs_rep/Pages/irs31.aspx"
+    },
+    "pt_2026_self_employed_regime": {
+      "title": "Autoridade Tributária: CIRS article 31 simplified regime",
+      "authority_name": "Autoridade Tributária e Aduaneira",
+      "country_code": "PT",
+      "jurisdiction": "Portugal",
+      "source_type": "tax_code",
+      "tax_year": 2026,
+      "url": "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/cirs_rep/Pages/irs31.aspx"
+    },
+    "pt_2025_family_deductions": {
+      "title": "Autoridade Tributária: CIRS article 78-A dependent and ascendant deductions",
+      "authority_name": "Autoridade Tributária e Aduaneira",
+      "country_code": "PT",
+      "jurisdiction": "Portugal",
+      "source_type": "tax_code",
+      "tax_year": 2025,
+      "url": "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/cirs_rep/Pages/irs78a.aspx"
+    },
+    "pt_2026_family_deductions": {
+      "title": "Autoridade Tributária: CIRS article 78-A dependent and ascendant deductions",
+      "authority_name": "Autoridade Tributária e Aduaneira",
+      "country_code": "PT",
+      "jurisdiction": "Portugal",
+      "source_type": "tax_code",
+      "tax_year": 2026,
+      "url": "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/cirs_rep/Pages/irs78a.aspx"
+    },
+    "pt_2025_expense_deductions": {
+      "title": "Autoridade Tributária: CIRS deduction articles 78-B, 78-E, 83-A, 84, 87, and 78-H",
+      "authority_name": "Autoridade Tributária e Aduaneira",
+      "country_code": "PT",
+      "jurisdiction": "Portugal",
+      "source_type": "tax_code",
+      "tax_year": 2025,
+      "url": "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/cirs_rep/Pages/irs78b.aspx"
+    },
+    "pt_2026_expense_deductions": {
+      "title": "Autoridade Tributária: CIRS deduction articles 78-B, 78-E, 83-A, 84, 87, and 78-H",
+      "authority_name": "Autoridade Tributária e Aduaneira",
+      "country_code": "PT",
+      "jurisdiction": "Portugal",
+      "source_type": "tax_code",
+      "tax_year": 2026,
+      "url": "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/cirs_rep/Pages/irs78b.aspx"
+    },
+    "pt_2024_employee_social_security": {
+      "title": "Segurança Social: employee contributions",
+      "authority_name": "Segurança Social",
+      "country_code": "PT",
+      "jurisdiction": "Portugal",
+      "source_type": "guidance",
+      "tax_year": 2024,
+      "url": "https://en.seg-social.pt/pt/employd-persons"
+    },
+    "pt_2025_employee_social_security": {
+      "title": "Segurança Social: employee contributions",
+      "authority_name": "Segurança Social",
+      "country_code": "PT",
+      "jurisdiction": "Portugal",
+      "source_type": "guidance",
+      "tax_year": 2025,
+      "url": "https://en.seg-social.pt/pt/employd-persons"
+    },
+    "pt_2026_employee_social_security": {
+      "title": "Segurança Social: employee contributions",
+      "authority_name": "Segurança Social",
+      "country_code": "PT",
+      "jurisdiction": "Portugal",
+      "source_type": "guidance",
+      "tax_year": 2026,
+      "url": "https://en.seg-social.pt/pt/employd-persons"
+    },
+    "pt_2024_self_employed_social_security": {
+      "title": "Segurança Social: self-employed workers",
+      "authority_name": "Segurança Social",
+      "country_code": "PT",
+      "jurisdiction": "Portugal",
+      "source_type": "guidance",
+      "tax_year": 2024,
+      "url": "https://en.seg-social.pt/self-employd-workers"
+    },
+    "pt_2025_self_employed_social_security": {
+      "title": "Segurança Social: self-employed workers",
+      "authority_name": "Segurança Social",
+      "country_code": "PT",
+      "jurisdiction": "Portugal",
+      "source_type": "guidance",
+      "tax_year": 2025,
+      "url": "https://en.seg-social.pt/self-employd-workers"
+    },
+    "pt_2026_self_employed_social_security": {
+      "title": "Segurança Social: self-employed workers",
+      "authority_name": "Segurança Social",
+      "country_code": "PT",
+      "jurisdiction": "Portugal",
+      "source_type": "guidance",
+      "tax_year": 2026,
+      "url": "https://en.seg-social.pt/self-employd-workers"
+    }
+  }
+}

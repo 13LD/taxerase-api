@@ -146,6 +146,30 @@ export function buildDisplayedSources({ resultMatchesSelection, result, selected
   return resultMatchesSelection ? result.sources : selectedRegime?.sources || [];
 }
 
+export function buildRuleStatusItems({
+  isSupportedRegime,
+  result,
+  resultMatchesSelection,
+  selectedRegime
+}) {
+  if (resultMatchesSelection) return result.rule_statuses || [];
+  if (!selectedRegime) return [];
+
+  if (isSupportedRegime) return [];
+
+  return selectedRegime.rule_statuses || [
+    {
+      status: "not_implemented",
+      status_label: "Not implemented",
+      severity: "blocking",
+      rule_key: `${selectedRegime.key}:calculator_flow`,
+      label: `${selectedRegime.name} calculator flow`,
+      message: "Official sources are mapped to this year and jurisdiction, but the calculator formula is still pending.",
+      source_keys: []
+    }
+  ];
+}
+
 export function buildAssumptionItems({ isSupportedRegime, result, resultMatchesSelection, selectedRegime }) {
   if (resultMatchesSelection) return result.assumptions;
   if (!selectedRegime) return ["No regimes are seeded for this year yet."];

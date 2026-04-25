@@ -129,26 +129,72 @@ class TaxRegime < ApplicationRecord
   def self.public_regime_options_for(country:, catalog_options:)
     options_by_pair = catalog_options.index_by { |regime| [ regime.fetch(:key), regime.fetch(:tax_year) ] }
 
-    for_country(country)
-      .includes(:tax_rule_set, :tax_parameters, tax_source_usages: :official_tax_source)
+    rows = for_country(country)
       .joins(:tax_rule_set)
       .where(key: catalog_options.map { |regime| regime.fetch(:key) }.uniq)
       .order(Arel.sql("tax_rule_sets.tax_year ASC"), :category, :region, :name)
-      .select { |regime| options_by_pair.key?([ regime.key, regime.tax_year ]) }
-      .map do |regime|
-        {
-          key: regime.key,
-          name: regime.name,
-          region: regime.region,
-          category: regime.category,
-          tax_year: regime.tax_year,
-          description: regime.description,
-          supported: true,
-          status: "Live",
-          sources: regime.source_links
-        }
+      .pluck(
+        :id,
+        :key,
+        :name,
+        :region,
+        :category,
+        Arel.sql("tax_rule_sets.tax_year"),
+        :description
+      )
+      .select { |_id, key, _name, _region, _category, tax_year, _description| options_by_pair.key?([ key, tax_year ]) }
+
+    sources_by_regime_id = source_links_by_regime_id(rows.map(&:first))
+
+    rows.map do |id, key, name, region, category, tax_year, description|
+      {
+        key: key,
+        name: name,
+        region: region,
+        category: category,
+        tax_year: tax_year,
+        description: description,
+        supported: true,
+        status: "Live",
+        sources: sources_by_regime_id.fetch(id, [])
+      }
+    end
+  end
+
+  def self.source_links_by_regime_id(regime_ids)
+    return {} if regime_ids.empty?
+
+    TaxSourceUsage
+      .joins(:official_tax_source)
+      .where(tax_regime_id: regime_ids)
+      .order(:tax_regime_id, :position)
+      .pluck(
+        :tax_regime_id,
+        :label,
+        :usage_type,
+        :notes,
+        Arel.sql("official_tax_sources.url"),
+        Arel.sql("official_tax_sources.authority_name"),
+        Arel.sql("official_tax_sources.jurisdiction"),
+        Arel.sql("official_tax_sources.tax_year"),
+        Arel.sql("official_tax_sources.notes")
+      )
+      .group_by(&:first)
+      .transform_values do |rows|
+        rows.map do |_tax_regime_id, label, usage_type, usage_notes, href, authority_name, jurisdiction, tax_year, source_notes|
+          {
+            label: label,
+            href: href,
+            usage_type: usage_type,
+            authority_name: authority_name,
+            jurisdiction: jurisdiction,
+            tax_year: tax_year,
+            notes: usage_notes.presence || source_notes
+          }
+        end
       end
   end
+  private_class_method :source_links_by_regime_id
 
   def self.public_catalog_rows_for(country:, supported_methods:)
     supported_rule_scope(country:, supported_methods:)

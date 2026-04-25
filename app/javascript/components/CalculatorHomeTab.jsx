@@ -35,6 +35,7 @@ export default function CalculatorHomeTab({
     displayedSources,
     formProps,
     headlineMetrics,
+    ruleStatusItems,
     selectedRegime
   } = useTaxCalculatorEngine({
     calculationEndpoint: calculatorConfig.calculationEndpoint,
@@ -91,6 +92,7 @@ export default function CalculatorHomeTab({
         <TaxCalculatorTraceability
           assumptionItems={assumptionItems}
           displayedSources={displayedSources}
+          ruleStatusItems={ruleStatusItems}
         />
       </div>
     </section>

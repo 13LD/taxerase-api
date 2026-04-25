@@ -46,7 +46,7 @@ module Taxerase
       result[:metadata][:display_currency_code] = resolved_input_currency_code
       result[:input][:input_currency_code] = resolved_input_currency_code
 
-      return result if resolved_input_currency_code == native_currency_code
+      return attach_rule_statuses(result) if resolved_input_currency_code == native_currency_code
 
       fx_reference = converter.reference_metadata
       convert_result_amounts!(result, resolved_input_currency_code)
@@ -56,7 +56,7 @@ module Taxerase
         "Displayed monetary amounts are converted back to #{resolved_input_currency_code} for presentation.",
         *Array(result[:assumptions])
       ]
-      result
+      attach_rule_statuses(result)
     end
 
     private
@@ -114,6 +114,11 @@ module Taxerase
         from_currency_code: native_currency_code,
         to_currency_code: display_currency_code
       )
+    end
+
+    def attach_rule_statuses(result)
+      result[:rule_statuses] = Taxerase::RuleStatus.from_assumptions(result[:assumptions]) if result[:rule_statuses].blank?
+      result
     end
   end
 end
