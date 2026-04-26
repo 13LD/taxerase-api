@@ -163,8 +163,12 @@ const andorraCalculatorConfig = {
     showAgeField: false,
     ageFieldHint: null,
     showChildrenCountField: true,
+    childrenCountHint:
+      "Counts dependent children for Andorra's dependent reduction. Disabled dependants can receive a separate uplift.",
     showChildrenUnderThreeField: false,
     showDisabilityField: true,
+    disabilityFieldHint:
+      "Applies Andorra's higher taxpayer personal reduction for recognized disability.",
     ageBracketOptions: [],
     disabilityOptions: [
       { value: "none", label: "None" },

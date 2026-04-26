@@ -1,0 +1,226 @@
+{
+  "country_code": "CZ",
+  "reports": [
+    {
+      "key": "personal_income_tax_return",
+      "name": "Personal income tax return",
+      "tax_year": 2026,
+      "tax_years": [2025, 2026, 2027],
+      "description": "Czech personal income tax return deadlines for the 2025 income year.",
+      "workflows": [
+        {
+          "key": "prepare_income_tax_return",
+          "name": "Prepare income tax return",
+          "description": "Review income, deductible expenses, spouse credit, child tax credit, non-taxable deductions, and attachments before filing.",
+          "reference_url": "https://portal.gov.cz/en/sluzby-vs/personal-income-tax-return-S4184"
+        },
+        {
+          "key": "submit_income_tax_return",
+          "name": "Submit income tax return",
+          "description": "Submit the Czech personal income tax return by the paper, electronic, or tax-adviser deadline that applies.",
+          "reference_url": "https://portal.gov.cz/en/sluzby-vs/personal-income-tax-return-S4184"
+        },
+        {
+          "key": "settle_income_tax_balance",
+          "name": "Settle income tax balance",
+          "description": "Pay the income tax balance by the applicable filing deadline when the return produces tax due.",
+          "reference_url": "https://portal.gov.cz/en/sluzby-vs/personal-income-tax-return-S4184"
+        }
+      ],
+      "events": [
+        {
+          "key": "paper_submission",
+          "title": "2025 paper income tax return deadline",
+          "event_type": "submission",
+          "event_date": "2026-04-01",
+          "window_start_date": "2026-01-01",
+          "window_end_date": "2026-04-01",
+          "description": "Personal income tax returns for 2025 are due within the three-month statutory deadline when not using the electronic or adviser extension."
+        },
+        {
+          "key": "electronic_submission",
+          "title": "2025 electronic income tax return deadline",
+          "event_type": "submission",
+          "event_date": "2026-05-04",
+          "window_start_date": "2026-01-01",
+          "window_end_date": "2026-05-04",
+          "description": "The deadline is extended to four months after the taxable period when the return is submitted electronically."
+        },
+        {
+          "key": "adviser_submission",
+          "title": "2025 adviser-filed income tax return deadline",
+          "event_type": "submission",
+          "event_date": "2026-07-01",
+          "window_start_date": "2026-01-01",
+          "window_end_date": "2026-07-01",
+          "description": "The deadline is extended to six months after the taxable period when filed by a tax adviser or where audit conditions apply."
+        },
+        {
+          "key": "electronic_payment",
+          "title": "2025 electronic income tax payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-05-04",
+          "description": "Income tax due with an electronically filed 2025 return is paid by the electronic filing deadline."
+        }
+      ]
+    },
+    {
+      "key": "vat_return_monthly",
+      "name": "Monthly VAT return",
+      "tax_year": 2026,
+      "tax_years": [2025, 2026, 2027],
+      "description": "Czech monthly VAT return and tax-due calendar for 2026 VAT periods.",
+      "workflows": [
+        {
+          "key": "reconcile_monthly_vat",
+          "name": "Reconcile monthly VAT",
+          "description": "Reconcile output VAT, input VAT, corrections, and EU reporting dependencies before filing.",
+          "reference_url": "https://financnisprava.gov.cz/en/danovy-kalendar?month=11&year=2026"
+        },
+        {
+          "key": "submit_monthly_vat",
+          "name": "Submit monthly VAT return",
+          "description": "Submit the monthly VAT return by the 25th day after the period, adjusted here for weekends and holidays.",
+          "reference_url": "https://financnisprava.gov.cz/en/danovy-kalendar?month=11&year=2026"
+        },
+        {
+          "key": "pay_monthly_vat",
+          "name": "Pay monthly VAT",
+          "description": "Pay the monthly VAT balance by the same deadline when the return is payable.",
+          "reference_url": "https://financnisprava.gov.cz/en/danovy-kalendar?month=11&year=2026"
+        }
+      ],
+      "events": [
+        { "key": "jan_submission", "title": "January 2026 VAT return deadline", "event_type": "submission", "event_date": "2026-02-25", "description": "VAT return for January 2026 is due by 25 February 2026." },
+        { "key": "jan_payment", "title": "January 2026 VAT payment deadline", "event_type": "payment", "event_date": "2026-02-25", "description": "VAT due for January 2026 is paid by 25 February 2026." },
+        { "key": "feb_submission", "title": "February 2026 VAT return deadline", "event_type": "submission", "event_date": "2026-03-25", "description": "VAT return for February 2026 is due by 25 March 2026." },
+        { "key": "feb_payment", "title": "February 2026 VAT payment deadline", "event_type": "payment", "event_date": "2026-03-25", "description": "VAT due for February 2026 is paid by 25 March 2026." },
+        { "key": "mar_submission", "title": "March 2026 VAT return deadline", "event_type": "submission", "event_date": "2026-04-27", "description": "VAT return for March 2026 is due by 27 April 2026 because 25 April falls on a Saturday." },
+        { "key": "mar_payment", "title": "March 2026 VAT payment deadline", "event_type": "payment", "event_date": "2026-04-27", "description": "VAT due for March 2026 is paid by 27 April 2026." },
+        { "key": "apr_submission", "title": "April 2026 VAT return deadline", "event_type": "submission", "event_date": "2026-05-25", "description": "VAT return for April 2026 is due by 25 May 2026." },
+        { "key": "apr_payment", "title": "April 2026 VAT payment deadline", "event_type": "payment", "event_date": "2026-05-25", "description": "VAT due for April 2026 is paid by 25 May 2026." },
+        { "key": "may_submission", "title": "May 2026 VAT return deadline", "event_type": "submission", "event_date": "2026-06-25", "description": "VAT return for May 2026 is due by 25 June 2026." },
+        { "key": "may_payment", "title": "May 2026 VAT payment deadline", "event_type": "payment", "event_date": "2026-06-25", "description": "VAT due for May 2026 is paid by 25 June 2026." },
+        { "key": "jun_submission", "title": "June 2026 VAT return deadline", "event_type": "submission", "event_date": "2026-07-27", "description": "VAT return for June 2026 is due by 27 July 2026 because 25 July falls on a Saturday." },
+        { "key": "jun_payment", "title": "June 2026 VAT payment deadline", "event_type": "payment", "event_date": "2026-07-27", "description": "VAT due for June 2026 is paid by 27 July 2026." },
+        { "key": "jul_submission", "title": "July 2026 VAT return deadline", "event_type": "submission", "event_date": "2026-08-25", "description": "VAT return for July 2026 is due by 25 August 2026." },
+        { "key": "jul_payment", "title": "July 2026 VAT payment deadline", "event_type": "payment", "event_date": "2026-08-25", "description": "VAT due for July 2026 is paid by 25 August 2026." },
+        { "key": "aug_submission", "title": "August 2026 VAT return deadline", "event_type": "submission", "event_date": "2026-09-25", "description": "VAT return for August 2026 is due by 25 September 2026." },
+        { "key": "aug_payment", "title": "August 2026 VAT payment deadline", "event_type": "payment", "event_date": "2026-09-25", "description": "VAT due for August 2026 is paid by 25 September 2026." },
+        { "key": "sep_submission", "title": "September 2026 VAT return deadline", "event_type": "submission", "event_date": "2026-10-26", "description": "VAT return for September 2026 is due by 26 October 2026 because 25 October falls on a Sunday." },
+        { "key": "sep_payment", "title": "September 2026 VAT payment deadline", "event_type": "payment", "event_date": "2026-10-26", "description": "VAT due for September 2026 is paid by 26 October 2026." },
+        { "key": "oct_submission", "title": "October 2026 VAT return deadline", "event_type": "submission", "event_date": "2026-11-25", "description": "VAT return for October 2026 is due by 25 November 2026." },
+        { "key": "oct_payment", "title": "October 2026 VAT payment deadline", "event_type": "payment", "event_date": "2026-11-25", "description": "VAT due for October 2026 is paid by 25 November 2026." },
+        { "key": "nov_submission", "title": "November 2026 VAT return deadline", "event_type": "submission", "event_date": "2026-12-28", "description": "VAT return for November 2026 is due by 28 December 2026 because 25 December is a holiday." },
+        { "key": "nov_payment", "title": "November 2026 VAT payment deadline", "event_type": "payment", "event_date": "2026-12-28", "description": "VAT due for November 2026 is paid by 28 December 2026." },
+        { "key": "dec_submission", "title": "December 2026 VAT return deadline", "event_type": "submission", "event_date": "2027-01-25", "description": "VAT return for December 2026 is due by 25 January 2027." },
+        { "key": "dec_payment", "title": "December 2026 VAT payment deadline", "event_type": "payment", "event_date": "2027-01-25", "description": "VAT due for December 2026 is paid by 25 January 2027." }
+      ]
+    },
+    {
+      "key": "vat_control_statement_monthly",
+      "name": "Monthly VAT control statement",
+      "tax_year": 2026,
+      "tax_years": [2025, 2026, 2027],
+      "description": "Czech VAT control statement calendar for 2026 monthly periods.",
+      "workflows": [
+        {
+          "key": "validate_control_statement",
+          "name": "Validate control statement",
+          "description": "Check invoice-level VAT control statement data against VAT returns and ledger records.",
+          "reference_url": "https://portal.gov.cz/en/sluzby-vs/vat-control-statement-S20031"
+        },
+        {
+          "key": "submit_control_statement",
+          "name": "Submit control statement",
+          "description": "Submit the VAT control statement by the statutory period deadline.",
+          "reference_url": "https://portal.gov.cz/en/sluzby-vs/vat-control-statement-S20031"
+        }
+      ],
+      "events": [
+        { "key": "jan_submission", "title": "January 2026 control statement deadline", "event_type": "submission", "event_date": "2026-02-25", "description": "Control statement for January 2026 is due by 25 February 2026." },
+        { "key": "feb_submission", "title": "February 2026 control statement deadline", "event_type": "submission", "event_date": "2026-03-25", "description": "Control statement for February 2026 is due by 25 March 2026." },
+        { "key": "mar_submission", "title": "March 2026 control statement deadline", "event_type": "submission", "event_date": "2026-04-27", "description": "Control statement for March 2026 is due by 27 April 2026 because 25 April falls on a Saturday." },
+        { "key": "apr_submission", "title": "April 2026 control statement deadline", "event_type": "submission", "event_date": "2026-05-25", "description": "Control statement for April 2026 is due by 25 May 2026." },
+        { "key": "may_submission", "title": "May 2026 control statement deadline", "event_type": "submission", "event_date": "2026-06-25", "description": "Control statement for May 2026 is due by 25 June 2026." },
+        { "key": "jun_submission", "title": "June 2026 control statement deadline", "event_type": "submission", "event_date": "2026-07-27", "description": "Control statement for June 2026 is due by 27 July 2026 because 25 July falls on a Saturday." },
+        { "key": "jul_submission", "title": "July 2026 control statement deadline", "event_type": "submission", "event_date": "2026-08-25", "description": "Control statement for July 2026 is due by 25 August 2026." },
+        { "key": "aug_submission", "title": "August 2026 control statement deadline", "event_type": "submission", "event_date": "2026-09-25", "description": "Control statement for August 2026 is due by 25 September 2026." },
+        { "key": "sep_submission", "title": "September 2026 control statement deadline", "event_type": "submission", "event_date": "2026-10-26", "description": "Control statement for September 2026 is due by 26 October 2026 because 25 October falls on a Sunday." },
+        { "key": "oct_submission", "title": "October 2026 control statement deadline", "event_type": "submission", "event_date": "2026-11-25", "description": "Control statement for October 2026 is due by 25 November 2026." },
+        { "key": "nov_submission", "title": "November 2026 control statement deadline", "event_type": "submission", "event_date": "2026-12-28", "description": "Control statement for November 2026 is due by 28 December 2026 because 25 December is a holiday." },
+        { "key": "dec_submission", "title": "December 2026 control statement deadline", "event_type": "submission", "event_date": "2027-01-25", "description": "Control statement for December 2026 is due by 25 January 2027." }
+      ]
+    },
+    {
+      "key": "pausalni_dan_monthly",
+      "name": "Monthly pausalni dan advance",
+      "tax_year": 2026,
+      "tax_years": [2025, 2026, 2027],
+      "description": "Czech monthly pausalni dan advance payment calendar for 2026.",
+      "workflows": [
+        {
+          "key": "confirm_pausal_band",
+          "name": "Confirm pausalni dan band",
+          "description": "Confirm eligibility, selected band, VAT status, and business-income limits before relying on the fixed monthly payment.",
+          "reference_url": "https://financnisprava.gov.cz/cs/dane/dane/dan-z-prijmu/pausalni-dan/obecne-informace"
+        },
+        {
+          "key": "pay_pausal_advance",
+          "name": "Pay pausalni dan advance",
+          "description": "Pay the monthly pausalni dan advance by the 20th day of the month, adjusted here for weekends and holidays.",
+          "reference_url": "https://financnisprava.gov.cz/cs/dane/dane/dan-z-prijmu/pausalni-dan/obecne-informace"
+        }
+      ],
+      "events": [
+        { "key": "jan_payment", "title": "January 2026 pausalni dan advance deadline", "event_type": "payment", "event_date": "2026-01-20", "description": "Pausalni dan advance for January 2026 is due by 20 January 2026." },
+        { "key": "feb_payment", "title": "February 2026 pausalni dan advance deadline", "event_type": "payment", "event_date": "2026-02-20", "description": "Pausalni dan advance for February 2026 is due by 20 February 2026." },
+        { "key": "mar_payment", "title": "March 2026 pausalni dan advance deadline", "event_type": "payment", "event_date": "2026-03-20", "description": "Pausalni dan advance for March 2026 is due by 20 March 2026." },
+        { "key": "apr_payment", "title": "April 2026 pausalni dan advance deadline", "event_type": "payment", "event_date": "2026-04-20", "description": "Pausalni dan advance for April 2026 is due by 20 April 2026." },
+        { "key": "may_payment", "title": "May 2026 pausalni dan advance deadline", "event_type": "payment", "event_date": "2026-05-20", "description": "Pausalni dan advance for May 2026 is due by 20 May 2026." },
+        { "key": "jun_payment", "title": "June 2026 pausalni dan advance deadline", "event_type": "payment", "event_date": "2026-06-22", "description": "Pausalni dan advance for June 2026 is due by 22 June 2026 because 20 June falls on a Saturday." },
+        { "key": "jul_payment", "title": "July 2026 pausalni dan advance deadline", "event_type": "payment", "event_date": "2026-07-20", "description": "Pausalni dan advance for July 2026 is due by 20 July 2026." },
+        { "key": "aug_payment", "title": "August 2026 pausalni dan advance deadline", "event_type": "payment", "event_date": "2026-08-20", "description": "Pausalni dan advance for August 2026 is due by 20 August 2026." },
+        { "key": "sep_payment", "title": "September 2026 pausalni dan advance deadline", "event_type": "payment", "event_date": "2026-09-21", "description": "Pausalni dan advance for September 2026 is due by 21 September 2026 because 20 September falls on a Sunday." },
+        { "key": "oct_payment", "title": "October 2026 pausalni dan advance deadline", "event_type": "payment", "event_date": "2026-10-20", "description": "Pausalni dan advance for October 2026 is due by 20 October 2026." },
+        { "key": "nov_payment", "title": "November 2026 pausalni dan advance deadline", "event_type": "payment", "event_date": "2026-11-20", "description": "Pausalni dan advance for November 2026 is due by 20 November 2026." },
+        { "key": "dec_payment", "title": "December 2026 pausalni dan advance deadline", "event_type": "payment", "event_date": "2026-12-21", "description": "Pausalni dan advance for December 2026 is due by 21 December 2026 because 20 December falls on a Sunday." }
+      ]
+    },
+    {
+      "key": "payroll_withholding_monthly",
+      "name": "Monthly payroll withholding",
+      "tax_year": 2026,
+      "tax_years": [2025, 2026, 2027],
+      "description": "Czech monthly withholding advance payment calendar for dependent-activity payroll in 2026.",
+      "workflows": [
+        {
+          "key": "reconcile_payroll_withholding",
+          "name": "Reconcile payroll withholding",
+          "description": "Reconcile wage tax advances, employee credits, and payroll records before remitting dependent-activity withholding.",
+          "reference_url": "https://financnisprava.gov.cz/en/danovy-kalendar?month=11&year=2026"
+        },
+        {
+          "key": "pay_payroll_withholding",
+          "name": "Pay payroll withholding",
+          "description": "Pay withheld payroll tax advances by the monthly deadline.",
+          "reference_url": "https://financnisprava.gov.cz/en/danovy-kalendar?month=11&year=2026"
+        }
+      ],
+      "events": [
+        { "key": "jan_payment", "title": "January 2026 payroll withholding payment deadline", "event_type": "payment", "event_date": "2026-02-20", "description": "Payroll withholding for January 2026 is due by 20 February 2026." },
+        { "key": "feb_payment", "title": "February 2026 payroll withholding payment deadline", "event_type": "payment", "event_date": "2026-03-20", "description": "Payroll withholding for February 2026 is due by 20 March 2026." },
+        { "key": "mar_payment", "title": "March 2026 payroll withholding payment deadline", "event_type": "payment", "event_date": "2026-04-20", "description": "Payroll withholding for March 2026 is due by 20 April 2026." },
+        { "key": "apr_payment", "title": "April 2026 payroll withholding payment deadline", "event_type": "payment", "event_date": "2026-05-20", "description": "Payroll withholding for April 2026 is due by 20 May 2026." },
+        { "key": "may_payment", "title": "May 2026 payroll withholding payment deadline", "event_type": "payment", "event_date": "2026-06-22", "description": "Payroll withholding for May 2026 is due by 22 June 2026 because 20 June falls on a Saturday." },
+        { "key": "jun_payment", "title": "June 2026 payroll withholding payment deadline", "event_type": "payment", "event_date": "2026-07-20", "description": "Payroll withholding for June 2026 is due by 20 July 2026." },
+        { "key": "jul_payment", "title": "July 2026 payroll withholding payment deadline", "event_type": "payment", "event_date": "2026-08-20", "description": "Payroll withholding for July 2026 is due by 20 August 2026." },
+        { "key": "aug_payment", "title": "August 2026 payroll withholding payment deadline", "event_type": "payment", "event_date": "2026-09-21", "description": "Payroll withholding for August 2026 is due by 21 September 2026 because 20 September falls on a Sunday." },
+        { "key": "sep_payment", "title": "September 2026 payroll withholding payment deadline", "event_type": "payment", "event_date": "2026-10-20", "description": "Payroll withholding for September 2026 is due by 20 October 2026." },
+        { "key": "oct_payment", "title": "October 2026 payroll withholding payment deadline", "event_type": "payment", "event_date": "2026-11-20", "description": "Payroll withholding for October 2026 is due by 20 November 2026." },
+        { "key": "nov_payment", "title": "November 2026 payroll withholding payment deadline", "event_type": "payment", "event_date": "2026-12-21", "description": "Payroll withholding for November 2026 is due by 21 December 2026 because 20 December falls on a Sunday." },
+        { "key": "dec_payment", "title": "December 2026 payroll withholding payment deadline", "event_type": "payment", "event_date": "2027-01-20", "description": "Payroll withholding for December 2026 is due by 20 January 2027." }
+      ]
+    }
+  ]
+}

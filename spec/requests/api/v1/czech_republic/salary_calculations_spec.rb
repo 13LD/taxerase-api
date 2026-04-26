@@ -169,8 +169,135 @@ RSpec.describe "Api::V1::CzechRepublic::SalaryCalculations", type: :request do
       )
       expect(json["detail_cards"].first["label"]).to eq("Deemed tax expenses (60%)")
       expect(json["assumptions"]).to include(
-        "The 60% flat-expense amount is a deemed tax deduction. It reduces taxable profit and contribution bases, but it is not treated as cash spent in the annual net-income metric."
+        "The selected flat-expense amount is a deemed tax deduction. It reduces taxable profit and contribution bases, but it is not treated as cash spent in the annual net-income metric."
       )
+    end
+
+    it "supports Czech spouse credit and non-taxable base deductions" do
+      payload = {
+        gross_income: 900_000,
+        tax_year: 2025,
+        salary_period: "YEAR",
+        tax_regime_key: "employee_czech_republic",
+        children_count: 1,
+        disability_level: "none"
+      }
+
+      post api_v1_czech_republic_salary_calculation_path,
+        params: { calculation: payload },
+        as: :json
+
+      expect(response).to have_http_status(:ok)
+
+      baseline = JSON.parse(response.body)
+
+      post api_v1_czech_republic_salary_calculation_path,
+        params: {
+          calculation: payload.merge(
+            apply_spouse_credit: true,
+            spouse_income: 20_000,
+            spouse_cares_child_under_three: true,
+            mortgage_interest_paid: 200_000,
+            pension_contributions: 30_000,
+            life_insurance_contributions: 30_000,
+            donations_amount: 50_000
+          )
+        },
+        as: :json
+
+      expect(response).to have_http_status(:ok)
+
+      json = JSON.parse(response.body)
+
+      expect(json.dig("breakdown", "spouse_credit")).to eq(24_840.0)
+      expect(json.dig("breakdown", "non_taxable_deductions")).to eq(248_000.0)
+      expect(json.dig("breakdown", "annual_income_tax")).to be < baseline.dig("breakdown", "annual_income_tax")
+    end
+
+    it "supports expanded Czech flat expense methods and caps" do
+      post api_v1_czech_republic_salary_calculation_path,
+        params: {
+          calculation: {
+            gross_income: 3_000_000,
+            deductible_expenses: 0,
+            expense_deduction_method: "flat_expense_80",
+            tax_year: 2025,
+            salary_period: "YEAR",
+            tax_regime_key: "self_employed_czech_republic",
+            children_count: 0,
+            disability_level: "none"
+          }
+        },
+        as: :json
+
+      expect(response).to have_http_status(:ok)
+
+      json = JSON.parse(response.body)
+
+      expect(json.dig("input", "expense_deduction_method")).to eq("flat_expense_80")
+      expect(json.dig("breakdown", "annual_deductible_expenses")).to eq(1_600_000.0)
+      expect(json["detail_cards"].first["label"]).to eq("Deemed tax expenses (80%)")
+    end
+
+    it "applies OSVC activity status variants to self-employed contribution minimums" do
+      payload = {
+        gross_income: 120_000,
+        deductible_expenses: 0,
+        expense_deduction_method: "actual_expenses",
+        tax_year: 2025,
+        salary_period: "YEAR",
+        tax_regime_key: "self_employed_czech_republic",
+        children_count: 0,
+        disability_level: "none"
+      }
+
+      post api_v1_czech_republic_salary_calculation_path,
+        params: { calculation: payload.merge(osvc_activity_status: "main") },
+        as: :json
+
+      expect(response).to have_http_status(:ok)
+
+      main_activity = JSON.parse(response.body)
+
+      post api_v1_czech_republic_salary_calculation_path,
+        params: { calculation: payload.merge(osvc_activity_status: "secondary") },
+        as: :json
+
+      expect(response).to have_http_status(:ok)
+
+      secondary_activity = JSON.parse(response.body)
+
+      expect(main_activity.dig("breakdown", "annual_social_security")).to be > secondary_activity.dig("breakdown", "annual_social_security")
+      expect(main_activity.dig("breakdown", "annual_health_contribution")).to be > secondary_activity.dig("breakdown", "annual_health_contribution")
+    end
+
+    it "supports Czech pausalni dan fixed-payment bands" do
+      post api_v1_czech_republic_salary_calculation_path,
+        params: {
+          calculation: {
+            gross_income: 900_000,
+            deductible_expenses: 0,
+            expense_deduction_method: "flat_expense_60",
+            self_employed_tax_mode: "pausal_band_1",
+            tax_year: 2025,
+            salary_period: "YEAR",
+            tax_regime_key: "self_employed_czech_republic",
+            children_count: 2,
+            disability_level: "ztp_p"
+          }
+        },
+        as: :json
+
+      expect(response).to have_http_status(:ok)
+
+      json = JSON.parse(response.body)
+
+      expect(json.dig("input", "self_employed_tax_mode")).to eq("pausal_band_1")
+      expect(json.dig("breakdown", "annual_income_tax")).to eq(1200.0)
+      expect(json.dig("breakdown", "annual_social_security")).to eq(65_676.0)
+      expect(json.dig("breakdown", "annual_health_contribution")).to eq(37_716.0)
+      expect(json.dig("breakdown", "taxpayer_credit")).to eq(0.0)
+      expect(json.dig("breakdown", "child_credit")).to eq(0.0)
     end
 
     it "caps Czech 60% flat expenses at CZK 1,200,000 a year" do
@@ -292,7 +419,7 @@ RSpec.describe "Api::V1::CzechRepublic::SalaryCalculations", type: :request do
       json = JSON.parse(response.body)
 
       expect(json["errors"]).to include(
-        "expense_deduction_method must be one of: actual_expenses, flat_expense_60"
+        "expense_deduction_method must be one of: actual_expenses, flat_expense_80, flat_expense_60, flat_expense_40, flat_expense_30"
       )
     end
   end

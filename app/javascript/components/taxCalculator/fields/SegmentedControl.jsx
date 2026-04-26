@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function SegmentedControl({ label, onChange, options, value }) {
+export default function SegmentedControl({ hint = null, label, onChange, options, value }) {
   return (
     <div className="field">
       <span className="field-label">{label}</span>
@@ -16,6 +16,7 @@ export default function SegmentedControl({ label, onChange, options, value }) {
           </button>
         ))}
       </div>
+      {hint ? <span className="field-hint">{hint}</span> : null}
     </div>
   );
 }

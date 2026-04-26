@@ -9,6 +9,12 @@ const percentageOptions = (values) =>
     label: `${value}%`
   }));
 
+const yearsDescending = (start, end) =>
+  Array.from({ length: end - start + 1 }, (_item, index) => {
+    const value = String(end - index);
+    return { value, label: value };
+  });
+
 const polandCalculatorConfig = {
   calculationEndpoint: "/api/v1/poland/salary_calculation",
   fallbackTitle: "Poland tax estimate",
@@ -55,7 +61,8 @@ const polandCalculatorConfig = {
         key: "ppk_employee_rate",
         type: "select",
         label: "PPK employee contribution",
-        hint: "Use 0% if the employee does not participate in PPK.",
+        hint:
+          "Employee share of PPK, Poland's employee capital-plan pension saving program. Use 0% if the employee does not participate.",
         categories: [ "employee" ],
         defaultValue: "0",
         resultInputKey: "ppk_employee_rate",
@@ -104,6 +111,8 @@ const polandCalculatorConfig = {
         key: "b2b_tax_form",
         type: "select",
         label: "Taxation form",
+        hint:
+          "Select the B2B income-tax regime: progressive tax scale, 19% flat tax, or revenue-based lump sum.",
         categories: [ "self_employed" ],
         defaultValue: "tax_scale",
         resultInputKey: "b2b_tax_form",
@@ -114,14 +123,23 @@ const polandCalculatorConfig = {
         ]
       },
       {
-        key: "lump_sum_rate",
+        key: "lump_sum_activity_type",
         type: "select",
-        label: "Lump-sum rate",
+        label: "Lump-sum activity",
+        hint:
+          "Maps the business activity to the seeded ryczalt revenue-tax rate, such as 12% for IT services or 3% for trade and gastronomy.",
         categories: [ "self_employed" ],
-        defaultValue: "12",
-        resultInputKey: "lump_sum_rate",
+        defaultValue: "it_services",
+        resultInputKey: "lump_sum_activity_type",
         visibleWhen: (controlValues) => controlValues.b2b_tax_form === "lump_sum",
-        options: percentageOptions([ 2, 3, 5.5, 8.5, 10, 12, 12.5, 14, 15, 17 ])
+        options: [
+          { value: "professional_services", label: "Professional services (17%)" },
+          { value: "healthcare", label: "Healthcare (14%)" },
+          { value: "it_services", label: "IT services (12%)" },
+          { value: "general_services", label: "General services (8.5%)" },
+          { value: "manufacturing_construction", label: "Manufacturing / construction (5.5%)" },
+          { value: "trade_gastronomy", label: "Trade / gastronomy (3%)" }
+        ]
       },
       {
         key: "social_insurance_mode",
@@ -140,6 +158,28 @@ const polandCalculatorConfig = {
         ]
       },
       {
+        key: "cooperating_person",
+        type: "checkbox",
+        label: "Cooperating person",
+        hint:
+          "Use this when ZUS should be calculated for a cooperating family member or similar status, which uses the standard contribution base instead of start-up relief.",
+        categories: [ "self_employed" ],
+        defaultValue: false,
+        resultInputKey: "cooperating_person"
+      },
+      {
+        key: "months_since_business_start",
+        type: "number",
+        label: "Months since business start",
+        hint:
+          "Lets the calculator choose start relief for the first 6 months and preferential ZUS for months 7-30 before falling back to the selected ZUS mode.",
+        categories: [ "self_employed" ],
+        defaultValue: "37",
+        min: 0,
+        step: 1,
+        resultInputKey: "months_since_business_start"
+      },
+      {
         key: "previous_year_average_monthly_income",
         type: "currency",
         label: "Previous-year average monthly income",
@@ -154,6 +194,8 @@ const polandCalculatorConfig = {
         key: "include_sickness_contribution",
         type: "checkbox",
         label: "Include sickness contribution",
+        hint:
+          "Optional ZUS sickness insurance for B2B taxpayers. Turning it off removes that social-insurance component.",
         categories: [ "self_employed" ],
         defaultValue: true,
         resultInputKey: "include_sickness_contribution",
@@ -181,6 +223,34 @@ const polandCalculatorConfig = {
         resultInputKey: "apply_return_relief"
       },
       {
+        key: "return_relief_prior_non_resident",
+        type: "checkbox",
+        label: "Prior non-residence",
+        hint:
+          "Return relief requires a qualifying period of non-residence before moving Polish tax residence back to Poland.",
+        categories: [ "employee", "self_employed" ],
+        defaultValue: false,
+        resultInputKey: "return_relief_prior_non_resident",
+        visibleWhen: (controlValues) => Boolean(controlValues.apply_return_relief)
+      },
+      {
+        key: "return_relief_year",
+        type: "select",
+        label: "Return relief year",
+        hint:
+          "Select which of the four eligible tax years after return this estimate represents.",
+        categories: [ "employee", "self_employed" ],
+        defaultValue: "1",
+        resultInputKey: "return_relief_year",
+        visibleWhen: (controlValues) => Boolean(controlValues.apply_return_relief),
+        options: [
+          { value: "1", label: "Year 1" },
+          { value: "2", label: "Year 2" },
+          { value: "3", label: "Year 3" },
+          { value: "4", label: "Year 4" }
+        ]
+      },
+      {
         key: "apply_family_4plus_relief",
         type: "checkbox",
         label: "Apply family 4+ relief",
@@ -199,12 +269,114 @@ const polandCalculatorConfig = {
         categories: [ "employee", "self_employed" ],
         defaultValue: false,
         resultInputKey: "apply_working_senior_relief"
+      },
+      {
+        key: "working_senior_receives_pension",
+        type: "checkbox",
+        label: "Receiving pension",
+        hint:
+          "Working-senior relief is available only when the taxpayer has reached retirement age but is not receiving the pension covered by the exclusion.",
+        categories: [ "employee", "self_employed" ],
+        defaultValue: false,
+        resultInputKey: "working_senior_receives_pension",
+        visibleWhen: (controlValues) => Boolean(controlValues.apply_working_senior_relief)
+      },
+      {
+        key: "birth_year",
+        type: "select",
+        label: "Birth year",
+        hint:
+          "Used with the income-type selector to test relief for young people more directly than the broad age bucket.",
+        categories: [ "employee" ],
+        defaultValue: "2000",
+        resultInputKey: "birth_year",
+        options: yearsDescending(1940, 2010)
+      },
+      {
+        key: "young_worker_relief_income_type",
+        type: "select",
+        label: "Young-relief income type",
+        hint:
+          "Relief for young people applies to qualifying employment-style income; choose other when the income should not receive the under-26 exemption.",
+        categories: [ "employee" ],
+        defaultValue: "employment",
+        resultInputKey: "young_worker_relief_income_type",
+        options: [
+          { value: "employment", label: "Employment income" },
+          { value: "other", label: "Other income" }
+        ]
+      },
+      {
+        key: "filing_status",
+        type: "select",
+        label: "Filing status",
+        hint:
+          "Applies a simplified individual, joint-spouse, or single-parent tax calculation before child relief.",
+        categories: [ "employee" ],
+        defaultValue: "individual",
+        resultInputKey: "filing_status",
+        options: [
+          { value: "individual", label: "Individual" },
+          { value: "joint_spouse", label: "Joint with spouse" },
+          { value: "single_parent", label: "Single parent" }
+        ]
+      },
+      {
+        key: "spouse_income",
+        type: "currency",
+        label: "Spouse income",
+        hint:
+          "Annual spouse income used for the simplified joint-spouse quotient and married household child-relief threshold.",
+        categories: [ "employee" ],
+        defaultValue: "0",
+        resultInputKey: "spouse_income",
+        visibleWhen: (controlValues) =>
+          controlValues.filing_status === "joint_spouse" ||
+          controlValues.child_relief_household_status === "married"
+      },
+      {
+        key: "child_relief_household_status",
+        type: "select",
+        label: "Child-relief household",
+        hint:
+          "Controls the one-child income threshold: single taxpayers use the lower threshold, while married and single-parent households use the household threshold.",
+        categories: [ "employee" ],
+        defaultValue: "single",
+        resultInputKey: "child_relief_household_status",
+        options: [
+          { value: "single", label: "Single" },
+          { value: "married", label: "Married household" },
+          { value: "single_parent", label: "Single-parent household" }
+        ]
+      },
+      {
+        key: "child_relief_household_income",
+        type: "currency",
+        label: "Child-relief household income",
+        hint:
+          "Annual income tested against the one-child limit. Leave 0 only when you want the backend to infer it from taxpayer income and spouse income.",
+        categories: [ "employee" ],
+        defaultValue: "",
+        resultInputKey: "child_relief_household_income"
+      },
+      {
+        key: "child_relief_claim_share",
+        type: "select",
+        label: "Child-relief claim share",
+        hint:
+          "Percentage of the annual child relief claimed by this taxpayer, useful when parents split the claim.",
+        categories: [ "employee" ],
+        defaultValue: "100",
+        resultInputKey: "child_relief_claim_share",
+        options: percentageOptions([ 0, 25, 50, 75, 100 ])
       }
     ],
     showAgeField: [ "employee" ],
     ageFieldHint:
       "For employment contracts, the under-26 bracket applies Poland's relief for young people automatically. Retirement-age relief still requires the dedicated working-senior option if you qualify.",
     showChildrenCountField: [ "employee", "self_employed" ],
+    childrenCountHint:
+      "Used for Poland's child relief on PIT-scale income and to validate family 4+ relief eligibility.",
     showChildrenUnderThreeField: false,
     showDisabilityField: false,
     ageBracketOptions: [

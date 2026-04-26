@@ -27,7 +27,24 @@ module Api
             housing_rent: calculation_params[:housing_rent],
             alimony_paid: calculation_params[:alimony_paid],
             care_home_expenses: calculation_params[:care_home_expenses],
-            domestic_work_expenses: calculation_params[:domestic_work_expenses]
+            domestic_work_expenses: calculation_params[:domestic_work_expenses],
+            young_dependents_second_later_under_six_count: calculation_params[:young_dependents_second_later_under_six_count],
+            vat_invoice_expenses: calculation_params[:vat_invoice_expenses],
+            vat_invoice_validation_state: calculation_params[:vat_invoice_validation_state],
+            disability_rehabilitation_expenses: calculation_params[:disability_rehabilitation_expenses],
+            disability_insurance_premiums: calculation_params[:disability_insurance_premiums],
+            ppr_contributions: calculation_params[:ppr_contributions],
+            ppr_age_band: calculation_params[:ppr_age_band],
+            donations: calculation_params[:donations],
+            filing_status: calculation_params[:filing_status],
+            apply_irs_jovem: calculation_params[:apply_irs_jovem],
+            irs_jovem_year: calculation_params[:irs_jovem_year],
+            union_dues: calculation_params[:union_dues],
+            professional_order_dues: calculation_params[:professional_order_dues],
+            self_employed_tax_regime: calculation_params[:self_employed_tax_regime],
+            start_activity_year: calculation_params[:start_activity_year],
+            social_security_exemption: calculation_params[:social_security_exemption],
+            social_security_adjustment_mode: calculation_params[:social_security_adjustment_mode]
           )
         end
 
@@ -53,7 +70,24 @@ module Api
             :housing_rent,
             :alimony_paid,
             :care_home_expenses,
-            :domestic_work_expenses
+            :domestic_work_expenses,
+            :young_dependents_second_later_under_six_count,
+            :vat_invoice_expenses,
+            :vat_invoice_validation_state,
+            :disability_rehabilitation_expenses,
+            :disability_insurance_premiums,
+            :ppr_contributions,
+            :ppr_age_band,
+            :donations,
+            :filing_status,
+            :apply_irs_jovem,
+            :irs_jovem_year,
+            :union_dues,
+            :professional_order_dues,
+            :self_employed_tax_regime,
+            :start_activity_year,
+            :social_security_exemption,
+            :social_security_adjustment_mode
           )
         end
 

@@ -6,13 +6,33 @@ import NumberField from "./fields/NumberField";
 import SegmentedControl from "./fields/SegmentedControl";
 import SelectField from "./fields/SelectField";
 
+function fallbackControlHint(control) {
+  if (control.hint) return control.hint;
+  if (control.type === "checkbox") {
+    return "Turn this on only when the underlying tax condition applies; unchecked leaves that rule out of the estimate.";
+  }
+  if (control.type === "select") {
+    return "This changes which statutory path, eligibility band, or calculation method is applied for the selected year.";
+  }
+  if (control.type === "currency") {
+    return "Enter the annual eligible amount in the selected input currency; keep 0 when the deduction or expense does not apply.";
+  }
+  if (control.type === "number") {
+    return "Enter the count, percentage, days, hours, or kilometres used by this rule; keep 0 when it does not apply.";
+  }
+
+  return null;
+}
+
 function renderRegimeControl(control, value, onChange, currencyCode) {
+  const hint = fallbackControlHint(control);
+
   if (control.type === "checkbox") {
     return (
       <CheckboxField
         key={control.key}
         checked={Boolean(value)}
-        hint={control.hint}
+        hint={hint}
         label={control.label}
         onChange={(event) => onChange(control.key, event.target.checked)}
       />
@@ -23,7 +43,7 @@ function renderRegimeControl(control, value, onChange, currencyCode) {
     return (
       <SelectField
         key={control.key}
-        hint={control.hint}
+        hint={hint}
         label={control.label}
         onChange={(event) => onChange(control.key, event.target.value)}
         options={control.options}
@@ -37,7 +57,7 @@ function renderRegimeControl(control, value, onChange, currencyCode) {
       <CurrencyField
         key={control.key}
         currencyCode={control.currencyCode || currencyCode}
-        hint={control.hint}
+        hint={hint}
         label={control.label}
         onChange={(event) => onChange(control.key, event.target.value)}
         value={value}
@@ -49,7 +69,7 @@ function renderRegimeControl(control, value, onChange, currencyCode) {
     return (
       <NumberField
         key={control.key}
-        hint={control.hint}
+        hint={hint}
         label={control.label}
         max={control.max}
         min={control.min}
@@ -69,14 +89,17 @@ export default function TaxCalculatorForm({
   ageBracketOptions,
   ageFieldHint,
   childrenCount,
+  childrenCountHint = null,
   childrenCountNumber,
   childrenCountOptions,
   childrenUnderThreeCount,
+  childrenUnderThreeHint = null,
   childrenUnderThreeOptions,
   countryOptions,
   currencyCode,
   deductibleExpenses,
   disabilityLevel,
+  disabilityFieldHint = null,
   disabilityOptions,
   errors,
   grossIncome,
@@ -130,6 +153,7 @@ export default function TaxCalculatorForm({
       {countryOptions.length > 1 ? (
         <SelectField
           disabled={isCountrySwitching}
+          hint="Sets the country-specific calculator, official source set, currency defaults, and available tax profiles."
           label="Country"
           onChange={onCountryChange}
           options={countryOptions.map((countryOption) => ({
@@ -142,6 +166,7 @@ export default function TaxCalculatorForm({
 
       <div className={`field-row ${showRegionField ? "" : "field-row--single"}`.trim()}>
         <SelectField
+          hint="Controls which rates, thresholds, credits, contribution caps, and source-backed rules are applied."
           label="Tax year"
           onChange={onTaxYearChange}
           options={taxYearOptions.map((year) => ({ value: String(year), label: String(year) }))}
@@ -150,6 +175,7 @@ export default function TaxCalculatorForm({
 
         {showRegionField ? (
           <SelectField
+            hint="Applies regional tax differences where the country has location-specific rates, deductions, or minimums."
             label="Region"
             onChange={onRegionChange}
             options={regionOptions.map((region) => ({
@@ -162,6 +188,7 @@ export default function TaxCalculatorForm({
       </div>
 
       <SegmentedControl
+        hint="Changes the calculation path between payroll-style employment income and business-income rules."
         label="Tax profile"
         onChange={onCategoryChange}
         options={profileOptions}
@@ -170,6 +197,7 @@ export default function TaxCalculatorForm({
 
       {inputCurrencyOptions.length > 1 ? (
         <SelectField
+          hint="Defines the currency for entered amounts; supported calculators convert and display results consistently."
           label="Input currency"
           onChange={onInputCurrencyChange}
           options={inputCurrencyOptions.map((currencyOption) => ({
@@ -182,6 +210,7 @@ export default function TaxCalculatorForm({
 
       <CurrencyField
         currencyCode={inputCurrencyCode}
+        hint="Gross income before tax, credits, deductions, and social-security or contribution effects."
         label={incomeLabel}
         onChange={onGrossIncomeChange}
         value={grossIncome}
@@ -190,6 +219,7 @@ export default function TaxCalculatorForm({
       {showDeductibleExpenses ? (
         <CurrencyField
           currencyCode={inputCurrencyCode}
+          hint="Business expenses that reduce profit before tax when the selected self-employed method accepts actual costs."
           label="Deductible expenses"
           onChange={onDeductibleExpensesChange}
           value={deductibleExpenses}
@@ -197,6 +227,7 @@ export default function TaxCalculatorForm({
       ) : null}
 
       <SegmentedControl
+        hint="Determines whether the income amount is used as a yearly value or annualized from a monthly value."
         label={periodLabel}
         onChange={onSalaryPeriodChange}
         options={salaryPeriodOptions}
@@ -217,7 +248,7 @@ export default function TaxCalculatorForm({
         >
           {showAgeField ? (
             <SelectField
-              hint={ageFieldHint}
+              hint={ageFieldHint || "Affects age-based allowances, credits, contribution rates, and retirement-age rules where supported."}
               label="Taxpayer age"
               onChange={onAgeBracketChange}
               options={ageBracketOptions}
@@ -227,6 +258,7 @@ export default function TaxCalculatorForm({
 
           {showChildrenCountField ? (
             <SelectField
+              hint={childrenCountHint || "Used for child-related credits, minimums, family allowances, and dependent-based reliefs."}
               label="Children"
               onChange={onChildrenCountChange}
               options={childrenCountOptions}
@@ -237,6 +269,7 @@ export default function TaxCalculatorForm({
           {showChildrenUnderThreeField ? (
             <SelectField
               disabled={childrenCountNumber === 0}
+              hint={childrenUnderThreeHint || "Applies early-childhood relief rules and is capped by the total dependent-children count."}
               label="Children under 3"
               onChange={onChildrenUnderThreeChange}
               options={childrenUnderThreeOptions}
@@ -248,6 +281,7 @@ export default function TaxCalculatorForm({
 
       {showPersonalReliefFields && showDisabilityField ? (
         <SelectField
+          hint={disabilityFieldHint || "Applies disability-linked allowances, credits, or personal minimum increases where the country supports them."}
           label="Taxpayer disability"
           onChange={onDisabilityLevelChange}
           options={resolvedDisabilityOptions}

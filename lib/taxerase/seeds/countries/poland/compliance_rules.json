@@ -1,0 +1,217 @@
+{
+  "country_code": "PL",
+  "reports": [
+    {
+      "key": "pit_annual",
+      "name": "Annual PIT return",
+      "tax_year": 2026,
+      "tax_years": [2025, 2026, 2027],
+      "description": "Poland annual PIT filing window for the 2025 income year.",
+      "workflows": [
+        {
+          "key": "review_twoj_epit",
+          "name": "Review Twoj e-PIT data",
+          "description": "Review pre-filled income, reliefs, child relief, filing status, and payments before submitting the annual PIT return.",
+          "reference_url": "https://www.podatki.gov.pl/en/residents/tax-filings/"
+        },
+        {
+          "key": "submit_pit",
+          "name": "Submit annual PIT return",
+          "description": "Submit the annual PIT return during the 15 February to 30 April filing window.",
+          "reference_url": "https://www.podatki.gov.pl/en/residents/tax-filings/"
+        },
+        {
+          "key": "settle_pit_balance",
+          "name": "Settle annual PIT balance",
+          "description": "Pay the annual PIT balance by the annual return deadline when the return produces tax due.",
+          "reference_url": "https://www.podatki.gov.pl/en/residents/tax-filings/"
+        }
+      ],
+      "events": [
+        {
+          "key": "annual_submission",
+          "title": "2025 annual PIT submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-04-30",
+          "window_start_date": "2026-02-15",
+          "window_end_date": "2026-04-30",
+          "description": "Annual PIT returns for 2025 income are submitted between 15 February and 30 April 2026."
+        },
+        {
+          "key": "annual_payment",
+          "title": "2025 annual PIT payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-04-30",
+          "description": "Any annual PIT balance for the 2025 return is generally paid by 30 April 2026."
+        }
+      ]
+    },
+    {
+      "key": "pit_advance_monthly",
+      "name": "Monthly PIT advances",
+      "tax_year": 2026,
+      "tax_years": [2025, 2026, 2027],
+      "description": "Poland monthly PIT advance payment calendar for 2026 business income.",
+      "workflows": [
+        {
+          "key": "prepare_pit_advance",
+          "name": "Prepare PIT advance",
+          "description": "Reconcile monthly taxable income, deductible costs, relief eligibility, and prior advances before paying the PIT advance.",
+          "reference_url": "https://www.podatki.gov.pl/en/residents/tax-filings/"
+        },
+        {
+          "key": "pay_pit_advance",
+          "name": "Pay PIT advance",
+          "description": "Pay the monthly PIT advance by the 20th day of the following month, adjusted here for weekends and holidays.",
+          "reference_url": "https://www.podatki.gov.pl/en/residents/tax-filings/"
+        }
+      ],
+      "events": [
+        { "key": "jan_payment", "title": "January 2026 PIT advance payment deadline", "event_type": "payment", "event_date": "2026-02-20", "description": "PIT advance for January 2026 is due by 20 February 2026." },
+        { "key": "feb_payment", "title": "February 2026 PIT advance payment deadline", "event_type": "payment", "event_date": "2026-03-20", "description": "PIT advance for February 2026 is due by 20 March 2026." },
+        { "key": "mar_payment", "title": "March 2026 PIT advance payment deadline", "event_type": "payment", "event_date": "2026-04-20", "description": "PIT advance for March 2026 is due by 20 April 2026." },
+        { "key": "apr_payment", "title": "April 2026 PIT advance payment deadline", "event_type": "payment", "event_date": "2026-05-20", "description": "PIT advance for April 2026 is due by 20 May 2026." },
+        { "key": "may_payment", "title": "May 2026 PIT advance payment deadline", "event_type": "payment", "event_date": "2026-06-22", "description": "PIT advance for May 2026 is due by 22 June 2026 because 20 June falls on a Saturday." },
+        { "key": "jun_payment", "title": "June 2026 PIT advance payment deadline", "event_type": "payment", "event_date": "2026-07-20", "description": "PIT advance for June 2026 is due by 20 July 2026." },
+        { "key": "jul_payment", "title": "July 2026 PIT advance payment deadline", "event_type": "payment", "event_date": "2026-08-20", "description": "PIT advance for July 2026 is due by 20 August 2026." },
+        { "key": "aug_payment", "title": "August 2026 PIT advance payment deadline", "event_type": "payment", "event_date": "2026-09-21", "description": "PIT advance for August 2026 is due by 21 September 2026 because 20 September falls on a Sunday." },
+        { "key": "sep_payment", "title": "September 2026 PIT advance payment deadline", "event_type": "payment", "event_date": "2026-10-20", "description": "PIT advance for September 2026 is due by 20 October 2026." },
+        { "key": "oct_payment", "title": "October 2026 PIT advance payment deadline", "event_type": "payment", "event_date": "2026-11-20", "description": "PIT advance for October 2026 is due by 20 November 2026." },
+        { "key": "nov_payment", "title": "November 2026 PIT advance payment deadline", "event_type": "payment", "event_date": "2026-12-21", "description": "PIT advance for November 2026 is due by 21 December 2026 because 20 December falls on a Sunday." },
+        { "key": "dec_payment", "title": "December 2026 PIT advance payment deadline", "event_type": "payment", "event_date": "2027-01-20", "description": "PIT advance for December 2026 is due by 20 January 2027." }
+      ]
+    },
+    {
+      "key": "jpk_v7_monthly",
+      "name": "Monthly JPK_V7M VAT return",
+      "tax_year": 2026,
+      "tax_years": [2025, 2026, 2027],
+      "description": "Poland monthly JPK_V7M return and VAT payment calendar for active VAT taxpayers in 2026.",
+      "workflows": [
+        {
+          "key": "reconcile_jpk_v7m",
+          "name": "Reconcile JPK_V7M",
+          "description": "Reconcile VAT sales, purchase registers, GTU markers, split-payment indicators, and corrections before filing.",
+          "reference_url": "https://www.podatki.gov.pl/en/value-added-tax/paying-vat/"
+        },
+        {
+          "key": "submit_jpk_v7m",
+          "name": "Submit JPK_V7M",
+          "description": "Submit the monthly JPK_VAT file with declaration by the 25th day of the following month.",
+          "reference_url": "https://www.podatki.gov.pl/en/value-added-tax/paying-vat/"
+        },
+        {
+          "key": "pay_monthly_vat",
+          "name": "Pay monthly VAT",
+          "description": "Pay the monthly VAT balance by the same statutory deadline when the return is payable.",
+          "reference_url": "https://www.podatki.gov.pl/en/value-added-tax/paying-vat/"
+        }
+      ],
+      "events": [
+        { "key": "jan_submission", "title": "January 2026 JPK_V7M deadline", "event_type": "submission", "event_date": "2026-02-25", "description": "JPK_V7M for January 2026 is due by 25 February 2026." },
+        { "key": "jan_payment", "title": "January 2026 VAT payment deadline", "event_type": "payment", "event_date": "2026-02-25", "description": "VAT for January 2026 is due by 25 February 2026 when payable." },
+        { "key": "feb_submission", "title": "February 2026 JPK_V7M deadline", "event_type": "submission", "event_date": "2026-03-25", "description": "JPK_V7M for February 2026 is due by 25 March 2026." },
+        { "key": "feb_payment", "title": "February 2026 VAT payment deadline", "event_type": "payment", "event_date": "2026-03-25", "description": "VAT for February 2026 is due by 25 March 2026 when payable." },
+        { "key": "mar_submission", "title": "March 2026 JPK_V7M deadline", "event_type": "submission", "event_date": "2026-04-27", "description": "JPK_V7M for March 2026 is due by 27 April 2026 because 25 April falls on a Saturday." },
+        { "key": "mar_payment", "title": "March 2026 VAT payment deadline", "event_type": "payment", "event_date": "2026-04-27", "description": "VAT for March 2026 is due by 27 April 2026 when payable." },
+        { "key": "apr_submission", "title": "April 2026 JPK_V7M deadline", "event_type": "submission", "event_date": "2026-05-25", "description": "JPK_V7M for April 2026 is due by 25 May 2026." },
+        { "key": "apr_payment", "title": "April 2026 VAT payment deadline", "event_type": "payment", "event_date": "2026-05-25", "description": "VAT for April 2026 is due by 25 May 2026 when payable." },
+        { "key": "may_submission", "title": "May 2026 JPK_V7M deadline", "event_type": "submission", "event_date": "2026-06-25", "description": "JPK_V7M for May 2026 is due by 25 June 2026." },
+        { "key": "may_payment", "title": "May 2026 VAT payment deadline", "event_type": "payment", "event_date": "2026-06-25", "description": "VAT for May 2026 is due by 25 June 2026 when payable." },
+        { "key": "jun_submission", "title": "June 2026 JPK_V7M deadline", "event_type": "submission", "event_date": "2026-07-27", "description": "JPK_V7M for June 2026 is due by 27 July 2026 because 25 July falls on a Saturday." },
+        { "key": "jun_payment", "title": "June 2026 VAT payment deadline", "event_type": "payment", "event_date": "2026-07-27", "description": "VAT for June 2026 is due by 27 July 2026 when payable." },
+        { "key": "jul_submission", "title": "July 2026 JPK_V7M deadline", "event_type": "submission", "event_date": "2026-08-25", "description": "JPK_V7M for July 2026 is due by 25 August 2026." },
+        { "key": "jul_payment", "title": "July 2026 VAT payment deadline", "event_type": "payment", "event_date": "2026-08-25", "description": "VAT for July 2026 is due by 25 August 2026 when payable." },
+        { "key": "aug_submission", "title": "August 2026 JPK_V7M deadline", "event_type": "submission", "event_date": "2026-09-25", "description": "JPK_V7M for August 2026 is due by 25 September 2026." },
+        { "key": "aug_payment", "title": "August 2026 VAT payment deadline", "event_type": "payment", "event_date": "2026-09-25", "description": "VAT for August 2026 is due by 25 September 2026 when payable." },
+        { "key": "sep_submission", "title": "September 2026 JPK_V7M deadline", "event_type": "submission", "event_date": "2026-10-26", "description": "JPK_V7M for September 2026 is due by 26 October 2026 because 25 October falls on a Sunday." },
+        { "key": "sep_payment", "title": "September 2026 VAT payment deadline", "event_type": "payment", "event_date": "2026-10-26", "description": "VAT for September 2026 is due by 26 October 2026 when payable." },
+        { "key": "oct_submission", "title": "October 2026 JPK_V7M deadline", "event_type": "submission", "event_date": "2026-11-25", "description": "JPK_V7M for October 2026 is due by 25 November 2026." },
+        { "key": "oct_payment", "title": "October 2026 VAT payment deadline", "event_type": "payment", "event_date": "2026-11-25", "description": "VAT for October 2026 is due by 25 November 2026 when payable." },
+        { "key": "nov_submission", "title": "November 2026 JPK_V7M deadline", "event_type": "submission", "event_date": "2026-12-28", "description": "JPK_V7M for November 2026 is due by 28 December 2026 because 25 December is a holiday." },
+        { "key": "nov_payment", "title": "November 2026 VAT payment deadline", "event_type": "payment", "event_date": "2026-12-28", "description": "VAT for November 2026 is due by 28 December 2026 when payable." },
+        { "key": "dec_submission", "title": "December 2026 JPK_V7M deadline", "event_type": "submission", "event_date": "2027-01-25", "description": "JPK_V7M for December 2026 is due by 25 January 2027." },
+        { "key": "dec_payment", "title": "December 2026 VAT payment deadline", "event_type": "payment", "event_date": "2027-01-25", "description": "VAT for December 2026 is due by 25 January 2027 when payable." }
+      ]
+    },
+    {
+      "key": "zus_dra_monthly",
+      "name": "Monthly ZUS DRA",
+      "tax_year": 2026,
+      "tax_years": [2025, 2026, 2027],
+      "description": "Poland monthly ZUS DRA declaration and contribution payment calendar for entrepreneurs in 2026.",
+      "workflows": [
+        {
+          "key": "prepare_zus_dra",
+          "name": "Prepare ZUS DRA",
+          "description": "Confirm insurance code, start relief, preferential ZUS, sickness insurance, and health-contribution base before settlement.",
+          "reference_url": "https://www.zus.pl/"
+        },
+        {
+          "key": "submit_and_pay_zus",
+          "name": "Submit and pay ZUS",
+          "description": "Submit the settlement declaration where required and pay contributions by the monthly entrepreneur deadline.",
+          "reference_url": "https://www.zus.pl/"
+        }
+      ],
+      "events": [
+        { "key": "jan_payment", "title": "January 2026 ZUS DRA deadline", "event_type": "submission", "event_date": "2026-02-20", "description": "ZUS DRA settlement for January 2026 is due by 20 February 2026 where required." },
+        { "key": "feb_payment", "title": "February 2026 ZUS DRA deadline", "event_type": "submission", "event_date": "2026-03-20", "description": "ZUS DRA settlement for February 2026 is due by 20 March 2026 where required." },
+        { "key": "mar_payment", "title": "March 2026 ZUS DRA deadline", "event_type": "submission", "event_date": "2026-04-20", "description": "ZUS DRA settlement for March 2026 is due by 20 April 2026 where required." },
+        { "key": "apr_payment", "title": "April 2026 ZUS DRA deadline", "event_type": "submission", "event_date": "2026-05-20", "description": "ZUS DRA settlement for April 2026 is due by 20 May 2026 where required." },
+        { "key": "may_payment", "title": "May 2026 ZUS DRA deadline", "event_type": "submission", "event_date": "2026-06-22", "description": "ZUS DRA settlement for May 2026 is due by 22 June 2026 because 20 June falls on a Saturday." },
+        { "key": "jun_payment", "title": "June 2026 ZUS DRA deadline", "event_type": "submission", "event_date": "2026-07-20", "description": "ZUS DRA settlement for June 2026 is due by 20 July 2026 where required." },
+        { "key": "jul_payment", "title": "July 2026 ZUS DRA deadline", "event_type": "submission", "event_date": "2026-08-20", "description": "ZUS DRA settlement for July 2026 is due by 20 August 2026 where required." },
+        { "key": "aug_payment", "title": "August 2026 ZUS DRA deadline", "event_type": "submission", "event_date": "2026-09-21", "description": "ZUS DRA settlement for August 2026 is due by 21 September 2026 because 20 September falls on a Sunday." },
+        { "key": "sep_payment", "title": "September 2026 ZUS DRA deadline", "event_type": "submission", "event_date": "2026-10-20", "description": "ZUS DRA settlement for September 2026 is due by 20 October 2026 where required." },
+        { "key": "oct_payment", "title": "October 2026 ZUS DRA deadline", "event_type": "submission", "event_date": "2026-11-20", "description": "ZUS DRA settlement for October 2026 is due by 20 November 2026 where required." },
+        { "key": "nov_payment", "title": "November 2026 ZUS DRA deadline", "event_type": "submission", "event_date": "2026-12-21", "description": "ZUS DRA settlement for November 2026 is due by 21 December 2026 because 20 December falls on a Sunday." },
+        { "key": "dec_payment", "title": "December 2026 ZUS DRA deadline", "event_type": "submission", "event_date": "2027-01-20", "description": "ZUS DRA settlement for December 2026 is due by 20 January 2027 where required." }
+      ]
+    },
+    {
+      "key": "ksef_rollout",
+      "name": "KSeF rollout",
+      "tax_year": 2026,
+      "tax_years": [2025, 2026, 2027],
+      "description": "Poland KSeF mandatory structured-invoice rollout checkpoints for 2026.",
+      "workflows": [
+        {
+          "key": "assess_ksef_scope",
+          "name": "Assess KSeF scope",
+          "description": "Determine whether the taxpayer is in the large-taxpayer, ordinary taxpayer, or small-invoice transition group.",
+          "reference_url": "https://ksef.podatki.gov.pl/informacje-ogolne-ksef-20/zakres-obowiazkowego-ksef/"
+        },
+        {
+          "key": "configure_ksef_access",
+          "name": "Configure KSeF access",
+          "description": "Set up KSeF authentication, permissions, invoice schema handling, and accounting-system integration before the relevant obligation date.",
+          "reference_url": "https://ksef.podatki.gov.pl/informacje-ogolne-ksef-20/zakres-obowiazkowego-ksef/"
+        }
+      ],
+      "events": [
+        {
+          "key": "large_taxpayer_start",
+          "title": "KSeF mandatory start for large taxpayers",
+          "event_type": "submission",
+          "event_date": "2026-02-01",
+          "description": "KSeF structured invoicing becomes mandatory from 1 February 2026 for taxpayers whose 2024 sales exceeded PLN 200 million gross."
+        },
+        {
+          "key": "ordinary_taxpayer_start",
+          "title": "KSeF mandatory start for other taxpayers",
+          "event_type": "submission",
+          "event_date": "2026-04-01",
+          "description": "KSeF structured invoicing becomes mandatory from 1 April 2026 for other covered taxpayers, subject to transition rules."
+        },
+        {
+          "key": "small_invoice_transition_end",
+          "title": "KSeF small-invoice transition end",
+          "event_type": "submission",
+          "event_date": "2027-01-01",
+          "description": "The 2026 small monthly invoice-value transition ends on 1 January 2027 for taxpayers covered by that deferral."
+        }
+      ]
+    }
+  ]
+}

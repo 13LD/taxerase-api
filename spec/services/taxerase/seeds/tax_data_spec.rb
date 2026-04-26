@@ -49,6 +49,18 @@ RSpec.describe Taxerase::Seeds::TaxData do
       annual_btw = netherlands.tax_reports.find_by!(key: "btw_aangifte_jaar", tax_year: 2026)
       opgaaf_icp = netherlands.tax_reports.find_by!(key: "opgaaf_icp", tax_year: 2026)
       inkomstenbelasting_2027 = netherlands.tax_reports.find_by!(key: "inkomstenbelasting", tax_year: 2027)
+      portugal_modelo_3 = portugal.tax_reports.find_by!(key: "irs_modelo_3", tax_year: 2026)
+      portugal_quarterly_iva = portugal.tax_reports.find_by!(key: "iva_periodica_trimestral", tax_year: 2026)
+      portugal_monthly_iva = portugal.tax_reports.find_by!(key: "iva_periodica_mensal", tax_year: 2026)
+      portugal_invoice_communication = portugal.tax_reports.find_by!(key: "comunicacao_faturas", tax_year: 2026)
+      portugal_quarterly_iva_2027 = portugal.tax_reports.find_by!(key: "iva_periodica_trimestral", tax_year: 2027)
+      poland_pit_annual = poland.tax_reports.find_by!(key: "pit_annual", tax_year: 2026)
+      poland_jpk_v7m = poland.tax_reports.find_by!(key: "jpk_v7_monthly", tax_year: 2026)
+      poland_ksef_rollout = poland.tax_reports.find_by!(key: "ksef_rollout", tax_year: 2026)
+      czech_income_tax = czech_republic.tax_reports.find_by!(key: "personal_income_tax_return", tax_year: 2026)
+      czech_vat_return = czech_republic.tax_reports.find_by!(key: "vat_return_monthly", tax_year: 2026)
+      czech_control_statement = czech_republic.tax_reports.find_by!(key: "vat_control_statement_monthly", tax_year: 2026)
+      czech_pausalni_dan = czech_republic.tax_reports.find_by!(key: "pausalni_dan_monthly", tax_year: 2026)
 
       expect(spain.tax_reports.where(tax_year: 2025..2027).group(:tax_year).count).to eq(
         2025 => 5,
@@ -84,6 +96,42 @@ RSpec.describe Taxerase::Seeds::TaxData do
       expect(opgaaf_icp.report_events.find_by!(key: "q4_submission").event_date).to eq(Date.new(2027, 2, 28))
       expect(inkomstenbelasting_2027.description).to include("2027 income year")
       expect(inkomstenbelasting_2027.report_events.find_by!(key: "annual_submission").event_date).to eq(Date.new(2028, 5, 1))
+
+      expect(portugal.tax_reports.where(tax_year: 2025..2027).group(:tax_year).count).to eq(
+        2025 => 5,
+        2026 => 5,
+        2027 => 5
+      )
+      expect(portugal_modelo_3.report_workflows.pluck(:name)).to include("Submit Declaracao Modelo 3")
+      expect(workflow_for(portugal_modelo_3, "submit_modelo_3").reference_url).to eq(portugal_declarations_reference_url)
+      expect(workflow_for(portugal_quarterly_iva, "pay_quarterly_iva").reference_url).to eq(portugal_payments_reference_url)
+      expect(portugal_modelo_3.report_events.find_by!(key: "annual_submission").window_start_date).to eq(Date.new(2026, 4, 1))
+      expect(portugal_quarterly_iva.report_events.find_by!(key: "q4_payment").event_date).to eq(Date.new(2027, 2, 25))
+      expect(portugal_quarterly_iva_2027.report_events.find_by!(key: "q4_payment").event_date).to eq(Date.new(2028, 2, 25))
+      expect(portugal_monthly_iva.report_events.find_by!(key: "sep_submission").event_date).to eq(Date.new(2026, 9, 21))
+      expect(portugal_invoice_communication.report_events.find_by!(key: "aug_submission").event_date).to eq(Date.new(2026, 8, 31))
+
+      expect(poland.tax_reports.where(tax_year: 2025..2027).group(:tax_year).count).to eq(
+        2025 => 5,
+        2026 => 5,
+        2027 => 5
+      )
+      expect(poland_pit_annual.report_events.find_by!(key: "annual_submission").event_date).to eq(Date.new(2026, 4, 30))
+      expect(poland_jpk_v7m.report_events.find_by!(key: "nov_submission").event_date).to eq(Date.new(2026, 12, 28))
+      expect(poland_jpk_v7m.report_events.find_by!(key: "dec_payment").event_date).to eq(Date.new(2027, 1, 25))
+      expect(workflow_for(poland_ksef_rollout, "configure_ksef_access").reference_url).to eq(ksef_reference_url)
+      expect(poland_ksef_rollout.report_events.find_by!(key: "ordinary_taxpayer_start").event_date).to eq(Date.new(2026, 4, 1))
+
+      expect(czech_republic.tax_reports.where(tax_year: 2025..2027).group(:tax_year).count).to eq(
+        2025 => 5,
+        2026 => 5,
+        2027 => 5
+      )
+      expect(czech_income_tax.report_events.find_by!(key: "paper_submission").event_date).to eq(Date.new(2026, 4, 1))
+      expect(czech_income_tax.report_events.find_by!(key: "electronic_submission").event_date).to eq(Date.new(2026, 5, 4))
+      expect(czech_vat_return.report_events.find_by!(key: "nov_payment").event_date).to eq(Date.new(2026, 12, 28))
+      expect(czech_control_statement.report_workflows.pluck(:name)).to include("Submit control statement")
+      expect(czech_pausalni_dan.report_events.find_by!(key: "dec_payment").event_date).to eq(Date.new(2026, 12, 21))
     end
   end
 
@@ -109,6 +157,18 @@ RSpec.describe Taxerase::Seeds::TaxData do
 
   def icp_reference_url
     "https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/zakelijk/btw/zakendoen_met_het_buitenland/goederen_en_diensten_naar_andere_eu_landen/opgaaf_icp/"
+  end
+
+  def portugal_declarations_reference_url
+    "https://info.portaldasfinancas.gov.pt/pt/apoio_contribuinte/calendario_fiscal/Pages/Quadro_res_Decl_2026.aspx"
+  end
+
+  def portugal_payments_reference_url
+    "https://info.portaldasfinancas.gov.pt/pt/apoio_contribuinte/calendario_fiscal/Pages/Quadro_res_Pag_2026.aspx"
+  end
+
+  def ksef_reference_url
+    "https://ksef.podatki.gov.pl/informacje-ogolne-ksef-20/zakres-obowiazkowego-ksef/"
   end
 
   def source_mismatches_for(country)

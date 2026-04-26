@@ -86,6 +86,15 @@ function calendarYearBounds(calendar, fallbackYear) {
   };
 }
 
+function centerMonthInChart(chartElement, monthElement) {
+  const targetLeft = monthElement.offsetLeft - ((chartElement.clientWidth - monthElement.clientWidth) / 2);
+
+  chartElement.scrollTo({
+    left: Math.max(targetLeft, 0),
+    behavior: "auto"
+  });
+}
+
 function monthsForYearRange(startYear, endYear) {
   const monthCount = ((endYear - startYear) + 1) * CALENDAR_MONTH_COUNT;
 
@@ -203,9 +212,10 @@ export default function ReportCalendarPanel({ active, countryCode, taxYear }) {
     if (!active || status !== "success" || !focusedMonthKey) return;
 
     window.requestAnimationFrame(() => {
-      chartRef.current
-        ?.querySelector(`[data-month-key="${focusedMonthKey}"]`)
-        ?.scrollIntoView({ block: "nearest", inline: "center" });
+      const chartElement = chartRef.current;
+      const monthElement = chartElement?.querySelector(`[data-month-key="${focusedMonthKey}"]`);
+
+      if (chartElement && monthElement) centerMonthInChart(chartElement, monthElement);
     });
   }, [active, focusedMonthKey, status]);
 

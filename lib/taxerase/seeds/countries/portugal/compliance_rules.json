@@ -1,0 +1,523 @@
+{
+  "country_code": "PT",
+  "reports": [
+    {
+      "key": "irs_modelo_3",
+      "name": "Declaracao Modelo 3",
+      "tax_year": 2026,
+      "tax_years": [2025, 2026, 2027],
+      "description": "Portugal annual IRS Modelo 3 filing window for the 2025 income year.",
+      "workflows": [
+        {
+          "key": "review_irs_prefill",
+          "name": "Review IRS pre-filled data",
+          "description": "Review household data, e-Fatura expenses, withholding, and pre-filled income before submitting Modelo 3.",
+          "reference_url": "https://info.portaldasfinancas.gov.pt/pt/apoio_contribuinte/calendario_fiscal/Pages/Quadro_res_Decl_2026.aspx"
+        },
+        {
+          "key": "submit_modelo_3",
+          "name": "Submit Declaracao Modelo 3",
+          "description": "Submit the annual IRS return and annexes during the April-to-June filing window.",
+          "reference_url": "https://info.portaldasfinancas.gov.pt/pt/apoio_contribuinte/calendario_fiscal/Pages/Quadro_res_Decl_2026.aspx"
+        },
+        {
+          "key": "settle_irs_balance",
+          "name": "Settle annual IRS balance",
+          "description": "Pay the annual IRS balance by the assessment deadline when the declaration results in tax due.",
+          "reference_url": "https://info.portaldasfinancas.gov.pt/pt/apoio_contribuinte/calendario_fiscal/Pages/Quadro_res_Pag_2026.aspx"
+        }
+      ],
+      "events": [
+        {
+          "key": "annual_submission",
+          "title": "2025 IRS Modelo 3 submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-06-30",
+          "window_start_date": "2026-04-01",
+          "window_end_date": "2026-06-30",
+          "description": "Modelo 3 for 2025 income is submitted from 1 April to 30 June 2026."
+        },
+        {
+          "key": "annual_payment",
+          "title": "2025 IRS balance payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-08-31",
+          "description": "Any annual IRS balance for the 2025 return is generally paid by 31 August 2026."
+        }
+      ]
+    },
+    {
+      "key": "irs_pagamentos_por_conta",
+      "name": "IRS payments on account",
+      "tax_year": 2026,
+      "tax_years": [2025, 2026, 2027],
+      "description": "Portugal IRS payments on account for qualifying self-employed taxpayers in the 2026 calendar year.",
+      "workflows": [
+        {
+          "key": "confirm_payments_on_account",
+          "name": "Confirm payment-on-account requirement",
+          "description": "Confirm whether the taxpayer is required to make IRS payments on account for category B activity.",
+          "reference_url": "https://info.portaldasfinancas.gov.pt/pt/apoio_contribuinte/calendario_fiscal/Pages/Quadro_res_Pag_2026.aspx"
+        },
+        {
+          "key": "prepare_installment_payment",
+          "name": "Prepare IRS installment payment",
+          "description": "Review the AT payment notice and available credits before settling each installment.",
+          "reference_url": "https://info.portaldasfinancas.gov.pt/pt/apoio_contribuinte/calendario_fiscal/Pages/Quadro_res_Pag_2026.aspx"
+        }
+      ],
+      "events": [
+        {
+          "key": "first_payment",
+          "title": "First 2026 IRS payment-on-account deadline",
+          "event_type": "payment",
+          "event_date": "2026-07-20",
+          "description": "First IRS payment on account is due by 20 July 2026 where applicable."
+        },
+        {
+          "key": "second_payment",
+          "title": "Second 2026 IRS payment-on-account deadline",
+          "event_type": "payment",
+          "event_date": "2026-09-21",
+          "description": "Second IRS payment on account is due by 21 September 2026 where applicable."
+        },
+        {
+          "key": "third_payment",
+          "title": "Third 2026 IRS payment-on-account deadline",
+          "event_type": "payment",
+          "event_date": "2026-12-21",
+          "description": "Third IRS payment on account is due by 21 December 2026 where applicable."
+        }
+      ]
+    },
+    {
+      "key": "iva_periodica_trimestral",
+      "name": "Quarterly IVA return",
+      "tax_year": 2026,
+      "tax_years": [2025, 2026, 2027],
+      "description": "Portugal quarterly IVA periodic return and payment calendar for ordinary quarterly VAT filers.",
+      "workflows": [
+        {
+          "key": "reconcile_quarterly_iva",
+          "name": "Reconcile quarterly IVA",
+          "description": "Reconcile taxable transactions, deductible input IVA, corrections, and invoice communication status before filing.",
+          "reference_url": "https://info.portaldasfinancas.gov.pt/pt/apoio_contribuinte/calendario_fiscal/Pages/Quadro_res_Decl_2026.aspx"
+        },
+        {
+          "key": "submit_quarterly_iva",
+          "name": "Submit quarterly IVA return",
+          "description": "Submit the quarterly IVA periodic return by the applicable deadline.",
+          "reference_url": "https://info.portaldasfinancas.gov.pt/pt/apoio_contribuinte/calendario_fiscal/Pages/Quadro_res_Decl_2026.aspx"
+        },
+        {
+          "key": "pay_quarterly_iva",
+          "name": "Pay quarterly IVA",
+          "description": "Pay the quarterly IVA balance by the separate payment deadline when the return is payable.",
+          "reference_url": "https://info.portaldasfinancas.gov.pt/pt/apoio_contribuinte/calendario_fiscal/Pages/Quadro_res_Pag_2026.aspx"
+        }
+      ],
+      "events": [
+        {
+          "key": "q1_submission",
+          "title": "Q1 2026 IVA submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-05-20",
+          "window_start_date": "2026-05-01",
+          "window_end_date": "2026-05-20",
+          "description": "Quarterly IVA return for Q1 2026 is due by 20 May 2026."
+        },
+        {
+          "key": "q1_payment",
+          "title": "Q1 2026 IVA payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-05-25",
+          "description": "Any payable quarterly IVA for Q1 2026 is due by 25 May 2026."
+        },
+        {
+          "key": "q2_submission",
+          "title": "Q2 2026 IVA submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-09-21",
+          "window_start_date": "2026-09-01",
+          "window_end_date": "2026-09-21",
+          "description": "Quarterly IVA return for Q2 2026 is due by 21 September 2026."
+        },
+        {
+          "key": "q2_payment",
+          "title": "Q2 2026 IVA payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-09-25",
+          "description": "Any payable quarterly IVA for Q2 2026 is due by 25 September 2026."
+        },
+        {
+          "key": "q3_submission",
+          "title": "Q3 2026 IVA submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-11-20",
+          "window_start_date": "2026-11-01",
+          "window_end_date": "2026-11-20",
+          "description": "Quarterly IVA return for Q3 2026 is due by 20 November 2026."
+        },
+        {
+          "key": "q3_payment",
+          "title": "Q3 2026 IVA payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-11-25",
+          "description": "Any payable quarterly IVA for Q3 2026 is due by 25 November 2026."
+        },
+        {
+          "key": "q4_submission",
+          "title": "Q4 2026 IVA submission deadline",
+          "event_type": "submission",
+          "event_date": "2027-02-20",
+          "window_start_date": "2027-02-01",
+          "window_end_date": "2027-02-20",
+          "description": "Quarterly IVA return for Q4 2026 is due by 20 February 2027."
+        },
+        {
+          "key": "q4_payment",
+          "title": "Q4 2026 IVA payment deadline",
+          "event_type": "payment",
+          "event_date": "2027-02-25",
+          "description": "Any payable quarterly IVA for Q4 2026 is due by 25 February 2027."
+        }
+      ]
+    },
+    {
+      "key": "iva_periodica_mensal",
+      "name": "Monthly IVA return",
+      "tax_year": 2026,
+      "tax_years": [2025, 2026, 2027],
+      "description": "Portugal monthly IVA periodic return and payment calendar for taxpayers assigned to monthly VAT filing.",
+      "workflows": [
+        {
+          "key": "confirm_monthly_iva",
+          "name": "Confirm monthly IVA status",
+          "description": "Confirm the taxpayer is assigned to the monthly IVA return period rather than quarterly filing.",
+          "reference_url": "https://info.portaldasfinancas.gov.pt/pt/apoio_contribuinte/calendario_fiscal/Pages/Quadro_res_Decl_2026.aspx"
+        },
+        {
+          "key": "submit_monthly_iva",
+          "name": "Submit monthly IVA return",
+          "description": "Submit the monthly IVA periodic return by the applicable monthly deadline.",
+          "reference_url": "https://info.portaldasfinancas.gov.pt/pt/apoio_contribuinte/calendario_fiscal/Pages/Quadro_res_Decl_2026.aspx"
+        },
+        {
+          "key": "pay_monthly_iva",
+          "name": "Pay monthly IVA",
+          "description": "Pay the monthly IVA balance by the separate payment deadline when the return is payable.",
+          "reference_url": "https://info.portaldasfinancas.gov.pt/pt/apoio_contribuinte/calendario_fiscal/Pages/Quadro_res_Pag_2026.aspx"
+        }
+      ],
+      "events": [
+        {
+          "key": "jan_submission",
+          "title": "January 2026 monthly IVA submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-01-20",
+          "window_start_date": "2026-01-01",
+          "window_end_date": "2026-01-20",
+          "description": "Monthly IVA return due by 20 January 2026."
+        },
+        {
+          "key": "jan_payment",
+          "title": "January 2026 monthly IVA payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-01-26",
+          "description": "Monthly IVA payment due by 26 January 2026."
+        },
+        {
+          "key": "feb_submission",
+          "title": "February 2026 monthly IVA submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-02-20",
+          "window_start_date": "2026-02-01",
+          "window_end_date": "2026-02-20",
+          "description": "Monthly IVA return due by 20 February 2026."
+        },
+        {
+          "key": "feb_payment",
+          "title": "February 2026 monthly IVA payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-02-25",
+          "description": "Monthly IVA payment due by 25 February 2026."
+        },
+        {
+          "key": "mar_submission",
+          "title": "March 2026 monthly IVA submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-03-20",
+          "window_start_date": "2026-03-01",
+          "window_end_date": "2026-03-20",
+          "description": "Monthly IVA return due by 20 March 2026."
+        },
+        {
+          "key": "mar_payment",
+          "title": "March 2026 monthly IVA payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-03-25",
+          "description": "Monthly IVA payment due by 25 March 2026."
+        },
+        {
+          "key": "apr_submission",
+          "title": "April 2026 monthly IVA submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-04-20",
+          "window_start_date": "2026-04-01",
+          "window_end_date": "2026-04-20",
+          "description": "Monthly IVA return due by 20 April 2026."
+        },
+        {
+          "key": "apr_payment",
+          "title": "April 2026 monthly IVA payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-04-27",
+          "description": "Monthly IVA payment due by 27 April 2026."
+        },
+        {
+          "key": "may_submission",
+          "title": "May 2026 monthly IVA submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-05-20",
+          "window_start_date": "2026-05-01",
+          "window_end_date": "2026-05-20",
+          "description": "Monthly IVA return due by 20 May 2026."
+        },
+        {
+          "key": "may_payment",
+          "title": "May 2026 monthly IVA payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-05-25",
+          "description": "Monthly IVA payment due by 25 May 2026."
+        },
+        {
+          "key": "jun_submission",
+          "title": "June 2026 monthly IVA submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-06-22",
+          "window_start_date": "2026-06-01",
+          "window_end_date": "2026-06-22",
+          "description": "Monthly IVA return due by 22 June 2026."
+        },
+        {
+          "key": "jun_payment",
+          "title": "June 2026 monthly IVA payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-06-25",
+          "description": "Monthly IVA payment due by 25 June 2026."
+        },
+        {
+          "key": "jul_submission",
+          "title": "July 2026 monthly IVA submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-07-20",
+          "window_start_date": "2026-07-01",
+          "window_end_date": "2026-07-20",
+          "description": "Monthly IVA return due by 20 July 2026."
+        },
+        {
+          "key": "jul_payment",
+          "title": "July 2026 monthly IVA payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-07-27",
+          "description": "Monthly IVA payment due by 27 July 2026."
+        },
+        {
+          "key": "sep_submission",
+          "title": "September 2026 monthly IVA submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-09-21",
+          "window_start_date": "2026-09-01",
+          "window_end_date": "2026-09-21",
+          "description": "Monthly IVA return due by 21 September 2026."
+        },
+        {
+          "key": "sep_payment",
+          "title": "September 2026 monthly IVA payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-09-25",
+          "description": "Monthly IVA payment due by 25 September 2026."
+        },
+        {
+          "key": "oct_submission",
+          "title": "October 2026 monthly IVA submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-10-20",
+          "window_start_date": "2026-10-01",
+          "window_end_date": "2026-10-20",
+          "description": "Monthly IVA return due by 20 October 2026."
+        },
+        {
+          "key": "oct_payment",
+          "title": "October 2026 monthly IVA payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-10-26",
+          "description": "Monthly IVA payment due by 26 October 2026."
+        },
+        {
+          "key": "nov_submission",
+          "title": "November 2026 monthly IVA submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-11-20",
+          "window_start_date": "2026-11-01",
+          "window_end_date": "2026-11-20",
+          "description": "Monthly IVA return due by 20 November 2026."
+        },
+        {
+          "key": "nov_payment",
+          "title": "November 2026 monthly IVA payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-11-25",
+          "description": "Monthly IVA payment due by 25 November 2026."
+        },
+        {
+          "key": "dec_submission",
+          "title": "December 2026 monthly IVA submission deadline",
+          "event_type": "submission",
+          "event_date": "2026-12-21",
+          "window_start_date": "2026-12-01",
+          "window_end_date": "2026-12-21",
+          "description": "Monthly IVA return due by 21 December 2026."
+        },
+        {
+          "key": "dec_payment",
+          "title": "December 2026 monthly IVA payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-12-28",
+          "description": "Monthly IVA payment due by 28 December 2026."
+        }
+      ]
+    },
+    {
+      "key": "comunicacao_faturas",
+      "name": "Invoice communication",
+      "tax_year": 2026,
+      "tax_years": [2025, 2026, 2027],
+      "description": "Portugal monthly invoice communication calendar for SAF-T / e-Fatura reporting or communication of no invoices.",
+      "workflows": [
+        {
+          "key": "collect_invoice_data",
+          "name": "Collect invoice data",
+          "description": "Collect monthly invoice elements, SAF-T data, or confirmation that there were no invoices to communicate.",
+          "reference_url": "https://info.portaldasfinancas.gov.pt/pt/apoio_contribuinte/calendario_fiscal/Pages/Quadro_res_Decl_2026.aspx"
+        },
+        {
+          "key": "communicate_invoice_elements",
+          "name": "Communicate invoice elements",
+          "description": "Communicate invoice elements or the absence of invoices by the monthly Portal das Financas deadline.",
+          "reference_url": "https://info.portaldasfinancas.gov.pt/pt/apoio_contribuinte/calendario_fiscal/Pages/Quadro_res_Decl_2026.aspx"
+        }
+      ],
+      "events": [
+        {
+          "key": "jan_submission",
+          "title": "January 2026 invoice communication deadline",
+          "event_type": "submission",
+          "event_date": "2026-01-09",
+          "window_start_date": "2026-01-01",
+          "window_end_date": "2026-01-09",
+          "description": "Invoice elements or no-invoice confirmation are due by 9 January 2026."
+        },
+        {
+          "key": "feb_submission",
+          "title": "February 2026 invoice communication deadline",
+          "event_type": "submission",
+          "event_date": "2026-02-05",
+          "window_start_date": "2026-02-01",
+          "window_end_date": "2026-02-05",
+          "description": "Invoice elements or no-invoice confirmation are due by 5 February 2026."
+        },
+        {
+          "key": "mar_submission",
+          "title": "March 2026 invoice communication deadline",
+          "event_type": "submission",
+          "event_date": "2026-03-05",
+          "window_start_date": "2026-03-01",
+          "window_end_date": "2026-03-05",
+          "description": "Invoice elements or no-invoice confirmation are due by 5 March 2026."
+        },
+        {
+          "key": "apr_submission",
+          "title": "April 2026 invoice communication deadline",
+          "event_type": "submission",
+          "event_date": "2026-04-08",
+          "window_start_date": "2026-04-01",
+          "window_end_date": "2026-04-08",
+          "description": "Invoice elements or no-invoice confirmation are due by 8 April 2026."
+        },
+        {
+          "key": "may_submission",
+          "title": "May 2026 invoice communication deadline",
+          "event_type": "submission",
+          "event_date": "2026-05-05",
+          "window_start_date": "2026-05-01",
+          "window_end_date": "2026-05-05",
+          "description": "Invoice elements or no-invoice confirmation are due by 5 May 2026."
+        },
+        {
+          "key": "jun_submission",
+          "title": "June 2026 invoice communication deadline",
+          "event_type": "submission",
+          "event_date": "2026-06-05",
+          "window_start_date": "2026-06-01",
+          "window_end_date": "2026-06-05",
+          "description": "Invoice elements or no-invoice confirmation are due by 5 June 2026."
+        },
+        {
+          "key": "jul_submission",
+          "title": "July 2026 invoice communication deadline",
+          "event_type": "submission",
+          "event_date": "2026-07-06",
+          "window_start_date": "2026-07-01",
+          "window_end_date": "2026-07-06",
+          "description": "Invoice elements or no-invoice confirmation are due by 6 July 2026."
+        },
+        {
+          "key": "aug_submission",
+          "title": "August 2026 invoice communication deadline",
+          "event_type": "submission",
+          "event_date": "2026-08-31",
+          "window_start_date": "2026-08-01",
+          "window_end_date": "2026-08-31",
+          "description": "Invoice elements or no-invoice confirmation are due by 31 August 2026."
+        },
+        {
+          "key": "sep_submission",
+          "title": "September 2026 invoice communication deadline",
+          "event_type": "submission",
+          "event_date": "2026-09-07",
+          "window_start_date": "2026-09-01",
+          "window_end_date": "2026-09-07",
+          "description": "Invoice elements or no-invoice confirmation are due by 7 September 2026."
+        },
+        {
+          "key": "oct_submission",
+          "title": "October 2026 invoice communication deadline",
+          "event_type": "submission",
+          "event_date": "2026-10-06",
+          "window_start_date": "2026-10-01",
+          "window_end_date": "2026-10-06",
+          "description": "Invoice elements or no-invoice confirmation are due by 6 October 2026."
+        },
+        {
+          "key": "nov_submission",
+          "title": "November 2026 invoice communication deadline",
+          "event_type": "submission",
+          "event_date": "2026-11-05",
+          "window_start_date": "2026-11-01",
+          "window_end_date": "2026-11-05",
+          "description": "Invoice elements or no-invoice confirmation are due by 5 November 2026."
+        },
+        {
+          "key": "dec_submission",
+          "title": "December 2026 invoice communication deadline",
+          "event_type": "submission",
+          "event_date": "2026-12-07",
+          "window_start_date": "2026-12-01",
+          "window_end_date": "2026-12-07",
+          "description": "Invoice elements or no-invoice confirmation are due by 7 December 2026."
+        }
+      ]
+    }
+  ]
+}

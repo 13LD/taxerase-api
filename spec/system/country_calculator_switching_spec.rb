@@ -47,7 +47,7 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
           "Scientific research or doctor specialist training"
         ]
       )
-      expect(page).to have_text("2025 thresholds: €46,660 standard or €35,468 if you are under 30 with a master's degree.")
+      expect(page).to have_text("Dutch expat facility for eligible inbound employees")
       expect(page).not_to have_select("Region")
       expect(page).not_to have_field("Children")
       expect(page).not_to have_field("Children under 3")
@@ -166,7 +166,7 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
     visit root_path(country: "PL")
 
     within(".results-card") do
-      expect(page).to have_text("PLN 120,199.98")
+      expect(page).to have_text("PLN 120,199.98", wait: 20)
     end
 
     within(".calculator-card") do
@@ -212,12 +212,29 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
 
       expect(page).to have_select("Expense method", selected: "60% flat expenses")
       expect(page).not_to have_field("Deductible expenses")
-      expect(page).to have_text("caps flat expenses at CZK 1,200,000 a year")
+      expect(page).to have_text("Flat expense methods use deemed costs by activity class")
     end
 
     within(".results-card") do
       expect(page).to have_text("Deemed tax expenses (60%)")
       expect(page).to have_text("Business profit")
+    end
+  end
+
+  it "keeps Czech employee relief controls visible after visiting a pausal self-employed mode" do
+    visit root_path(country: "CZ")
+
+    within(".calculator-card") do
+      click_button "B2B contract"
+      select "Pausalni dan band 1", from: "Self-employed tax mode"
+      click_button "Contract of employment"
+
+      expect(page).to have_select("Child-credit claim share")
+      expect(page).to have_field("Apply spouse credit")
+      expect(page).to have_field("Mortgage interest")
+      expect(page).to have_field("Pension contributions")
+      expect(page).to have_field("Life insurance contributions")
+      expect(page).to have_field("Donations")
     end
   end
 

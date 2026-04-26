@@ -102,6 +102,7 @@ export default function TaxComparisonCard({
 
       <div className="comparison-shared-controls">
         <SegmentedControl
+          hint="Aligns both sides to the same employment or self-employed calculation shape."
           label="Tax profile"
           onChange={onCategoryChange}
           options={profileOptions}
@@ -110,6 +111,7 @@ export default function TaxComparisonCard({
 
         <CurrencyField
           currencyCode={inputCurrencyCode}
+          hint="Shared pre-tax income used as the starting point for both country calculations."
           label={incomeLabel}
           onChange={onGrossIncomeChange}
           value={grossIncome}
@@ -117,6 +119,7 @@ export default function TaxComparisonCard({
 
         {inputCurrencyOptions.length > 1 ? (
           <SelectField
+            hint="Defines the currency for shared comparison inputs before any normalization or local display."
             label="Input currency"
             onChange={onInputCurrencyChange}
             options={inputCurrencyOptions.map((currencyOption) => ({
@@ -130,6 +133,7 @@ export default function TaxComparisonCard({
         {showDeductibleExpenses ? (
           <CurrencyField
             currencyCode={inputCurrencyCode}
+            hint="Shared business costs used only by country profiles that accept actual self-employed expenses."
             label={deductibleExpensesLabel}
             onChange={onDeductibleExpensesChange}
             value={deductibleExpenses}
@@ -144,6 +148,7 @@ export default function TaxComparisonCard({
             <h3>{leftLabel}</h3>
           </div>
           <SelectField
+            hint="Sets the first jurisdiction's source set, currency, rates, and available regional options."
             label="Country"
             onChange={onLeftCountryChange}
             options={leftCountryOptions.map((country) => ({
@@ -154,6 +159,7 @@ export default function TaxComparisonCard({
           />
           <SelectField
             disabled={leftRegionOptions.length <= 1}
+            hint="Applies regional tax differences to the first jurisdiction when more than one region exists."
             label="Region"
             onChange={onLeftRegionChange}
             options={leftRegionOptions.map((region) => ({
@@ -170,6 +176,7 @@ export default function TaxComparisonCard({
             <h3>{rightLabel}</h3>
           </div>
           <SelectField
+            hint="Sets the second jurisdiction's source set, currency, rates, and available regional options."
             label="Country"
             onChange={onRightCountryChange}
             options={rightCountryOptions.map((country) => ({
@@ -180,6 +187,7 @@ export default function TaxComparisonCard({
           />
           <SelectField
             disabled={rightRegionOptions.length <= 1}
+            hint="Applies regional tax differences to the second jurisdiction when more than one region exists."
             label="Region"
             onChange={onRightRegionChange}
             options={rightRegionOptions.map((region) => ({
