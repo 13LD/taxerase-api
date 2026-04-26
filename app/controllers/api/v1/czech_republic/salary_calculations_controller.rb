@@ -19,7 +19,18 @@ module Api
             age_bracket: calculation_params[:age_bracket],
             children_count: calculation_params[:children_count],
             children_under_three_count: calculation_params[:children_under_three_count],
-            disability_level: calculation_params[:disability_level]
+            disability_level: calculation_params[:disability_level],
+            child_credit_claim_share: calculation_params[:child_credit_claim_share],
+            apply_spouse_credit: calculation_params[:apply_spouse_credit],
+            spouse_income: calculation_params[:spouse_income],
+            spouse_ztp_p: calculation_params[:spouse_ztp_p],
+            spouse_cares_child_under_three: calculation_params[:spouse_cares_child_under_three],
+            mortgage_interest_paid: calculation_params[:mortgage_interest_paid],
+            pension_contributions: calculation_params[:pension_contributions],
+            life_insurance_contributions: calculation_params[:life_insurance_contributions],
+            donations_amount: calculation_params[:donations_amount],
+            self_employed_tax_mode: calculation_params[:self_employed_tax_mode],
+            osvc_activity_status: calculation_params[:osvc_activity_status]
           )
         end
 
@@ -37,7 +48,18 @@ module Api
             :age_bracket,
             :children_count,
             :children_under_three_count,
-            :disability_level
+            :disability_level,
+            :child_credit_claim_share,
+            :apply_spouse_credit,
+            :spouse_income,
+            :spouse_ztp_p,
+            :spouse_cares_child_under_three,
+            :mortgage_interest_paid,
+            :pension_contributions,
+            :life_insurance_contributions,
+            :donations_amount,
+            :self_employed_tax_mode,
+            :osvc_activity_status
           )
         end
 

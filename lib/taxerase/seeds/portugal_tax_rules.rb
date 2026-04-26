@@ -39,6 +39,7 @@ module Taxerase
         YEAR_PARAMETERS.fetch(tax_year).merge(
           "dependent_deduction" => 600,
           "dependent_under_three_bonus" => 126,
+          "young_dependent_second_later_bonus" => 300,
           "ascendant_deduction" => 525,
           "single_ascendant_bonus" => 110,
           "general_family_deduction_rate" => 0.35,
@@ -53,8 +54,27 @@ module Taxerase
           "care_home_deduction_rate" => 0.25,
           "care_home_deduction_cap" => 403.75,
           "domestic_work_deduction_rate" => 0.05,
-          "domestic_work_deduction_cap" => 200
+          "domestic_work_deduction_cap" => 200,
+          "vat_invoice_deduction_rate" => 0.15,
+          "vat_invoice_deduction_cap" => 250,
+          "disability_rehabilitation_deduction_rate" => 0.30,
+          "disability_insurance_deduction_rate" => 0.25,
+          "disability_insurance_deduction_cap" => 1_000,
+          "ppr_deduction_rate" => 0.20,
+          "ppr_deduction_cap_under_35" => 400,
+          "ppr_deduction_cap_35_to_50" => 350,
+          "ppr_deduction_cap_over_50" => 300,
+          "donations_deduction_rate" => 0.25,
+          "irs_jovem_exemption_cap" => irs_jovem_exemption_cap(tax_year),
+          "union_dues_deduction_multiplier" => 1.5,
+          "union_dues_deduction_cap_rate" => 0.01
         )
+      end
+
+      def irs_jovem_exemption_cap(tax_year)
+        return 0 if tax_year < 2025
+
+        28_737.5
       end
 
       def summary_year?(tax_year)

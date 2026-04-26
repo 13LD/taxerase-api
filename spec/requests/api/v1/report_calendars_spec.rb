@@ -153,6 +153,140 @@ RSpec.describe "Api::V1::ReportCalendars", type: :request do
       )
     end
 
+    it "returns Portugal report deadlines with workflows and spillover events" do
+      get api_v1_country_report_calendar_path(country_code: "PT"), params: { tax_year: 2026 }
+
+      expect(response).to have_http_status(:ok)
+
+      json = JSON.parse(response.body)
+      reports = expect_multi_year_calendar(json, country_code: "PT", expected_reports_per_year: 5)
+      modelo_3 = report_by_key_and_year(reports, "irs_modelo_3", 2026)
+      irs_payments = report_by_key_and_year(reports, "irs_pagamentos_por_conta", 2026)
+      quarterly_iva = report_by_key_and_year(reports, "iva_periodica_trimestral", 2026)
+      monthly_iva = report_by_key_and_year(reports, "iva_periodica_mensal", 2026)
+      invoice_communication = report_by_key_and_year(reports, "comunicacao_faturas", 2026)
+      quarterly_iva_2027 = report_by_key_and_year(reports, "iva_periodica_trimestral", 2027)
+
+      expect(reports.map { |report| report["name"] }).to include(
+        "Declaracao Modelo 3",
+        "IRS payments on account",
+        "Quarterly IVA return",
+        "Monthly IVA return",
+        "Invoice communication"
+      )
+      expect(modelo_3["events"]).to include(
+        hash_including(
+          "event_type" => "submission",
+          "event_date" => "2026-06-30",
+          "window_start_date" => "2026-04-01",
+          "window_end_date" => "2026-06-30"
+        ),
+        hash_including("event_type" => "payment", "event_date" => "2026-08-31")
+      )
+      expect(irs_payments["events"].map { |event| event["event_date"] }).to eq(
+        %w[2026-07-20 2026-09-21 2026-12-21]
+      )
+      expect(quarterly_iva["events"]).to include(
+        hash_including(
+          "event_type" => "submission",
+          "event_date" => "2027-02-20",
+          "window_start_date" => "2027-02-01",
+          "window_end_date" => "2027-02-20"
+        ),
+        hash_including("event_type" => "payment", "event_date" => "2027-02-25")
+      )
+      expect(quarterly_iva_2027["events"]).to include(
+        hash_including("event_type" => "payment", "event_date" => "2028-02-25")
+      )
+      expect(monthly_iva["workflows"].map { |workflow| workflow["name"] }).to include(
+        "Confirm monthly IVA status",
+        "Submit monthly IVA return",
+        "Pay monthly IVA"
+      )
+      expect(workflow_by_key(monthly_iva, "submit_monthly_iva")["reference_url"]).to eq(portugal_declarations_reference_url)
+      expect(workflow_by_key(quarterly_iva, "pay_quarterly_iva")["reference_url"]).to eq(portugal_payments_reference_url)
+      expect(invoice_communication["events"]).to include(
+        hash_including(
+          "event_type" => "submission",
+          "event_date" => "2026-08-31",
+          "window_start_date" => "2026-08-01",
+          "window_end_date" => "2026-08-31"
+        )
+      )
+    end
+
+    it "returns Poland report deadlines with PIT, JPK, ZUS, and KSeF workflows" do
+      get api_v1_country_report_calendar_path(country_code: "PL"), params: { tax_year: 2026 }
+
+      expect(response).to have_http_status(:ok)
+
+      json = JSON.parse(response.body)
+      reports = expect_multi_year_calendar(json, country_code: "PL", expected_reports_per_year: 5)
+      pit_annual = report_by_key_and_year(reports, "pit_annual", 2026)
+      jpk_v7m = report_by_key_and_year(reports, "jpk_v7_monthly", 2026)
+      ksef_rollout = report_by_key_and_year(reports, "ksef_rollout", 2026)
+
+      expect(reports.map { |report| report["name"] }).to include(
+        "Annual PIT return",
+        "Monthly PIT advances",
+        "Monthly JPK_V7M VAT return",
+        "Monthly ZUS DRA",
+        "KSeF rollout"
+      )
+      expect(pit_annual["events"]).to include(
+        hash_including(
+          "event_type" => "submission",
+          "event_date" => "2026-04-30",
+          "window_start_date" => "2026-02-15",
+          "window_end_date" => "2026-04-30"
+        )
+      )
+      expect(jpk_v7m["events"]).to include(
+        hash_including("event_type" => "submission", "event_date" => "2026-12-28"),
+        hash_including("event_type" => "payment", "event_date" => "2027-01-25")
+      )
+      expect(workflow_by_key(ksef_rollout, "configure_ksef_access")["reference_url"]).to eq(ksef_reference_url)
+      expect(ksef_rollout["events"]).to include(
+        hash_including("event_type" => "submission", "event_date" => "2026-02-01"),
+        hash_including("event_type" => "submission", "event_date" => "2026-04-01")
+      )
+    end
+
+    it "returns Czech Republic report deadlines with income tax, VAT, control statement, and pausalni workflows" do
+      get api_v1_country_report_calendar_path(country_code: "CZ"), params: { tax_year: 2026 }
+
+      expect(response).to have_http_status(:ok)
+
+      json = JSON.parse(response.body)
+      reports = expect_multi_year_calendar(json, country_code: "CZ", expected_reports_per_year: 5)
+      income_tax = report_by_key_and_year(reports, "personal_income_tax_return", 2026)
+      vat_return = report_by_key_and_year(reports, "vat_return_monthly", 2026)
+      control_statement = report_by_key_and_year(reports, "vat_control_statement_monthly", 2026)
+      pausalni_dan = report_by_key_and_year(reports, "pausalni_dan_monthly", 2026)
+
+      expect(reports.map { |report| report["name"] }).to include(
+        "Personal income tax return",
+        "Monthly VAT return",
+        "Monthly VAT control statement",
+        "Monthly pausalni dan advance",
+        "Monthly payroll withholding"
+      )
+      expect(income_tax["events"]).to include(
+        hash_including("event_type" => "submission", "event_date" => "2026-04-01"),
+        hash_including("event_type" => "submission", "event_date" => "2026-05-04"),
+        hash_including("event_type" => "submission", "event_date" => "2026-07-01")
+      )
+      expect(vat_return["events"]).to include(
+        hash_including("event_type" => "submission", "event_date" => "2026-12-28"),
+        hash_including("event_type" => "payment", "event_date" => "2027-01-25")
+      )
+      expect(workflow_by_key(control_statement, "submit_control_statement")["reference_url"]).to eq(czech_control_statement_reference_url)
+      expect(pausalni_dan["events"]).to include(
+        hash_including("event_type" => "payment", "event_date" => "2026-01-20"),
+        hash_including("event_type" => "payment", "event_date" => "2026-12-21")
+      )
+    end
+
     it "returns an empty report list for countries without compliance report data" do
       get api_v1_country_report_calendar_path(country_code: "AD"), params: { tax_year: 2026 }
 
@@ -165,7 +299,7 @@ RSpec.describe "Api::V1::ReportCalendars", type: :request do
     end
   end
 
-  def expect_multi_year_calendar(json, country_code:)
+  def expect_multi_year_calendar(json, country_code:, expected_reports_per_year: 5)
     reports = json.fetch("reports")
 
     expect(json.dig("country", "code")).to eq(country_code)
@@ -173,7 +307,7 @@ RSpec.describe "Api::V1::ReportCalendars", type: :request do
     expect(json["tax_years"]).to eq([ 2025, 2026, 2027 ])
     expect(json["start_year"]).to eq(2025)
     expect(json["end_year"]).to eq(2027)
-    expect(reports.size).to eq(15)
+    expect(reports.size).to eq(expected_reports_per_year * 3)
     expect(reports.map { |report| report["tax_year"] }.uniq).to eq([ 2025, 2026, 2027 ])
 
     reports
@@ -205,5 +339,21 @@ RSpec.describe "Api::V1::ReportCalendars", type: :request do
 
   def oss_reference_url
     "https://www.belastingdienst.nl/e-commerce"
+  end
+
+  def portugal_declarations_reference_url
+    "https://info.portaldasfinancas.gov.pt/pt/apoio_contribuinte/calendario_fiscal/Pages/Quadro_res_Decl_2026.aspx"
+  end
+
+  def portugal_payments_reference_url
+    "https://info.portaldasfinancas.gov.pt/pt/apoio_contribuinte/calendario_fiscal/Pages/Quadro_res_Pag_2026.aspx"
+  end
+
+  def ksef_reference_url
+    "https://ksef.podatki.gov.pl/informacje-ogolne-ksef-20/zakres-obowiazkowego-ksef/"
+  end
+
+  def czech_control_statement_reference_url
+    "https://portal.gov.cz/en/sluzby-vs/vat-control-statement-S20031"
   end
 end

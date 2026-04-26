@@ -88,6 +88,121 @@ RSpec.describe Taxerase::Compliance::ReportCalendar do
         )
       )
     end
+
+    it "serializes Portugal compliance reports across the same multi-year window" do
+      payload = described_class.call(country_code: "PT", tax_year: 2026)
+      reports = expect_multi_year_payload(payload, country_code: "PT")
+      modelo_3 = report_by_key_and_year(reports, "irs_modelo_3", 2026)
+      quarterly_iva = report_by_key_and_year(reports, "iva_periodica_trimestral", 2026)
+      monthly_iva = report_by_key_and_year(reports, "iva_periodica_mensal", 2026)
+      invoice_communication = report_by_key_and_year(reports, "comunicacao_faturas", 2026)
+
+      expect(reports.map { |report| report.fetch(:name) }).to include(
+        "Declaracao Modelo 3",
+        "IRS payments on account",
+        "Quarterly IVA return",
+        "Monthly IVA return",
+        "Invoice communication"
+      )
+      expect(modelo_3.fetch(:events)).to include(
+        hash_including(
+          event_type: "submission",
+          event_date: "2026-06-30",
+          window_start_date: "2026-04-01",
+          window_end_date: "2026-06-30"
+        ),
+        hash_including(event_type: "payment", event_date: "2026-08-31")
+      )
+      expect(quarterly_iva.fetch(:events)).to include(
+        hash_including(
+          event_type: "submission",
+          event_date: "2027-02-20",
+          window_start_date: "2027-02-01",
+          window_end_date: "2027-02-20"
+        ),
+        hash_including(event_type: "payment", event_date: "2027-02-25")
+      )
+      expect(report_by_key_and_year(reports, "iva_periodica_trimestral", 2027).fetch(:events)).to include(
+        hash_including(event_type: "payment", event_date: "2028-02-25")
+      )
+      expect(monthly_iva.fetch(:workflows).map { |workflow| workflow.fetch(:name) }).to include(
+        "Confirm monthly IVA status",
+        "Submit monthly IVA return",
+        "Pay monthly IVA"
+      )
+      expect(invoice_communication.fetch(:events)).to include(
+        hash_including(
+          event_type: "submission",
+          event_date: "2026-08-31",
+          window_start_date: "2026-08-01",
+          window_end_date: "2026-08-31"
+        )
+      )
+    end
+
+    it "serializes Poland compliance reports across the same multi-year window" do
+      payload = described_class.call(country_code: "PL", tax_year: 2026)
+      reports = expect_multi_year_payload(payload, country_code: "PL")
+      pit_annual = report_by_key_and_year(reports, "pit_annual", 2026)
+      jpk_v7m = report_by_key_and_year(reports, "jpk_v7_monthly", 2026)
+      ksef_rollout = report_by_key_and_year(reports, "ksef_rollout", 2026)
+
+      expect(reports.map { |report| report.fetch(:name) }).to include(
+        "Annual PIT return",
+        "Monthly JPK_V7M VAT return",
+        "KSeF rollout"
+      )
+      expect(pit_annual.fetch(:events)).to include(
+        hash_including(
+          event_type: "submission",
+          event_date: "2026-04-30",
+          window_start_date: "2026-02-15",
+          window_end_date: "2026-04-30"
+        ),
+        hash_including(event_type: "payment", event_date: "2026-04-30")
+      )
+      expect(jpk_v7m.fetch(:events)).to include(
+        hash_including(event_type: "submission", event_date: "2026-12-28"),
+        hash_including(event_type: "payment", event_date: "2027-01-25")
+      )
+      expect(ksef_rollout.fetch(:events)).to include(
+        hash_including(event_type: "submission", event_date: "2026-02-01"),
+        hash_including(event_type: "submission", event_date: "2026-04-01")
+      )
+    end
+
+    it "serializes Czech Republic compliance reports across the same multi-year window" do
+      payload = described_class.call(country_code: "CZ", tax_year: 2026)
+      reports = expect_multi_year_payload(payload, country_code: "CZ")
+      income_tax = report_by_key_and_year(reports, "personal_income_tax_return", 2026)
+      vat_return = report_by_key_and_year(reports, "vat_return_monthly", 2026)
+      control_statement = report_by_key_and_year(reports, "vat_control_statement_monthly", 2026)
+      pausalni_dan = report_by_key_and_year(reports, "pausalni_dan_monthly", 2026)
+
+      expect(reports.map { |report| report.fetch(:name) }).to include(
+        "Personal income tax return",
+        "Monthly VAT return",
+        "Monthly VAT control statement",
+        "Monthly pausalni dan advance"
+      )
+      expect(income_tax.fetch(:events)).to include(
+        hash_including(event_type: "submission", event_date: "2026-04-01"),
+        hash_including(event_type: "submission", event_date: "2026-05-04"),
+        hash_including(event_type: "submission", event_date: "2026-07-01")
+      )
+      expect(vat_return.fetch(:events)).to include(
+        hash_including(event_type: "submission", event_date: "2026-12-28"),
+        hash_including(event_type: "payment", event_date: "2027-01-25")
+      )
+      expect(control_statement.fetch(:workflows).map { |workflow| workflow.fetch(:name) }).to include(
+        "Validate control statement",
+        "Submit control statement"
+      )
+      expect(pausalni_dan.fetch(:events)).to include(
+        hash_including(event_type: "payment", event_date: "2026-01-20"),
+        hash_including(event_type: "payment", event_date: "2026-12-21")
+      )
+    end
   end
 
   def expect_multi_year_payload(payload, country_code:)

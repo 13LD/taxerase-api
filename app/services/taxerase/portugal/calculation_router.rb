@@ -32,7 +32,24 @@ module Taxerase
         housing_rent: 0,
         alimony_paid: 0,
         care_home_expenses: 0,
-        domestic_work_expenses: 0
+        domestic_work_expenses: 0,
+        young_dependents_second_later_under_six_count: 0,
+        vat_invoice_expenses: 0,
+        vat_invoice_validation_state: "not_validated",
+        disability_rehabilitation_expenses: 0,
+        disability_insurance_premiums: 0,
+        ppr_contributions: 0,
+        ppr_age_band: "under_35",
+        donations: 0,
+        filing_status: "individual",
+        apply_irs_jovem: false,
+        irs_jovem_year: 0,
+        union_dues: 0,
+        professional_order_dues: 0,
+        self_employed_tax_regime: "simplified",
+        start_activity_year: "none",
+        social_security_exemption: false,
+        social_security_adjustment_mode: "standard"
       )
         resolved_input_currency_code = input_currency_handler.resolve_input_currency_code(input_currency_code)
         resolved_children_count = children_count.presence || 0
@@ -46,6 +63,19 @@ module Taxerase
         resolved_alimony_paid = alimony_paid.presence || 0
         resolved_care_home_expenses = care_home_expenses.presence || 0
         resolved_domestic_work_expenses = domestic_work_expenses.presence || 0
+        resolved_young_dependents_second_later_under_six_count =
+          young_dependents_second_later_under_six_count.presence || 0
+        resolved_vat_invoice_expenses = vat_invoice_expenses.presence || 0
+        resolved_vat_invoice_validation_state = vat_invoice_validation_state.presence || "not_validated"
+        resolved_disability_rehabilitation_expenses = disability_rehabilitation_expenses.presence || 0
+        resolved_disability_insurance_premiums = disability_insurance_premiums.presence || 0
+        resolved_ppr_contributions = ppr_contributions.presence || 0
+        resolved_ppr_age_band = ppr_age_band.presence || "under_35"
+        resolved_donations = donations.presence || 0
+        resolved_filing_status = filing_status.presence || "individual"
+        resolved_irs_jovem_year = irs_jovem_year.presence || 0
+        resolved_union_dues = union_dues.presence || 0
+        resolved_professional_order_dues = professional_order_dues.presence || 0
         normalized_gross_income = input_currency_handler.convert_amount(
           gross_income,
           input_currency_code: resolved_input_currency_code
@@ -77,7 +107,22 @@ module Taxerase
             housing_rent: resolved_housing_rent,
             alimony_paid: resolved_alimony_paid,
             care_home_expenses: resolved_care_home_expenses,
-            domestic_work_expenses: resolved_domestic_work_expenses
+            domestic_work_expenses: resolved_domestic_work_expenses,
+            young_dependents_second_later_under_six_count: resolved_young_dependents_second_later_under_six_count,
+            vat_invoice_expenses: resolved_vat_invoice_expenses,
+            vat_invoice_validation_state: resolved_vat_invoice_validation_state,
+            disability_rehabilitation_expenses: resolved_disability_rehabilitation_expenses,
+            disability_insurance_premiums: resolved_disability_insurance_premiums,
+            ppr_contributions: resolved_ppr_contributions,
+            ppr_age_band: resolved_ppr_age_band,
+            donations: resolved_donations,
+            filing_status: resolved_filing_status,
+            apply_irs_jovem:,
+            irs_jovem_year: resolved_irs_jovem_year,
+            self_employed_tax_regime: self_employed_tax_regime.presence || "simplified",
+            start_activity_year: start_activity_year.presence || "none",
+            social_security_exemption:,
+            social_security_adjustment_mode: social_security_adjustment_mode.presence || "standard"
           )
         else
           calculator.call(
@@ -95,7 +140,20 @@ module Taxerase
             housing_rent: resolved_housing_rent,
             alimony_paid: resolved_alimony_paid,
             care_home_expenses: resolved_care_home_expenses,
-            domestic_work_expenses: resolved_domestic_work_expenses
+            domestic_work_expenses: resolved_domestic_work_expenses,
+            young_dependents_second_later_under_six_count: resolved_young_dependents_second_later_under_six_count,
+            vat_invoice_expenses: resolved_vat_invoice_expenses,
+            vat_invoice_validation_state: resolved_vat_invoice_validation_state,
+            disability_rehabilitation_expenses: resolved_disability_rehabilitation_expenses,
+            disability_insurance_premiums: resolved_disability_insurance_premiums,
+            ppr_contributions: resolved_ppr_contributions,
+            ppr_age_band: resolved_ppr_age_band,
+            donations: resolved_donations,
+            filing_status: resolved_filing_status,
+            apply_irs_jovem:,
+            irs_jovem_year: resolved_irs_jovem_year,
+            union_dues: resolved_union_dues,
+            professional_order_dues: resolved_professional_order_dues
           )
         end
 

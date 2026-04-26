@@ -39,7 +39,20 @@ module Taxerase
         social_insurance_mode: "standard",
         include_sickness_contribution: true,
         business_days_in_month: 30,
-        previous_year_average_monthly_income: 12_000
+        previous_year_average_monthly_income: 12_000,
+        birth_year: nil,
+        young_worker_relief_income_type: "employment",
+        return_relief_prior_non_resident: false,
+        return_relief_year: 0,
+        working_senior_receives_pension: false,
+        child_relief_household_status: "single",
+        child_relief_household_income: nil,
+        child_relief_claim_share: 100,
+        filing_status: "individual",
+        spouse_income: 0,
+        lump_sum_activity_type: "it_services",
+        cooperating_person: false,
+        months_since_business_start: 37
       )
         resolved_input_currency_code = input_currency_handler.resolve_input_currency_code(input_currency_code)
         normalized_gross_income = input_currency_handler.convert_amount(
@@ -72,7 +85,13 @@ module Taxerase
             social_insurance_mode: value_or_default(social_insurance_mode, "standard"),
             include_sickness_contribution: value_or_default(include_sickness_contribution, true),
             business_days_in_month: value_or_default(business_days_in_month, 30),
-            previous_year_average_monthly_income: value_or_default(previous_year_average_monthly_income, 12_000)
+            previous_year_average_monthly_income: value_or_default(previous_year_average_monthly_income, 12_000),
+            lump_sum_activity_type: value_or_default(lump_sum_activity_type, "it_services"),
+            return_relief_prior_non_resident: value_or_default(return_relief_prior_non_resident, false),
+            return_relief_year: value_or_default(return_relief_year, 0),
+            working_senior_receives_pension: value_or_default(working_senior_receives_pension, false),
+            cooperating_person: value_or_default(cooperating_person, false),
+            months_since_business_start: value_or_default(months_since_business_start, 37)
           )
         else
           calculator.call(
@@ -91,7 +110,17 @@ module Taxerase
             ppk_employer_rate: value_or_default(ppk_employer_rate, 0),
             employer_accident_rate: value_or_default(employer_accident_rate, 1.67),
             include_labor_fund: value_or_default(include_labor_fund, true),
-            include_fgsp: value_or_default(include_fgsp, true)
+            include_fgsp: value_or_default(include_fgsp, true),
+            birth_year:,
+            young_worker_relief_income_type: value_or_default(young_worker_relief_income_type, "employment"),
+            return_relief_prior_non_resident: value_or_default(return_relief_prior_non_resident, false),
+            return_relief_year: value_or_default(return_relief_year, 0),
+            working_senior_receives_pension: value_or_default(working_senior_receives_pension, false),
+            child_relief_household_status: value_or_default(child_relief_household_status, "single"),
+            child_relief_household_income:,
+            child_relief_claim_share: value_or_default(child_relief_claim_share, 100),
+            filing_status: value_or_default(filing_status, "individual"),
+            spouse_income: value_or_default(spouse_income, 0)
           )
         end
 

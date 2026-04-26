@@ -70,7 +70,10 @@ export default function CalculatorHomeTab({
             {...formProps}
             ageBracketOptions={formConfig.ageBracketOptions || []}
             ageFieldHint={formConfig.ageFieldHint}
+            childrenCountHint={formConfig.childrenCountHint}
+            childrenUnderThreeHint={formConfig.childrenUnderThreeHint}
             countryOptions={countryOptions || []}
+            disabilityFieldHint={formConfig.disabilityFieldHint}
             disabilityOptions={formConfig.disabilityOptions || []}
             errors={combinedErrors}
             isCountrySwitching={isCountrySwitching}

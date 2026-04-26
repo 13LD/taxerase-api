@@ -16,6 +16,14 @@ module Taxerase
       COUNTRY_CODE = "PL".freeze
       B2B_TAX_FORMS = %w[tax_scale flat_tax lump_sum].freeze
       SOCIAL_INSURANCE_MODES = %w[start_relief preferential small_zus_plus standard].freeze
+      LUMP_SUM_ACTIVITY_TYPES = %w[
+        professional_services
+        healthcare
+        it_services
+        general_services
+        manufacturing_construction
+        trade_gastronomy
+      ].freeze
 
       def self.call(
         gross_income:,
@@ -33,7 +41,13 @@ module Taxerase
         social_insurance_mode: "standard",
         include_sickness_contribution: true,
         business_days_in_month: 30,
-        previous_year_average_monthly_income: 12_000
+        previous_year_average_monthly_income: 12_000,
+        lump_sum_activity_type: "it_services",
+        return_relief_prior_non_resident: false,
+        return_relief_year: 0,
+        working_senior_receives_pension: false,
+        cooperating_person: false,
+        months_since_business_start: 37
       )
         new(
           gross_income:,
@@ -51,7 +65,13 @@ module Taxerase
           social_insurance_mode:,
           include_sickness_contribution:,
           business_days_in_month:,
-          previous_year_average_monthly_income:
+          previous_year_average_monthly_income:,
+          lump_sum_activity_type:,
+          return_relief_prior_non_resident:,
+          return_relief_year:,
+          working_senior_receives_pension:,
+          cooperating_person:,
+          months_since_business_start:
         ).call
       end
 
@@ -71,7 +91,13 @@ module Taxerase
         social_insurance_mode:,
         include_sickness_contribution:,
         business_days_in_month:,
-        previous_year_average_monthly_income:
+        previous_year_average_monthly_income:,
+        lump_sum_activity_type:,
+        return_relief_prior_non_resident:,
+        return_relief_year:,
+        working_senior_receives_pension:,
+        cooperating_person:,
+        months_since_business_start:
       )
         @gross_income = gross_income
         @salary_period = salary_period
@@ -89,6 +115,12 @@ module Taxerase
         @include_sickness_contribution = include_sickness_contribution
         @business_days_in_month = business_days_in_month
         @previous_year_average_monthly_income = previous_year_average_monthly_income
+        @lump_sum_activity_type = lump_sum_activity_type
+        @return_relief_prior_non_resident = return_relief_prior_non_resident
+        @return_relief_year = return_relief_year
+        @working_senior_receives_pension = working_senior_receives_pension
+        @cooperating_person = cooperating_person
+        @months_since_business_start = months_since_business_start
       end
 
       def call
@@ -110,7 +142,7 @@ module Taxerase
           special_income_relief:
         )
         annual_income_tax_before_reliefs = income_tax_before_reliefs_for(annual_taxable_income)
-        annual_child_relief = b2b_tax_form.to_s == "tax_scale" ? ChildRelief.call(regime:, children_count:) : BigDecimal("0")
+        annual_child_relief = child_relief_for_tax_scale(annual_gross_income)
         annual_income_tax = [ annual_income_tax_before_reliefs - annual_child_relief, 0 ].max
         annual_total_tax = annual_social_security + annual_health_contribution + annual_income_tax
         annual_net_income = annual_gross_income - annual_deductible_expenses - annual_total_tax
@@ -153,7 +185,8 @@ module Taxerase
         :age_bracket, :children_count, :apply_return_relief, :apply_family_4plus_relief,
         :apply_working_senior_relief, :b2b_tax_form, :lump_sum_rate, :social_insurance_mode,
         :include_sickness_contribution, :business_days_in_month,
-        :previous_year_average_monthly_income
+        :previous_year_average_monthly_income, :lump_sum_activity_type, :return_relief_prior_non_resident,
+        :return_relief_year, :working_senior_receives_pension, :cooperating_person, :months_since_business_start
 
       def input_payload(annual_gross_income:, annual_deductible_expenses:)
         {
@@ -172,8 +205,11 @@ module Taxerase
           apply_working_senior_relief: truthy?(apply_working_senior_relief),
           b2b_tax_form:,
           lump_sum_rate: round_percentage(parsed_lump_sum_rate),
+          lump_sum_activity_type: lump_sum_activity_type.to_s.presence || "it_services",
           social_insurance_mode:,
           include_sickness_contribution: truthy?(include_sickness_contribution),
+          cooperating_person: truthy?(cooperating_person),
+          months_since_business_start: parsed_months_since_business_start,
           business_days_in_month: parsed_business_days_in_month,
           previous_year_average_monthly_income: round_currency(parsed_previous_year_average_monthly_income)
         }
@@ -216,16 +252,26 @@ module Taxerase
           SpecialIncomeRelief.validation_errors_for(
             age_bracket:,
             children_count:,
+            apply_return_relief:,
             apply_family_4plus_relief:,
-            apply_working_senior_relief:
+            apply_working_senior_relief:,
+            return_relief_prior_non_resident:,
+            return_relief_year:,
+            working_senior_receives_pension:
           )
         )
         errors << "b2b_tax_form must be one of: #{B2B_TAX_FORMS.join(', ')}" unless B2B_TAX_FORMS.include?(b2b_tax_form.to_s)
         unless SOCIAL_INSURANCE_MODES.include?(social_insurance_mode.to_s)
           errors << "social_insurance_mode must be one of: #{SOCIAL_INSURANCE_MODES.join(', ')}"
         end
-        errors << "lump_sum_rate must be between 0 and 0.5" unless parsed_lump_sum_rate.between?(0, 0.5)
+        unless valid_lump_sum_activity_type?
+          errors << "lump_sum_activity_type must be one of: #{LUMP_SUM_ACTIVITY_TYPES.join(', ')}"
+        end
+        if b2b_tax_form.to_s != "lump_sum" || valid_lump_sum_activity_type?
+          errors << "lump_sum_rate must be between 0 and 0.5" unless parsed_lump_sum_rate.between?(0, 0.5)
+        end
         errors << "business_days_in_month must be between 1 and 31" unless parsed_business_days_in_month.between?(1, 31)
+        errors << "months_since_business_start must be 0 or greater" if parsed_months_since_business_start.negative?
         if parsed_previous_year_average_monthly_income.negative?
           errors << "previous_year_average_monthly_income must be 0 or greater"
         end
@@ -235,6 +281,18 @@ module Taxerase
         raise ValidationError.new(errors) if errors.any?
       rescue ArgumentError
         raise ValidationError.new(errors + [ "children_count must be 0 or greater" ])
+      end
+
+      def child_relief_for_tax_scale(annual_gross_income)
+        return BigDecimal("0") unless b2b_tax_form.to_s == "tax_scale"
+
+        ChildRelief.call(
+          regime:,
+          children_count:,
+          household_income: annual_gross_income,
+          household_status: "single",
+          claim_share: 100
+        )
       end
 
       def regime
@@ -253,7 +311,8 @@ module Taxerase
         assumptions = [
           "Poland, tax year #{tax_year}.",
           "Tax form can be tax scale, flat tax, or lump sum. Child relief is currently modeled only for the tax-scale path.",
-          "ZUS social contributions use the selected relief path: start relief, preferential, Small ZUS Plus, or standard full ZUS. Small ZUS Plus uses 50% of the prior-year average monthly income, clamped to the official min and max bases.",
+          "Lump-sum tax uses the selected activity type to look up a seeded ryczalt rate; the legacy free-form rate is no longer used for lump-sum estimates.",
+          "ZUS social contributions use the selected relief path plus start-timeline and cooperating-person inputs. Cooperating-person status uses the standard base. Small ZUS Plus uses 50% of the prior-year average monthly income, clamped to the official min and max bases.",
           "For monthly estimates, fixed B2B contributions are prorated by business days as a simple approximation."
         ]
 
@@ -278,7 +337,7 @@ module Taxerase
         when "flat_tax"
           annual_taxable_income * parameter_decimal!("flat_tax_rate")
         else
-          annual_taxable_income * parsed_lump_sum_rate
+          annual_taxable_income * lump_sum_activity_rate
         end
       end
 
@@ -310,7 +369,7 @@ module Taxerase
       end
 
       def annual_social_security_contribution
-        return BigDecimal("0") if social_insurance_mode.to_s == "start_relief"
+        return BigDecimal("0") if effective_social_insurance_mode == "start_relief"
 
         monthly_rate = parameter_decimal!("zus_pension_rate") +
           parameter_decimal!("zus_disability_rate") +
@@ -323,7 +382,7 @@ module Taxerase
       end
 
       def social_contribution_base
-        case social_insurance_mode.to_s
+        case effective_social_insurance_mode
         when "preferential"
           parameter_decimal!("monthly_preferential_social_base")
         when "small_zus_plus"
@@ -338,7 +397,7 @@ module Taxerase
       end
 
       def include_b2b_labor_fund?
-        return false if %w[start_relief preferential].include?(social_insurance_mode.to_s)
+        return false if %w[start_relief preferential].include?(effective_social_insurance_mode)
 
         social_contribution_base >= parameter_decimal!("monthly_minimum_wage")
       end
@@ -352,6 +411,22 @@ module Taxerase
           apply_working_senior_relief:,
           allow_relief_for_young: false
         )
+      end
+
+      def effective_social_insurance_mode
+        return "standard" if truthy?(cooperating_person)
+        return "start_relief" if parsed_months_since_business_start.between?(0, 6)
+        return "preferential" if parsed_months_since_business_start.between?(7, 30)
+
+        social_insurance_mode.to_s
+      end
+
+      def lump_sum_activity_rate
+        parameter_decimal!("lump_sum_rate_#{lump_sum_activity_type}")
+      end
+
+      def valid_lump_sum_activity_type?
+        LUMP_SUM_ACTIVITY_TYPES.include?(lump_sum_activity_type.to_s)
       end
 
       def parsed_gross_income
@@ -376,7 +451,11 @@ module Taxerase
       end
 
       def parsed_lump_sum_rate
-        @parsed_lump_sum_rate ||= percentage_to_decimal(lump_sum_rate)
+        @parsed_lump_sum_rate ||= b2b_tax_form.to_s == "lump_sum" ? lump_sum_activity_rate : percentage_to_decimal(lump_sum_rate)
+      end
+
+      def parsed_months_since_business_start
+        @parsed_months_since_business_start ||= Integer(months_since_business_start.to_s, exception: false) || -1
       end
 
       def parsed_business_days_in_month

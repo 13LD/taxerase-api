@@ -171,7 +171,7 @@ RSpec.describe "Spain calculator selectors", type: :system, js: true do
     within_calculator_card do
       select "Madrid", from: "Region"
       select "75+", from: "Taxpayer age"
-      select "2", from: "Children"
+      select "2", from: "Children", exact: true
       select "1", from: "Children under 3"
       select "65% or more", from: "Taxpayer disability"
     end
@@ -191,7 +191,7 @@ RSpec.describe "Spain calculator selectors", type: :system, js: true do
 
     within_calculator_card do
       select "Madrid", from: "Region"
-      select "1", from: "Dependent ascendants"
+      select "1", from: "Dependent ascendants", exact: true
       select "1", from: "Ascendants over 75"
       select "1", from: "Ascendants disability 65%+"
       select "Married family unit", from: "Joint filing"

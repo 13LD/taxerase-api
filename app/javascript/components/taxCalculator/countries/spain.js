@@ -59,6 +59,8 @@ const spainCalculatorConfig = {
         key: "ascendants_count",
         type: "select",
         label: "Dependent ascendants",
+        hint:
+          "Parents or grandparents who qualify for Spain's ascendant minimum. This increases the personal and family minimum before tax is calculated.",
         categories: [ "employee", "self_employed" ],
         defaultValue: "0",
         resultInputKey: "ascendants_count",
@@ -69,6 +71,8 @@ const spainCalculatorConfig = {
         key: "ascendants_over_75_count",
         type: "select",
         label: "Ascendants over 75",
+        hint:
+          "Subset of dependent ascendants aged over 75. Spain adds an extra ascendant minimum for this age band.",
         categories: [ "employee", "self_employed" ],
         defaultValue: "0",
         resultInputKey: "ascendants_over_75_count",
@@ -79,6 +83,8 @@ const spainCalculatorConfig = {
         key: "ascendant_disability_33_count",
         type: "select",
         label: "Ascendants disability 33% to 64%",
+        hint:
+          "Dependent ascendants with recognized disability from 33% to 64%; used for the ascendant disability minimum.",
         categories: [ "employee", "self_employed" ],
         defaultValue: "0",
         resultInputKey: "ascendant_disability_33_count",
@@ -89,6 +95,8 @@ const spainCalculatorConfig = {
         key: "ascendant_disability_65_count",
         type: "select",
         label: "Ascendants disability 65%+",
+        hint:
+          "Dependent ascendants with recognized disability of 65% or more; this applies the higher ascendant disability minimum.",
         categories: [ "employee", "self_employed" ],
         defaultValue: "0",
         resultInputKey: "ascendant_disability_65_count",
@@ -99,6 +107,8 @@ const spainCalculatorConfig = {
         key: "ascendant_disability_support_count",
         type: "select",
         label: "Ascendants needing support",
+        hint:
+          "Disabled dependent ascendants with reduced mobility or third-party support needs; adds the support increment.",
         categories: [ "employee", "self_employed" ],
         defaultValue: "0",
         resultInputKey: "ascendant_disability_support_count",
@@ -109,6 +119,8 @@ const spainCalculatorConfig = {
         key: "joint_filing_mode",
         type: "select",
         label: "Joint filing",
+        hint:
+          "Applies the Spanish family-unit reduction for married or single-parent joint filing instead of individual filing.",
         categories: [ "employee", "self_employed" ],
         defaultValue: "none",
         resultInputKey: "joint_filing_mode",
@@ -123,24 +135,29 @@ const spainCalculatorConfig = {
         key: "union_dues",
         label: "Union dues",
         categories: [ "employee" ],
-        hint: "Deductible employment expense."
+        hint:
+          "Union membership fees paid by an employee. The calculator subtracts them as deductible work-income expenses."
       }),
       currencyControl({
         key: "professional_fees",
         label: "Compulsory professional fees",
         categories: [ "employee" ],
-        hint: "Capped deductible employment expense."
+        hint:
+          "Mandatory professional association fees required for the job. The calculator applies the statutory deductible cap."
       }),
       currencyControl({
         key: "legal_defense_costs",
         label: "Labor legal-defense costs",
         categories: [ "employee" ],
-        hint: "Capped deductible employment expense for labor disputes."
+        hint:
+          "Legal defense costs from employment disputes. The calculator applies the employment legal-defense cap."
       }),
       {
         key: "disabled_worker_status",
         type: "select",
         label: "Disabled worker expense",
+        hint:
+          "Adds Spain's increased deductible employment expense for workers with recognized disability, with a higher amount for 65%+ or support needs.",
         categories: [ "employee" ],
         defaultValue: "none",
         resultInputKey: "disabled_worker_status",
@@ -155,6 +172,8 @@ const spainCalculatorConfig = {
         key: "geographic_mobility",
         type: "checkbox",
         label: "Apply geographic mobility expense",
+        hint:
+          "Use when unemployment-to-employment relocation rules apply. This adds the Spanish geographic-mobility work-expense increase.",
         categories: [ "employee" ],
         defaultValue: false,
         resultInputKey: "geographic_mobility",
@@ -164,6 +183,8 @@ const spainCalculatorConfig = {
         key: "large_family_category",
         type: "select",
         label: "Large-family deduction",
+        hint:
+          "Select the official large-family category. The calculator applies the national family deduction for general or special category families.",
         categories: [ "employee", "self_employed" ],
         defaultValue: "none",
         resultInputKey: "large_family_category",
@@ -178,6 +199,8 @@ const spainCalculatorConfig = {
         key: "large_family_extra_children",
         type: "select",
         label: "Extra children in large family",
+        hint:
+          "Children above the baseline large-family threshold. Spain adds an extra deduction amount for each additional child.",
         categories: [ "employee", "self_employed" ],
         defaultValue: "0",
         resultInputKey: "large_family_extra_children",
@@ -188,6 +211,8 @@ const spainCalculatorConfig = {
         key: "single_parent_two_children",
         type: "checkbox",
         label: "Single parent with two children",
+        hint:
+          "Use for the national deduction for a single parent with two children when the statutory conditions are met.",
         categories: [ "employee", "self_employed" ],
         defaultValue: false,
         resultInputKey: "single_parent_two_children",
@@ -197,6 +222,8 @@ const spainCalculatorConfig = {
         key: "maternity_eligible_months",
         type: "select",
         label: "Maternity deduction months",
+        hint:
+          "Months eligible for Spain's maternity deduction. The calculator multiplies the monthly deduction by this count.",
         categories: [ "employee", "self_employed" ],
         defaultValue: "0",
         resultInputKey: "maternity_eligible_months",
@@ -207,12 +234,15 @@ const spainCalculatorConfig = {
         key: "nursery_expenses_paid",
         label: "Nursery expenses paid",
         categories: [ "employee", "self_employed" ],
-        hint: "Additional maternity deduction increment, capped annually."
+        hint:
+          "Eligible nursery or childcare centre costs. The calculator applies the additional maternity increment up to the annual cap."
       }),
       {
         key: "disabled_descendants_count",
         type: "select",
         label: "Disabled descendants in charge",
+        hint:
+          "Children or descendants in your care with recognized disability. The calculator applies the national disability-in-care deduction.",
         categories: [ "employee", "self_employed" ],
         defaultValue: "0",
         resultInputKey: "disabled_descendants_count",
@@ -223,6 +253,8 @@ const spainCalculatorConfig = {
         key: "disabled_ascendants_count",
         type: "select",
         label: "Disabled ascendants in charge",
+        hint:
+          "Parents or grandparents in your care with recognized disability. The calculator applies the national disability-in-care deduction.",
         categories: [ "employee", "self_employed" ],
         defaultValue: "0",
         resultInputKey: "disabled_ascendants_count",
@@ -233,6 +265,8 @@ const spainCalculatorConfig = {
         key: "spouse_disability_dependant",
         type: "checkbox",
         label: "Spouse with disability in charge",
+        hint:
+          "Use when the spouse qualifies as a dependent with disability for Spain's national family deduction.",
         categories: [ "employee", "self_employed" ],
         defaultValue: false,
         resultInputKey: "spouse_disability_dependant",
@@ -242,6 +276,8 @@ const spainCalculatorConfig = {
         key: "self_employed_estimation_method",
         type: "select",
         label: "Self-employed estimation method",
+        hint:
+          "Direct simplified and direct normal use actual expense inputs; modules use the seeded objective-estimation net-income rate.",
         categories: [ "self_employed" ],
         defaultValue: "direct_simplified",
         resultInputKey: "self_employed_estimation_method",
@@ -255,18 +291,22 @@ const spainCalculatorConfig = {
         key: "home_office_supply_expenses",
         label: "Home-office supply expenses",
         categories: [ "self_employed" ],
-        hint: "Uses the 30% x business-use-area approach."
+        hint:
+          "Utilities and supply costs for a declared home workspace. Spain applies 30% of the business-use area share."
       }),
       currencyControl({
         key: "home_office_ownership_expenses",
         label: "Home-office ownership expenses",
         categories: [ "self_employed" ],
-        hint: "Applied by business-use area percentage."
+        hint:
+          "Ownership or occupancy costs for the business-use part of the home. The calculator applies the entered business-use percentage."
       }),
       {
         key: "home_office_business_use_percentage",
         type: "number",
         label: "Home-office business use",
+        hint:
+          "Percentage of the home allocated to business use. This drives the home-office supply and ownership deductions.",
         suffix: "%",
         min: 0,
         max: 100,
@@ -279,12 +319,15 @@ const spainCalculatorConfig = {
         key: "meals_expenses",
         label: "Deductible meals",
         categories: [ "self_employed" ],
-        hint: "Separate meal/subsistence expense class."
+        hint:
+          "Eligible business meal and subsistence costs entered separately from ordinary expenses for direct-estimation calculations."
       }),
       {
         key: "reta_contribution_mode",
         type: "select",
         label: "RETA contribution mode",
+        hint:
+          "RETA is Spain's self-employed social-security regime. Select standard contribution or one of the reduced-quota paths.",
         categories: [ "self_employed" ],
         defaultValue: "standard",
         resultInputKey: "reta_contribution_mode",
@@ -300,6 +343,8 @@ const spainCalculatorConfig = {
         key: "family_collaborator",
         type: "checkbox",
         label: "Family collaborator reduction",
+        hint:
+          "Use when the self-employed worker qualifies for the family-collaborator Social Security reduction.",
         categories: [ "self_employed" ],
         defaultValue: false,
         resultInputKey: "family_collaborator"
@@ -308,6 +353,8 @@ const spainCalculatorConfig = {
         key: "corporate_self_employed",
         type: "checkbox",
         label: "Corporate self-employed",
+        hint:
+          "Use for autónomo societario cases. The calculator applies the corporate self-employed contribution-base handling.",
         categories: [ "self_employed" ],
         defaultValue: false,
         resultInputKey: "corporate_self_employed"
@@ -316,6 +363,8 @@ const spainCalculatorConfig = {
         key: "apply_reta_pluriactivity",
         type: "checkbox",
         label: "Estimate pluriactivity refund",
+        hint:
+          "Use when the person paid both employee common-contingencies contributions and RETA. The calculator estimates the refund threshold.",
         categories: [ "self_employed" ],
         defaultValue: false,
         resultInputKey: "apply_reta_pluriactivity",
@@ -331,10 +380,17 @@ const spainCalculatorConfig = {
       }
     ],
     showAgeField: true,
-    ageFieldHint: null,
+    ageFieldHint:
+      "Applies Spain's taxpayer age increments to the personal and family minimum for age 65+ and 75+.",
     showChildrenCountField: true,
+    childrenCountHint:
+      "Counts descendants for Spain's descendant minimum and family deductions. Amounts increase by child order.",
     showChildrenUnderThreeField: true,
+    childrenUnderThreeHint:
+      "Subset of declared children under 3. Spain adds an extra descendant minimum for each child in this age band.",
     showDisabilityField: true,
+    disabilityFieldHint:
+      "Applies Spain's taxpayer disability minimum, with higher relief for 65%+ disability or support needs.",
     ageBracketOptions: [
       { value: "under_65", label: "Under 65" },
       { value: "from_65_to_74", label: "65 to 74" },

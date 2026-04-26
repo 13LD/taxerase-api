@@ -16,6 +16,8 @@ module Taxerase
       COUNTRY_CODE = "PL".freeze
       REVENUE_COST_MODES = %w[normal elevated copyright none].freeze
       MONTHLY_TAX_RELIEF_MODES = %w[full half third none].freeze
+      CHILD_RELIEF_HOUSEHOLD_STATUSES = %w[single married single_parent].freeze
+      FILING_STATUSES = %w[individual joint_spouse single_parent].freeze
 
       def self.call(
         gross_income:,
@@ -33,7 +35,17 @@ module Taxerase
         ppk_employer_rate: 0,
         employer_accident_rate: 1.67,
         include_labor_fund: true,
-        include_fgsp: true
+        include_fgsp: true,
+        birth_year: nil,
+        young_worker_relief_income_type: "employment",
+        return_relief_prior_non_resident: false,
+        return_relief_year: 0,
+        working_senior_receives_pension: false,
+        child_relief_household_status: "single",
+        child_relief_household_income: nil,
+        child_relief_claim_share: 100,
+        filing_status: "individual",
+        spouse_income: 0
       )
         new(
           gross_income:,
@@ -51,7 +63,17 @@ module Taxerase
           ppk_employer_rate:,
           employer_accident_rate:,
           include_labor_fund:,
-          include_fgsp:
+          include_fgsp:,
+          birth_year:,
+          young_worker_relief_income_type:,
+          return_relief_prior_non_resident:,
+          return_relief_year:,
+          working_senior_receives_pension:,
+          child_relief_household_status:,
+          child_relief_household_income:,
+          child_relief_claim_share:,
+          filing_status:,
+          spouse_income:
         ).call
       end
 
@@ -71,7 +93,17 @@ module Taxerase
         ppk_employer_rate:,
         employer_accident_rate:,
         include_labor_fund:,
-        include_fgsp:
+        include_fgsp:,
+        birth_year:,
+        young_worker_relief_income_type:,
+        return_relief_prior_non_resident:,
+        return_relief_year:,
+        working_senior_receives_pension:,
+        child_relief_household_status:,
+        child_relief_household_income:,
+        child_relief_claim_share:,
+        filing_status:,
+        spouse_income:
       )
         @gross_income = gross_income
         @salary_period = salary_period
@@ -89,6 +121,16 @@ module Taxerase
         @employer_accident_rate = employer_accident_rate
         @include_labor_fund = include_labor_fund
         @include_fgsp = include_fgsp
+        @birth_year = birth_year
+        @young_worker_relief_income_type = young_worker_relief_income_type
+        @return_relief_prior_non_resident = return_relief_prior_non_resident
+        @return_relief_year = return_relief_year
+        @working_senior_receives_pension = working_senior_receives_pension
+        @child_relief_household_status = child_relief_household_status
+        @child_relief_household_income = child_relief_household_income
+        @child_relief_claim_share = child_relief_claim_share
+        @filing_status = filing_status
+        @spouse_income = spouse_income
       end
 
       def call
@@ -113,12 +155,14 @@ module Taxerase
             special_income_relief.fetch(:exempt_income_cap),
           0
         ].max
-        annual_income_tax_before_reliefs = [
-          ProgressiveTax.call(amount: taxable_income, brackets: regime.brackets_for("pit_scale")) -
-            annual_tax_reducing_amount,
-          0
-        ].max
-        annual_child_relief = ChildRelief.call(regime:, children_count:)
+        annual_income_tax_before_reliefs = annual_tax_before_child_relief(taxable_income)
+        annual_child_relief = ChildRelief.call(
+          regime:,
+          children_count:,
+          household_status: child_relief_household_status,
+          household_income: resolved_child_relief_household_income(annual_gross_income),
+          claim_share: child_relief_claim_share
+        )
         annual_income_tax = [ annual_income_tax_before_reliefs - annual_child_relief, 0 ].max
         annual_employer_social_security = annual_gross_income * employer_social_security_rate
         annual_accident_contribution = annual_gross_income * parsed_employer_accident_rate
@@ -180,7 +224,10 @@ module Taxerase
       attr_reader :gross_income, :salary_period, :tax_regime_key, :tax_year, :age_bracket,
         :children_count, :apply_return_relief, :apply_family_4plus_relief, :apply_working_senior_relief,
         :revenue_cost_mode, :monthly_tax_relief_mode, :ppk_employee_rate, :ppk_employer_rate,
-        :employer_accident_rate, :include_labor_fund, :include_fgsp
+        :employer_accident_rate, :include_labor_fund, :include_fgsp, :birth_year,
+        :young_worker_relief_income_type, :return_relief_prior_non_resident, :return_relief_year,
+        :working_senior_receives_pension, :child_relief_household_status, :child_relief_household_income,
+        :child_relief_claim_share, :filing_status, :spouse_income
 
       def input_payload(annual_gross_income:)
         {
@@ -196,6 +243,16 @@ module Taxerase
           apply_return_relief: truthy?(apply_return_relief),
           apply_family_4plus_relief: truthy?(apply_family_4plus_relief),
           apply_working_senior_relief: truthy?(apply_working_senior_relief),
+          birth_year: parsed_birth_year,
+          young_worker_relief_income_type: young_worker_relief_income_type.to_s.presence || "employment",
+          return_relief_prior_non_resident: truthy?(return_relief_prior_non_resident),
+          return_relief_year: parsed_return_relief_year,
+          working_senior_receives_pension: truthy?(working_senior_receives_pension),
+          child_relief_household_status: child_relief_household_status.to_s.presence || "single",
+          child_relief_household_income: round_currency(parsed_child_relief_household_income),
+          child_relief_claim_share: round_percentage(parsed_child_relief_claim_share),
+          filing_status: filing_status.to_s.presence || "individual",
+          spouse_income: round_currency(parsed_spouse_income),
           revenue_cost_mode:,
           monthly_tax_relief_mode:,
           ppk_employee_rate: round_percentage(parsed_ppk_employee_rate),
@@ -259,8 +316,13 @@ module Taxerase
           SpecialIncomeRelief.validation_errors_for(
             age_bracket:,
             children_count:,
+            apply_return_relief:,
             apply_family_4plus_relief:,
-            apply_working_senior_relief:
+            apply_working_senior_relief:,
+            return_relief_prior_non_resident:,
+            return_relief_year:,
+            working_senior_receives_pension:,
+            young_worker_relief_income_type:
           )
         )
         errors << "revenue_cost_mode must be one of: #{REVENUE_COST_MODES.join(', ')}" unless REVENUE_COST_MODES.include?(revenue_cost_mode.to_s)
@@ -270,6 +332,14 @@ module Taxerase
         errors << "ppk_employee_rate must be between 0 and 0.04" unless parsed_ppk_employee_rate.between?(0, 0.04)
         errors << "ppk_employer_rate must be between 0 and 0.04" unless parsed_ppk_employer_rate.between?(0, 0.04)
         errors << "employer_accident_rate must be between 0 and 0.1" unless parsed_employer_accident_rate.between?(0, 0.1)
+        errors << "birth_year must be a valid year when provided" if birth_year.present? && parsed_birth_year.zero?
+        unless CHILD_RELIEF_HOUSEHOLD_STATUSES.include?(child_relief_household_status.to_s)
+          errors << "child_relief_household_status must be one of: #{CHILD_RELIEF_HOUSEHOLD_STATUSES.join(', ')}"
+        end
+        errors << "child_relief_claim_share must be between 0 and 100" unless parsed_child_relief_claim_share.between?(0, 1)
+        errors << "child_relief_household_income must be 0 or greater" if parsed_child_relief_household_income.negative?
+        errors << "filing_status must be one of: #{FILING_STATUSES.join(', ')}" unless FILING_STATUSES.include?(filing_status.to_s)
+        errors << "spouse_income must be 0 or greater" if parsed_spouse_income.negative?
 
         parsed_children_count
 
@@ -296,7 +366,8 @@ module Taxerase
           "Employee payroll contributions use the standard Polish employee rates for retirement, disability, sickness, and health insurance.",
           "Employer-cost cards use employer pension and disability rates, the selected accident rate, and optional Labor Fund, FGŚP, and employer PPK contributions.",
           "Revenue cost mode, PIT-2 monthly tax relief share, and PPK rates are user-selected. Copyright costs are capped at the annual statutory limit stored for the selected year.",
-          "Child relief is applied against annual PIT only. Joint filing, one-child income-threshold tests, and custody-allocation edge cases are still out of scope."
+          "Child relief uses the selected household status, one-child household-income threshold, and claim-share percentage.",
+          "Joint spouse and single-parent filing apply a simplified household quotient to the entered taxpayer income and spouse income where relevant."
         ]
 
         return assumptions if special_income_relief.fetch(:enabled_reliefs).empty?
@@ -311,8 +382,40 @@ module Taxerase
           apply_return_relief:,
           apply_family_4plus_relief:,
           apply_working_senior_relief:,
-          allow_relief_for_young: true
+          allow_relief_for_young: true,
+          young_worker_eligible: young_worker_eligible?
         )
+      end
+
+      def annual_tax_before_child_relief(taxable_income)
+        brackets = regime.brackets_for("pit_scale")
+
+        case filing_status.to_s
+        when "joint_spouse"
+          quotient_tax_before_allowance((taxable_income + parsed_spouse_income) / 2, brackets)
+        when "single_parent"
+          quotient_tax_before_allowance(taxable_income / 2, brackets)
+        else
+          [ ProgressiveTax.call(amount: taxable_income, brackets:) - annual_tax_reducing_amount, 0 ].max
+        end
+      end
+
+      def quotient_tax_before_allowance(quotient_income, brackets)
+        [ ProgressiveTax.call(amount: quotient_income, brackets:) - annual_tax_reducing_amount, 0 ].max * 2
+      end
+
+      def young_worker_eligible?
+        return age_bracket.to_s == "under_26" if parsed_birth_year.zero?
+
+        (tax_year.to_i - parsed_birth_year) < 26 && young_worker_relief_income_type.to_s == "employment"
+      end
+
+      def resolved_child_relief_household_income(annual_gross_income)
+        unless child_relief_household_income.nil? || child_relief_household_income.to_s.blank? || parsed_child_relief_household_income.zero?
+          return parsed_child_relief_household_income
+        end
+
+        annual_gross_income + (child_relief_household_status.to_s == "married" ? parsed_spouse_income : BigDecimal("0"))
       end
 
       def employee_social_security_rate
@@ -365,6 +468,43 @@ module Taxerase
 
           parsed_value
         end
+      end
+
+      def parsed_birth_year
+        @parsed_birth_year ||= begin
+          if birth_year.nil? || birth_year.to_s.blank?
+            0
+          else
+            parsed_value = Integer(birth_year.to_s, exception: false)
+            parsed_value.to_i.between?(1900, tax_year.to_i) ? parsed_value : 0
+          end
+        end
+      end
+
+      def parsed_return_relief_year
+        @parsed_return_relief_year ||= Integer(return_relief_year.to_s, exception: false) || 0
+      end
+
+      def parsed_child_relief_household_income
+        @parsed_child_relief_household_income ||= begin
+          if child_relief_household_income.nil? || child_relief_household_income.to_s.blank?
+            BigDecimal("0")
+          else
+            BigDecimal(child_relief_household_income.to_s)
+          end
+        end
+      rescue ArgumentError
+        BigDecimal("-1")
+      end
+
+      def parsed_child_relief_claim_share
+        @parsed_child_relief_claim_share ||= percentage_to_decimal(child_relief_claim_share)
+      end
+
+      def parsed_spouse_income
+        @parsed_spouse_income ||= BigDecimal(spouse_income.to_s)
+      rescue ArgumentError
+        BigDecimal("-1")
       end
 
       def parsed_ppk_employee_rate

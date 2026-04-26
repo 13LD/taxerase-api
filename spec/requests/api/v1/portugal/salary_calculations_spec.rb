@@ -104,6 +104,50 @@ RSpec.describe "Api::V1::Portugal::SalaryCalculations", type: :request do
       expect(json.dig("breakdown", "taxable_income")).to eq(baseline.dig("breakdown", "taxable_income"))
     end
 
+    it "applies Portugal employee household, IRS Jovem, dues, and expanded deductions" do
+      post api_v1_portugal_salary_calculation_path,
+        params: {
+          calculation: {
+            gross_income: 60_000,
+            tax_year: 2025,
+            salary_period: "YEAR",
+            tax_regime_key: "employee_portugal",
+            children_count: 3,
+            children_under_three_count: 1,
+            young_dependents_second_later_under_six_count: 2,
+            disability_level: "none",
+            filing_status: "joint",
+            apply_irs_jovem: true,
+            irs_jovem_year: 2,
+            union_dues: 300,
+            professional_order_dues: 200,
+            vat_invoice_expenses: 5_000,
+            vat_invoice_validation_state: "validated",
+            disability_rehabilitation_expenses: 1_000,
+            disability_insurance_premiums: 1_000,
+            ppr_contributions: 3_000,
+            ppr_age_band: "under_35",
+            donations: 1_000
+          }
+        },
+        as: :json
+
+      expect(response).to have_http_status(:ok)
+
+      json = JSON.parse(response.body)
+
+      expect(json.dig("input", "filing_status")).to eq("joint")
+      expect(json.dig("input", "apply_irs_jovem")).to be(true)
+      expect(json.dig("breakdown", "specific_deduction")).to eq(7_250.0)
+      expect(json.dig("breakdown", "irs_jovem_exemption")).to eq(28_737.5)
+      expect(json.dig("breakdown", "young_dependent_second_later_deduction")).to eq(600.0)
+      expect(json.dig("breakdown", "vat_invoice_deduction")).to eq(250.0)
+      expect(json.dig("breakdown", "disability_rehabilitation_deduction")).to eq(300.0)
+      expect(json.dig("breakdown", "disability_insurance_deduction")).to eq(250.0)
+      expect(json.dig("breakdown", "ppr_deduction")).to eq(400.0)
+      expect(json.dig("breakdown", "donations_deduction")).to eq(250.0)
+    end
+
     it "returns a self-employed breakdown for professional services" do
       post api_v1_portugal_salary_calculation_path,
         params: {
@@ -176,6 +220,67 @@ RSpec.describe "Api::V1::Portugal::SalaryCalculations", type: :request do
       expect(goods_activity.dig("breakdown", "annual_net_income")).to be > professional_services.dig("breakdown", "annual_net_income")
     end
 
+    it "supports Portugal self-employed organized-accounting and social-security controls" do
+      post api_v1_portugal_salary_calculation_path,
+        params: {
+          calculation: {
+            gross_income: 70_000,
+            deductible_expenses: 10_000,
+            tax_year: 2025,
+            salary_period: "YEAR",
+            tax_regime_key: "self_employed_portugal",
+            business_activity_type: "professional_services",
+            self_employed_tax_regime: "organized_accounting",
+            social_security_exemption: true,
+            social_security_adjustment_mode: "increase_25",
+            children_count: 0,
+            children_under_three_count: 0,
+            disability_level: "none"
+          }
+        },
+        as: :json
+
+      expect(response).to have_http_status(:ok)
+
+      json = JSON.parse(response.body)
+
+      expect(json.dig("input", "self_employed_tax_regime")).to eq("organized_accounting")
+      expect(json.dig("input", "social_security_exemption")).to be(true)
+      expect(json.dig("breakdown", "annual_social_security")).to eq(0.0)
+      expect(json.dig("breakdown", "taxable_income_before_irs_jovem")).to eq(60_000.0)
+      expect(json.dig("breakdown", "documentation_shortfall_addition")).to eq(0.0)
+    end
+
+    it "applies Portugal self-employed start-of-activity and Social Security adjustment estimates" do
+      post api_v1_portugal_salary_calculation_path,
+        params: {
+          calculation: {
+            gross_income: 70_000,
+            deductible_expenses: 0,
+            tax_year: 2025,
+            salary_period: "YEAR",
+            tax_regime_key: "self_employed_portugal",
+            business_activity_type: "professional_services",
+            self_employed_tax_regime: "simplified",
+            start_activity_year: "first_year",
+            social_security_adjustment_mode: "reduce_25",
+            children_count: 0,
+            children_under_three_count: 0,
+            disability_level: "none"
+          }
+        },
+        as: :json
+
+      expect(response).to have_http_status(:ok)
+
+      json = JSON.parse(response.body)
+
+      expect(json.dig("input", "start_activity_year")).to eq("first_year")
+      expect(json.dig("input", "social_security_adjustment_mode")).to eq("reduce_25")
+      expect(json.dig("breakdown", "simplified_taxable_base")).to eq(26_250.0)
+      expect(json.dig("breakdown", "annual_social_security")).to eq(7_864.5)
+    end
+
     it "returns validation errors for invalid input" do
       post api_v1_portugal_salary_calculation_path,
         params: {
@@ -190,7 +295,15 @@ RSpec.describe "Api::V1::Portugal::SalaryCalculations", type: :request do
             children_under_three_count: 2,
             disability_level: "invalid",
             ascendants_count: -1,
-            health_expenses: -5
+            health_expenses: -5,
+            filing_status: "married",
+            vat_invoice_validation_state: "reviewed",
+            ppr_age_band: "teen",
+            apply_irs_jovem: true,
+            irs_jovem_year: 11,
+            self_employed_tax_regime: "cash_basis",
+            start_activity_year: "third_year",
+            social_security_adjustment_mode: "double"
           }
         },
         as: :json
@@ -206,6 +319,38 @@ RSpec.describe "Api::V1::Portugal::SalaryCalculations", type: :request do
       expect(json["errors"]).to include("disability_level must be one of: none, disability_60_plus")
       expect(json["errors"]).to include("ascendants_count must be 0 or greater")
       expect(json["errors"]).to include("health_expenses must be 0 or greater")
+      expect(json["errors"]).to include("filing_status must be one of: individual, joint")
+      expect(json["errors"]).to include("vat_invoice_validation_state must be one of: not_validated, pending, validated")
+      expect(json["errors"]).to include("ppr_age_band must be one of: under_35, from_35_to_50, over_50")
+      expect(json["errors"]).to include("irs_jovem_year must be between 1 and 10 when IRS Jovem applies")
+      expect(json["errors"]).to include("self_employed_tax_regime must be one of: simplified, organized_accounting")
+      expect(json["errors"]).to include("start_activity_year must be one of: none, first_year, second_year")
+      expect(json["errors"]).to include("social_security_adjustment_mode must be one of: standard, reduce_25, increase_25")
+    end
+
+    it "rejects second-and-later young-dependent counts that exceed the dependent count" do
+      post api_v1_portugal_salary_calculation_path,
+        params: {
+          calculation: {
+            gross_income: 60_000,
+            tax_year: 2025,
+            salary_period: "YEAR",
+            tax_regime_key: "employee_portugal",
+            children_count: 0,
+            children_under_three_count: 0,
+            young_dependents_second_later_under_six_count: 1,
+            disability_level: "none"
+          }
+        },
+        as: :json
+
+      expect(response).to have_http_status(:unprocessable_content)
+
+      json = JSON.parse(response.body)
+
+      expect(json["errors"]).to include(
+        "young_dependents_second_later_under_six_count must be between 0 and second-and-later children_count"
+      )
     end
   end
 end

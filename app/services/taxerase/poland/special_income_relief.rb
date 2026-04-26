@@ -16,7 +16,12 @@ module Taxerase
         age_bracket:,
         children_count:,
         apply_family_4plus_relief: false,
-        apply_working_senior_relief: false
+        apply_working_senior_relief: false,
+        apply_return_relief: false,
+        return_relief_prior_non_resident: false,
+        return_relief_year: 0,
+        working_senior_receives_pension: false,
+        young_worker_relief_income_type: "employment"
       )
         errors = []
         errors << "age_bracket must be one of: #{AGE_BRACKETS.join(', ')}" unless AGE_BRACKETS.include?(age_bracket.to_s)
@@ -29,6 +34,17 @@ module Taxerase
         if truthy?(apply_working_senior_relief) && age_bracket.to_s != "retirement_age_or_older"
           errors << "working senior relief requires retirement age or older"
         end
+        if truthy?(apply_working_senior_relief) && truthy?(working_senior_receives_pension)
+          errors << "working senior relief requires not receiving a pension"
+        end
+        if truthy?(apply_return_relief)
+          parsed_return_relief_year = Integer(return_relief_year.to_s, exception: false)
+          errors << "return relief requires prior non-residence eligibility" unless truthy?(return_relief_prior_non_resident)
+          errors << "return_relief_year must be between 1 and 4" unless (1..4).include?(parsed_return_relief_year)
+        end
+        unless %w[employment other].include?(young_worker_relief_income_type.to_s)
+          errors << "young_worker_relief_income_type must be one of: employment, other"
+        end
 
         errors
       end
@@ -39,10 +55,11 @@ module Taxerase
         apply_return_relief: false,
         apply_family_4plus_relief: false,
         apply_working_senior_relief: false,
-        allow_relief_for_young: true
+        allow_relief_for_young: true,
+        young_worker_eligible: false
       )
         enabled_reliefs = []
-        if allow_relief_for_young && age_bracket.to_s == "under_26"
+        if allow_relief_for_young && young_worker_eligible
           enabled_reliefs << "Relief for young people under 26"
         end
         enabled_reliefs << "Return relief" if truthy?(apply_return_relief)
