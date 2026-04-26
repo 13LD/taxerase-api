@@ -264,7 +264,7 @@ const portugalCalculatorConfig = {
         type: "select",
         label: "Activity type",
         hint:
-          "Professional services use the 75% simplified-regime coefficient, other services use 35%, and goods or hospitality use 15%.",
+          "Professional services, other services, and goods or hospitality use different simplified-regime coefficients and Social Security relevant-income rates.",
         categories: [ "self_employed" ],
         defaultValue: "professional_services",
         resultInputKey: "business_activity_type",
@@ -272,8 +272,7 @@ const portugalCalculatorConfig = {
           { value: "professional_services", label: "Professional services" },
           { value: "other_services", label: "Other services" },
           { value: "sales_goods_hospitality", label: "Goods, hospitality, food, or beverage" }
-        ],
-        visibleWhen: (controlValues) => controlValues.self_employed_tax_regime !== "organized_accounting"
+        ]
       },
       ...sharedDeductionControls
     ],

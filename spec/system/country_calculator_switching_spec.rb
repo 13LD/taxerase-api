@@ -279,6 +279,8 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
       expect(page).to have_text("Simplified self-employed - Portugal")
       expect(page).to have_select("Activity type")
       expect(page).to have_field("Deductible expenses")
+      select "Organized accounting estimate", from: "Category B tax regime"
+      expect(page).to have_select("Activity type")
     end
 
     within(".results-card") do

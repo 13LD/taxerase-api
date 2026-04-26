@@ -124,7 +124,7 @@ module Taxerase
 
       def donation_deduction_for(tax_base_before_deductions)
         return BigDecimal("0") if parsed_donations_amount < parameter_decimal!("donation_minimum_amount") &&
-          parsed_donations_amount <= tax_base_before_deductions * parameter_decimal!("donation_minimum_tax_base_rate")
+          parsed_donations_amount < tax_base_before_deductions * parameter_decimal!("donation_minimum_tax_base_rate")
 
         [
           parsed_donations_amount,
