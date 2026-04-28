@@ -8,7 +8,7 @@ module Api
         rescue_from Taxerase::InputCurrencyHandler::ValidationError, with: :render_validation_error
 
         def create
-          render json: Taxerase::CzechRepublic::CalculationRouter.call(
+          render json: calculator_result_payload(Taxerase::CzechRepublic::CalculationRouter.call(
             gross_income: calculation_params[:gross_income],
             input_currency_code: calculation_params[:input_currency_code],
             salary_period: calculation_params[:salary_period],
@@ -31,13 +31,14 @@ module Api
             donations_amount: calculation_params[:donations_amount],
             self_employed_tax_mode: calculation_params[:self_employed_tax_mode],
             osvc_activity_status: calculation_params[:osvc_activity_status]
-          )
+          ))
         end
 
         private
 
         def calculation_params
-          params.require(:calculation).permit(
+          @calculation_params ||= calculator_calculation_params(
+            Taxerase::CzechRepublic::CalculationRouter,
             :gross_income,
             :input_currency_code,
             :salary_period,
@@ -59,7 +60,8 @@ module Api
             :life_insurance_contributions,
             :donations_amount,
             :self_employed_tax_mode,
-            :osvc_activity_status
+            :osvc_activity_status,
+            public_defaults: { age_bracket: "standard" }
           )
         end
 

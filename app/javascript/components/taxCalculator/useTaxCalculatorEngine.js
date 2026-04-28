@@ -33,7 +33,10 @@ import {
   resolveSelectedRegime
 } from "./selection";
 
+const EMPTY_REGIME_CONTROLS = [];
+
 export default function useTaxCalculatorEngine({
+  advancedOptionsEnabled = true,
   calculationEndpoint,
   countryCurrencyCode = "EUR",
   defaultInput,
@@ -85,6 +88,7 @@ export default function useTaxCalculatorEngine({
   const requestAbortControllerRef = useRef(null);
   const inFlightCalculationSignatureRef = useRef(null);
   const successfulCalculationSignatureRef = useRef(null);
+  const enabledRegimeControls = advancedOptionsEnabled ? regimeControls : EMPTY_REGIME_CONTROLS;
 
   const regimesForYear = useMemo(
     () => regimeOptions.filter((regime) => regime.tax_year === selectedTaxYear),
@@ -112,22 +116,22 @@ export default function useTaxCalculatorEngine({
   const visibleRegimeControls = useMemo(
     () =>
       buildVisibleRegimeControls({
-        regimeControls,
+        regimeControls: enabledRegimeControls,
         selectedCategory,
         controlValues: regimeControlValues,
         selectedTaxYear
       }),
-    [regimeControlValues, regimeControls, selectedCategory, selectedTaxYear]
+    [enabledRegimeControls, regimeControlValues, selectedCategory, selectedTaxYear]
   );
   const regimeControlEffects = useMemo(
     () =>
       resolveRegimeControlEffects({
-        regimeControls,
+        regimeControls: enabledRegimeControls,
         selectedCategory,
         controlValues: regimeControlValues,
         selectedTaxYear
       }),
-    [regimeControlValues, regimeControls, selectedCategory, selectedTaxYear]
+    [enabledRegimeControls, regimeControlValues, selectedCategory, selectedTaxYear]
   );
   const regimeCategoryOverride = regimeControlEffects.regimeCategoryOverride || null;
 
@@ -151,12 +155,12 @@ export default function useTaxCalculatorEngine({
   const selectedControlSignatureParts = useMemo(
     () =>
       buildSelectedControlSignatureParts({
-        regimeControls,
+        regimeControls: enabledRegimeControls,
         selectedCategory,
         controlValues: regimeControlValues,
         selectedTaxYear
       }),
-    [regimeControlValues, regimeControls, selectedCategory, selectedTaxYear]
+    [enabledRegimeControls, regimeControlValues, selectedCategory, selectedTaxYear]
   );
 
   const selectedCalculationRequestSignature = useMemo(
@@ -215,12 +219,12 @@ export default function useTaxCalculatorEngine({
     () =>
       buildResultControlSignatureParts({
         result,
-        regimeControls,
+        regimeControls: enabledRegimeControls,
         selectedCategory,
         controlValues: regimeControlValues,
         selectedTaxYear
       }),
-    [regimeControlValues, regimeControls, result, selectedCategory, selectedTaxYear]
+    [enabledRegimeControls, regimeControlValues, result, selectedCategory, selectedTaxYear]
   );
   const resultCalculationSignature = useMemo(() => {
     const resultInputCurrencyCode = result?.input?.input_currency_code || countryCurrencyCode;
@@ -399,7 +403,7 @@ export default function useTaxCalculatorEngine({
           childrenUnderThreeCount,
           disabilityLevel,
           regimeControlPayload: buildRegimeControlPayload({
-            regimeControls,
+            regimeControls: enabledRegimeControls,
             selectedCategory,
             controlValues: regimeControlValues,
             selectedTaxYear
@@ -457,7 +461,7 @@ export default function useTaxCalculatorEngine({
     grossIncome,
     isSupportedRegime,
     regimeControlValues,
-    regimeControls,
+    enabledRegimeControls,
     salaryPeriod,
     selectedCategory,
     selectedInputCurrencyCode,
@@ -575,7 +579,7 @@ export default function useTaxCalculatorEngine({
       selectedRegion,
       selectedTaxYear,
       showDeductibleExpenses,
-      showPersonalReliefFields,
+      showPersonalReliefFields: advancedOptionsEnabled && showPersonalReliefFields,
       showChildrenCountField: false,
       showChildrenUnderThreeField: false,
       taxYearOptions

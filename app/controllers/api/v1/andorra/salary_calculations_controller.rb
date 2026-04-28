@@ -8,7 +8,7 @@ module Api
         rescue_from Taxerase::InputCurrencyHandler::ValidationError, with: :render_validation_error
 
         def create
-          render json: Taxerase::Andorra::CalculationRouter.call(
+          render json: calculator_result_payload(Taxerase::Andorra::CalculationRouter.call(
             gross_income: calculation_params[:gross_income],
             input_currency_code: calculation_params[:input_currency_code],
             salary_period: calculation_params[:salary_period],
@@ -34,13 +34,14 @@ module Api
             apply_housing_rent_support: calculation_params[:apply_housing_rent_support],
             housing_support_priority_group: calculation_params[:housing_support_priority_group],
             housing_rent: calculation_params[:housing_rent]
-          )
+          ))
         end
 
         private
 
         def calculation_params
-          params.require(:calculation).permit(
+          @calculation_params ||= calculator_calculation_params(
+            Taxerase::Andorra::CalculationRouter,
             :gross_income,
             :input_currency_code,
             :salary_period,
@@ -65,7 +66,8 @@ module Api
             :self_employed_social_security_regime,
             :apply_housing_rent_support,
             :housing_support_priority_group,
-            :housing_rent
+            :housing_rent,
+            public_defaults: { age_bracket: "standard" }
           )
         end
 

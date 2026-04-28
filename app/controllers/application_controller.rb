@@ -2,6 +2,26 @@ class ApplicationController < ActionController::Base
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
 
+  PUBLIC_CALCULATION_PARAM_KEYS = %i[
+    gross_income
+    input_currency_code
+    tax_year
+    tax_regime_key
+    deductible_expenses
+  ].freeze
+  PUBLIC_CALCULATION_DEFAULTS = {
+    salary_period: "YEAR",
+    children_count: 0,
+    children_under_three_count: 0,
+    disability_level: "none"
+  }.freeze
+  PUBLIC_CALCULATION_PROFILE_CATEGORIES = %w[employee self_employed].freeze
+  PUBLIC_CALCULATION_BREAKDOWN_KEYS = %i[
+    annual_net_income
+    monthly_net_income
+    effective_tax_rate
+  ].freeze
+
   before_action :store_auth_return_path, if: :devise_controller?
 
   private
@@ -54,6 +74,7 @@ class ApplicationController < ActionController::Base
     {
       signed_in: user_signed_in?,
       email: current_user&.email,
+      profile_country_code: current_user&.profile&.country_code,
       selected_country_code: current_user&.selected_country_code,
       selected_country_name: current_user&.selected_country_name,
       profile_type: current_user&.profile_type,
@@ -61,7 +82,6 @@ class ApplicationController < ActionController::Base
       profile_path: edit_profile_path,
       sign_in_path: new_user_session_path,
       sign_out_path: destroy_user_session_path,
-      sign_up_path: new_user_registration_path,
       authenticity_token: form_authenticity_token
     }
   end
@@ -70,6 +90,14 @@ class ApplicationController < ActionController::Base
     supported_profile_type(params[:profile_type]) ||
       supported_profile_type(current_user&.profile_type) ||
       Profile::DEFAULT_PROFILE_TYPE
+  end
+
+  def calculator_props_payload(calculator_definition)
+    calculator_definition.build_props(
+      profile_category: calculator_profile_category
+    ).tap do |props|
+      props[:initial_result] = calculator_result_payload(props.fetch(:initial_result))
+    end.merge(auth: calculator_auth_props)
   end
 
   def supported_profile_type(value)
@@ -83,5 +111,60 @@ class ApplicationController < ActionController::Base
     payload = { errors: error.errors }
     payload[:rule_statuses] = error.rule_statuses if error.respond_to?(:rule_statuses) && error.rule_statuses.present?
     payload
+  end
+
+  def calculator_calculation_params(calculation_router, *permitted_keys, public_defaults: {})
+    permitted_params = params.require(:calculation).permit(*permitted_keys)
+    return permitted_params if user_signed_in?
+
+    public_calculation_params(permitted_params, calculation_router, public_defaults)
+  end
+
+  def calculator_result_payload(result)
+    return result if user_signed_in?
+
+    public_calculation_result(result)
+  end
+
+  def public_calculation_params(permitted_params, calculation_router, public_defaults)
+    public_values = PUBLIC_CALCULATION_DEFAULTS
+      .merge(public_defaults)
+      .merge(permitted_params.slice(*PUBLIC_CALCULATION_PARAM_KEYS).to_h.symbolize_keys)
+    public_params = ActionController::Parameters.new(public_values).permit!
+    public_params[:tax_regime_key] = public_calculation_regime_key(public_params, calculation_router)
+    public_params
+  end
+
+  def public_calculation_regime_key(public_params, calculation_router)
+    regime_key = public_params[:tax_regime_key].presence
+    tax_year = public_params[:tax_year].to_i
+    return if regime_key.blank? || tax_year.zero?
+
+    regime = calculation_router.find_regime(regime_key, tax_year)
+    return regime_key if public_calculation_regime?(regime, calculation_router)
+
+    calculation_router.default_regime_key(tax_year)
+  rescue ActiveRecord::RecordNotFound
+    nil
+  end
+
+  def public_calculation_regime?(regime, calculation_router)
+    regime.present? &&
+      PUBLIC_CALCULATION_PROFILE_CATEGORIES.include?(regime.category) &&
+      calculation_router.supported?(regime)
+  end
+
+  def public_calculation_result(result)
+    result_hash = result.deep_symbolize_keys
+
+    {
+      input: result_hash[:input],
+      metadata: result_hash[:metadata],
+      breakdown: result_hash.fetch(:breakdown, {}).slice(*PUBLIC_CALCULATION_BREAKDOWN_KEYS),
+      detail_cards: [],
+      assumptions: [],
+      sources: [],
+      rule_statuses: []
+    }
   end
 end

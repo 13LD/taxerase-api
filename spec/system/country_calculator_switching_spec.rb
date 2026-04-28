@@ -13,6 +13,8 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
   end
 
   it "switches from Spain to Netherlands and loads country-specific fields" do
+    sign_in_calculator_user
+
     visit root_path
     page.execute_script("window.__country_switch_marker = 'keep'")
 
@@ -65,6 +67,8 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
   end
 
   it "recalculates the Netherlands self-employed profile" do
+    sign_in_calculator_user(country_code: "NL", profile_type: "self_employed")
+
     visit root_path(country: "NL")
 
     within(".calculator-card") do
@@ -100,6 +104,8 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
   end
 
   it "shows the Spain Beckham Law profile with its own description and breakdown" do
+    sign_in_calculator_user
+
     visit root_path(country: "ES")
 
     within(".calculator-card") do
@@ -121,6 +127,8 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
   end
 
   it "keeps Spain self-employed controls visible after leaving Beckham Law" do
+    sign_in_calculator_user
+
     visit root_path(country: "ES")
 
     within(".calculator-card") do
@@ -136,6 +144,8 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
   end
 
   it "switches to Poland and loads Poland-specific controls and PLN output" do
+    sign_in_calculator_user
+
     visit root_path
 
     switch_country("Poland", heading: "Contract of employment - Poland")
@@ -181,6 +191,8 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
   end
 
   it "recalculates Poland automatically when gross salary and salary period change" do
+    sign_in_calculator_user(country_code: "PL")
+
     visit root_path(country: "PL")
 
     within(".results-card") do
@@ -200,6 +212,8 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
   end
 
   it "switches to the Czech Republic and loads child and disability credits with CZK output" do
+    sign_in_calculator_user
+
     visit root_path
 
     switch_country("Czech Republic", heading: "Resident employee - Czech Republic")
@@ -223,6 +237,8 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
   end
 
   it "defaults Czech self-employed to the 60% flat expense method" do
+    sign_in_calculator_user(country_code: "CZ")
+
     visit root_path(country: "CZ")
 
     within(".calculator-card") do
@@ -240,6 +256,8 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
   end
 
   it "keeps Czech employee relief controls visible after visiting a pausal self-employed mode" do
+    sign_in_calculator_user(country_code: "CZ")
+
     visit root_path(country: "CZ")
 
     within(".calculator-card") do
@@ -270,6 +288,8 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
   end
 
   it "switches to Portugal and loads Portugal-specific deduction controls" do
+    sign_in_calculator_user
+
     visit root_path
 
     within(".calculator-card") do
@@ -309,6 +329,8 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
   end
 
   it "switches to Andorra and loads Andorra-specific deduction controls" do
+    sign_in_calculator_user
+
     visit root_path
 
     within(".calculator-card") do
@@ -365,6 +387,8 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
   end
 
   it "recalculates Andorra self-employed with the under-35 CASS regime" do
+    sign_in_calculator_user(country_code: "AD")
+
     visit root_path(country: "AD")
 
     within(".calculator-card") do
@@ -386,6 +410,8 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
   end
 
   it "does not get stuck calculating for decimal Andorra regime-control currency inputs" do
+    sign_in_calculator_user(country_code: "AD")
+
     visit root_path(country: "AD")
 
     within(".calculator-card") do

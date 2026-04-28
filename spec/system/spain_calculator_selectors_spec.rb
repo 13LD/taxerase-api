@@ -18,6 +18,8 @@ RSpec.describe "Spain calculator selectors", type: :system, js: true do
   end
 
   it "keeps a tax breakdown visible when switching to the self-employed profile" do
+    sign_in_calculator_user
+
     visit root_path
 
     within_results_card do
@@ -78,6 +80,8 @@ RSpec.describe "Spain calculator selectors", type: :system, js: true do
   end
 
   it "recalculates automatically when the region dropdown changes for a supported flow" do
+    sign_in_calculator_user
+
     visit root_path
 
     within_calculator_card do
@@ -144,6 +148,8 @@ RSpec.describe "Spain calculator selectors", type: :system, js: true do
   end
 
   it "recalculates automatically when the year dropdown changes to 2024" do
+    sign_in_calculator_user
+
     visit root_path
 
     within_calculator_card do
@@ -166,6 +172,8 @@ RSpec.describe "Spain calculator selectors", type: :system, js: true do
   end
 
   it "recalculates automatically when age, children, and disability selectors change" do
+    sign_in_calculator_user
+
     visit root_path
 
     within_calculator_card do
@@ -187,6 +195,8 @@ RSpec.describe "Spain calculator selectors", type: :system, js: true do
   end
 
   it "recalculates when expanded Spain family and employee deduction controls change" do
+    sign_in_calculator_user
+
     visit root_path
 
     within_calculator_card do
@@ -214,6 +224,8 @@ RSpec.describe "Spain calculator selectors", type: :system, js: true do
   end
 
   it "recalculates automatically when gross income and salary period change" do
+    sign_in_calculator_user
+
     visit root_path
 
     within_results_card do
@@ -279,5 +291,76 @@ RSpec.describe "Spain calculator selectors", type: :system, js: true do
     expect(region_options).not_to include("Navarre")
     expect(region_options).not_to include("Bizkaia")
     expect(page).not_to have_text("Research pending")
+  end
+
+  it "limits signed-out calculator controls to public inputs" do
+    visit root_path
+
+    within_calculator_card do
+      expect(page).to have_select("Country", selected: "Spain")
+      expect(page).to have_select("Tax year")
+      expect(page).to have_select("Region")
+      expect(page).to have_button("Contract of employment", class: /is-active/)
+      expect(page).to have_button("B2B contract")
+      expect(page).to have_field("Gross income")
+
+      expect(page).to have_no_button("Monthly")
+      expect(page).to have_no_unchecked_field("Apply Beckham Law")
+      expect(page).to have_no_select("Taxpayer age")
+      expect(page).to have_no_field("Children")
+      expect(page).to have_no_select("Taxpayer disability")
+      expect(page).to have_no_select("Dependent ascendants")
+      expect(page).to have_no_field("Union dues")
+
+      click_button "B2B contract"
+
+      expect(page).to have_field("Deductible expenses")
+      expect(page).to have_no_select("Self-employed estimation method")
+      expect(page).to have_no_field("Home-office supply expenses")
+      expect(page).to have_no_select("RETA contribution mode")
+    end
+
+    within_results_card do
+      expect(all(".metric-label").map(&:text)).to eq([
+        "Annual net income",
+        "Monthly net income",
+        "Effective tax rate"
+      ])
+      expect(page).to have_no_text("Deductible expenses")
+      expect(page).to have_no_text("Self-employed social security")
+      expect(page).to have_no_text("Estimated monthly RETA base")
+    end
+    expect(page).to have_no_css(".assumptions-card")
+    expect(page).to have_no_text("Calculation context")
+    expect(page).to have_css(".calculator-auth-note", text: "Sign in for the full breakdown")
+    expect(page).to have_link("Sign in", href: %r{/sign_in\?return_to=})
+
+    switch_country_options = nil
+
+    within_calculator_card do
+      select "Poland", from: "Country"
+      expect(page).to have_text("B2B contract - Poland", wait: 20)
+      switch_country_options = find_field("Input currency").all("option").map(&:text)
+      expect(page).to have_no_select("Taxpayer age")
+      expect(page).to have_no_unchecked_field("Apply return relief")
+
+      click_button "B2B contract"
+
+      expect(page).to have_field("Deductible expenses")
+      expect(page).to have_no_select("Taxation form")
+    end
+
+    within_results_card do
+      expect(all(".metric-label").map(&:text)).to eq([
+        "Annual net income",
+        "Monthly net income",
+        "Effective tax rate"
+      ])
+      expect(page).to have_no_text("Health contribution")
+      expect(page).to have_no_text("Deductible expenses")
+    end
+    expect(page).to have_no_css(".assumptions-card")
+
+    expect(switch_country_options).to eq([ "PLN", "EUR" ])
   end
 end

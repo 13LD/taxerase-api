@@ -2,6 +2,32 @@ require "rails_helper"
 
 RSpec.describe "Api::V1::ReportCalendars", type: :request do
   describe "GET /api/v1/countries/:country_code/report_calendar" do
+    before do |example|
+      sign_in_api_user unless example.metadata[:skip_calendar_auth]
+    end
+
+    it "requires authentication", :skip_calendar_auth do
+      get api_v1_country_report_calendar_path(country_code: "ES"), params: { tax_year: 2026 }
+
+      expect(response).to have_http_status(:unauthorized)
+      expect(JSON.parse(response.body)["errors"]).to include("Sign in to open the calendar.")
+    end
+
+    it "requires a profile country", :skip_calendar_auth do
+      user = User.create!(
+        email: "calendar-no-profile@example.com",
+        password: "password123",
+        confirmed_at: Time.current
+      )
+      sign_in user
+
+      get api_v1_country_report_calendar_path(country_code: "ES"), params: { tax_year: 2026 }
+
+      expect(response).to have_http_status(:forbidden)
+      expect(JSON.parse(response.body)["errors"])
+        .to include("Add a country to your profile before opening the calendar.")
+    end
+
     it "returns Spain report deadlines with workflows and typed events" do
       get api_v1_country_report_calendar_path(country_code: "ES"), params: { tax_year: 2026 }
 

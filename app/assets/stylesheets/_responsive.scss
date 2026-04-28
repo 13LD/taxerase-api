@@ -131,6 +131,14 @@
     grid-column: 2;
   }
 
+  .workspace-modal {
+    padding: 22px;
+  }
+
+  .workspace-modal__actions {
+    grid-template-columns: 1fr;
+  }
+
   .workspace-sidebar__brand {
     display: grid;
     justify-content: center;

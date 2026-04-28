@@ -1,4 +1,5 @@
 require "rails_helper"
+require "cgi"
 
 RSpec.describe "Pages", type: :request do
   CALCULATION_ROUTERS = [
@@ -43,6 +44,13 @@ RSpec.describe "Pages", type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(query_count).to be < 30
+    end
+
+    it "serializes only public initial calculation fields for guests" do
+      get root_path
+
+      expect(response).to have_http_status(:ok)
+      expect_public_initial_result(serialized_calculator_props.fetch("initial_result"))
     end
 
     it "renders the Spain home page when optional add-on parameter rows are stale" do
@@ -246,6 +254,7 @@ RSpec.describe "Pages", type: :request do
       expect(json.dig("calculator_props", "country", "code")).to eq("NL")
       expect(json.dig("calculator_props", "regime_options").map { |entry| entry["key"] })
         .to include("employee_netherlands", "self_employed_netherlands")
+      expect_public_initial_result(json.dig("calculator_props", "initial_result"))
     end
 
     it "applies the signed-in user's profile type to calculator props when no profile type is requested" do
@@ -380,6 +389,25 @@ RSpec.describe "Pages", type: :request do
     CALCULATION_ROUTERS.each do |router|
       router.remove_instance_variable(:@country) if router.instance_variable_defined?(:@country)
     end
+  end
+
+  def serialized_calculator_props
+    calculator_app = Nokogiri::HTML(response.body).at_css("#country-calculator-app")
+    raw_props = calculator_app["data-props"]
+
+    JSON.parse(CGI.unescapeHTML(raw_props))
+  end
+
+  def expect_public_initial_result(initial_result)
+    expect(initial_result.fetch("breakdown").keys).to contain_exactly(
+      "annual_net_income",
+      "monthly_net_income",
+      "effective_tax_rate"
+    )
+    expect(initial_result.fetch("detail_cards")).to eq([])
+    expect(initial_result.fetch("assumptions")).to eq([])
+    expect(initial_result.fetch("sources")).to eq([])
+    expect(initial_result.fetch("rule_statuses")).to eq([])
   end
 
   def count_application_queries
