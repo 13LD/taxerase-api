@@ -109,7 +109,7 @@ function monthsForYearRange(startYear, endYear) {
   );
 }
 
-export default function ReportCalendarPanel({ active, countryCode, taxYear }) {
+export default function ReportCalendarPanel({ active, countryCode, profileType, taxYear }) {
   const [calendar, setCalendar] = useState(null);
   const [status, setStatus] = useState("idle");
   const [errors, setErrors] = useState([]);
@@ -130,6 +130,7 @@ export default function ReportCalendarPanel({ active, countryCode, taxYear }) {
 
     requestReportCalendar({
       countryCode,
+      profileType,
       taxYear: year,
       signal: abortController.signal
     })
@@ -156,7 +157,7 @@ export default function ReportCalendarPanel({ active, countryCode, taxYear }) {
       });
 
     return () => abortController.abort();
-  }, [active, countryCode, year]);
+  }, [active, countryCode, profileType, year]);
 
   const reports = useMemo(() => calendar?.reports || [], [calendar]);
   const workflowReports = useMemo(() => {

@@ -25,12 +25,16 @@ module Taxerase
         false
       end
 
-      def build_props
+      def build_props(profile_category: "employee")
         comparison_catalog = Registry.comparison_catalog
         selected_catalog = comparison_catalog.find { |entry| entry.dig(:country, :code) == country.fetch(:code) }
         tax_year_options = selected_catalog&.fetch(:tax_year_options) || calculation_router.public_tax_year_options
         default_tax_year = tax_year_options.last || default_input.fetch(:tax_year)
-        default_tax_regime_key = default_regime_key_for(default_tax_year, selected_catalog)
+        default_tax_regime_key = default_regime_key_for(
+          default_tax_year,
+          selected_catalog,
+          profile_category:
+        )
 
         raise ArgumentError, "No public tax regimes are configured for #{country.fetch(:name)}." if default_tax_regime_key.blank?
 
@@ -121,10 +125,16 @@ module Taxerase
         age_bracket
       end
 
-      def default_regime_key_for(default_tax_year, selected_catalog)
-        selected_catalog&.fetch(:regime_options)&.find do |regime|
-          regime[:tax_year] == default_tax_year && regime[:category] == "employee"
-        end&.fetch(:key) || calculation_router.default_regime_key(default_tax_year)
+      def default_regime_key_for(default_tax_year, selected_catalog, profile_category: "employee")
+        [ profile_category.presence || "employee", "employee" ].uniq.each do |category|
+          catalog_key = selected_catalog&.fetch(:regime_options)&.find do |regime|
+            regime[:tax_year] == default_tax_year && regime[:category] == category
+          end&.fetch(:key)
+          return catalog_key if catalog_key.present?
+
+          router_key = calculation_router.default_regime_key(default_tax_year, category:)
+          return router_key if router_key.present?
+        end
       end
     end
   end

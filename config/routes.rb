@@ -1,4 +1,23 @@
 Rails.application.routes.draw do
+  devise_for :users,
+             path: "",
+             path_names: {
+               sign_in: "sign_in",
+               sign_out: "sign_out",
+               sign_up: "sign_up",
+               password: "password",
+               confirmation: "confirmation"
+             },
+             controllers: {
+               sessions: "users/sessions",
+               registrations: "users/registrations",
+               confirmations: "users/confirmations"
+             }
+
+  resource :profile, only: [ :edit, :update ], controller: "users/profiles"
+
+  mount LetterOpenerWeb::Engine, at: "/letter_opener" if Rails.env.development?
+
   get "up" => "rails/health#show", as: :rails_health_check
 
   root "pages#home"

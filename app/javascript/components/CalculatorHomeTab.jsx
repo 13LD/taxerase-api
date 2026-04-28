@@ -14,7 +14,8 @@ export default function CalculatorHomeTab({
   calculatorProps,
   countrySwitchErrors,
   isCountrySwitching,
-  onCountryChangeRequest
+  onCountryChangeRequest,
+  onProfileTypeChangeRequest
 }) {
   const {
     country,
@@ -43,10 +44,9 @@ export default function CalculatorHomeTab({
     defaultInput,
     defaultTaxRegimeKey,
     inputCurrencyOptions: inputCurrencyOptions || [],
-    incomeLabels: formConfig.incomeLabels || {},
+    onCategoryPreferenceChange: onProfileTypeChangeRequest,
     regimeControls: formConfig.regimeControls || [],
     initialResult,
-    periodLabels: formConfig.periodLabels || {},
     profileLabels: formConfig.profileLabels || {},
     regimeOptions,
     taxYearOptions

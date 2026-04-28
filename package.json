@@ -6,10 +6,13 @@
     "esbuild": "^0.27.4",
     "eslint": "^10.1.0",
     "eslint-plugin-react-hooks": "^7.0.1",
-    "globals": "^17.4.0"
+    "globals": "^17.4.0",
+    "sass": "^1.99.0"
   },
   "scripts": {
-    "build": "esbuild app/javascript/*.* --bundle --sourcemap --format=esm --loader:.js=jsx --outdir=app/assets/builds --public-path=/assets",
+    "build": "yarn build:js && yarn build:css",
+    "build:css": "sass app/assets/stylesheets/application.scss:app/assets/builds/application.css --no-source-map",
+    "build:js": "esbuild app/javascript/*.* --bundle --sourcemap --format=esm --loader:.js=jsx --outdir=app/assets/builds --public-path=/assets",
     "lint:js": "eslint app/javascript"
   },
   "dependencies": {

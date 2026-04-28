@@ -92,8 +92,11 @@ export async function requestComparison({ payload, signal }) {
   });
 }
 
-export async function requestCountryCalculator({ countryCode, signal }) {
-  return fetch(`/api/v1/countries/${encodeURIComponent(countryCode)}/calculator`, {
+export async function requestCountryCalculator({ countryCode, profileType, signal }) {
+  const url = new URL(`/api/v1/countries/${encodeURIComponent(countryCode)}/calculator`, window.location.origin);
+  if (profileType) url.searchParams.set("profile_type", profileType);
+
+  return fetch(url.toString(), {
     method: "GET",
     signal,
     headers: {
@@ -103,8 +106,9 @@ export async function requestCountryCalculator({ countryCode, signal }) {
   });
 }
 
-export async function requestReportCalendar({ countryCode, signal, taxYear }) {
+export async function requestReportCalendar({ countryCode, profileType, signal, taxYear }) {
   const url = new URL(`/api/v1/countries/${encodeURIComponent(countryCode)}/report_calendar`, window.location.origin);
+  if (profileType) url.searchParams.set("profile_type", profileType);
   if (taxYear) url.searchParams.set("tax_year", taxYear);
 
   return fetch(url.toString(), {

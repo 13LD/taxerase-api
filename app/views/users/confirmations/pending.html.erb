@@ -1,0 +1,21 @@
+<% content_for :title, "Taxerase | Check your inbox" %>
+
+<main class="page-shell auth-page-shell">
+  <section class="liquid-card auth-card">
+    <div class="confirmation-hero">
+      <span class="confirmation-hero__mark" aria-hidden="true">@</span>
+      <span class="screen-label">Confirmation sent</span>
+      <h2>Check your inbox</h2>
+      <p>
+        We sent a confirmation link<%= " to #{@confirmation_email}" if @confirmation_email.present? %>.
+        Detailed calculator settings and the tax calendar unlock after the email is confirmed and you sign in.
+      </p>
+      <% if Rails.env.development? %>
+        <p class="availability-note">
+          In local development, open <%= link_to "Letter Opener", "/letter_opener", class: "inline-link" %> to view the email without SMTP.
+        </p>
+      <% end %>
+      <%= link_to "Back to sign in", new_user_session_path(return_to: auth_return_to_param), class: "secondary-action" %>
+    </div>
+  </section>
+</main>

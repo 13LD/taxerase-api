@@ -1,0 +1,236 @@
+/* Responsive overrides. Keep this loaded after component files. */
+
+@media (max-width: 1080px) {
+  .tabbed-calculator-shell {
+    --workspace-sidebar-top: 12px;
+    --workspace-sidebar-vertical-inset: 24px;
+
+    grid-template-columns: 1fr;
+  }
+
+  .workspace-sidebar {
+    position: sticky;
+    top: var(--workspace-sidebar-top);
+    left: auto;
+    grid-template-rows: auto auto;
+    width: auto;
+    height: auto;
+    min-height: auto;
+    max-height: calc(100vh - var(--workspace-sidebar-vertical-inset));
+    max-height: calc(100svh - var(--workspace-sidebar-vertical-inset));
+  }
+
+  .calculator-tabs {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    overflow-y: visible;
+  }
+
+  .workspace-sidebar__profile {
+    min-height: 64px;
+  }
+
+  .workspace-main {
+    grid-column: 1;
+  }
+
+  .experience-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .field-row,
+  .detail-grid,
+  .comparison-controls,
+  .comparison-shared-controls,
+  .comparison-graphic__grid,
+  .comparison-graphic__stats,
+  .report-calendar-workflows {
+    grid-template-columns: 1fr;
+  }
+
+  .metric-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .metric-grid .metric-card--primary,
+  .metric-grid .metric-card--secondary,
+  .metric-grid .metric-card--danger {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 720px) {
+  .page-shell {
+    width: min(100% - 20px, 100%);
+    padding-top: 20px;
+  }
+
+  .tabbed-calculator-shell {
+    --workspace-sidebar-top: 20px;
+    --workspace-sidebar-vertical-inset: 32px;
+
+    grid-template-columns: 62px minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .liquid-card {
+    padding: 22px;
+    border-radius: 28px;
+  }
+
+  .auth-page-shell {
+    min-height: auto;
+    place-items: stretch;
+    align-content: start;
+    padding-top: 12px;
+    padding-bottom: 28px;
+  }
+
+  .auth-card,
+  .auth-card--wide {
+    width: 100%;
+  }
+
+  .auth-link-row {
+    grid-template-columns: minmax(0, 1fr);
+    justify-content: stretch;
+    gap: 10px;
+  }
+
+  .workspace-sidebar {
+    position: fixed;
+    top: var(--workspace-sidebar-top);
+    left: 10px;
+    z-index: 5;
+    align-self: start;
+    grid-template-rows: auto;
+    gap: 14px;
+    width: 62px;
+    height: calc(100vh - var(--workspace-sidebar-vertical-inset));
+    height: calc(100svh - var(--workspace-sidebar-vertical-inset));
+    min-height: 0;
+    max-height: calc(100vh - var(--workspace-sidebar-vertical-inset));
+    max-height: calc(100svh - var(--workspace-sidebar-vertical-inset));
+    padding: 19px 8px 12px;
+    border-radius: 20px;
+    transition: width 180ms ease;
+  }
+
+  .workspace-sidebar.is-open {
+    grid-template-rows: auto auto minmax(0, 1fr);
+    gap: 18px;
+    width: min(calc(100vw - 20px), 340px);
+    padding: 18px 14px;
+    overflow-y: hidden;
+  }
+
+  .workspace-sidebar.is-open + .workspace-main {
+    display: none;
+  }
+
+  .workspace-main {
+    grid-column: 2;
+  }
+
+  .workspace-sidebar__brand {
+    display: grid;
+    justify-content: center;
+    justify-items: center;
+    gap: 10px;
+    padding: 0;
+  }
+
+  .workspace-sidebar.is-open .workspace-sidebar__brand {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 4px;
+  }
+
+  .workspace-sidebar__brand-lockup {
+    justify-content: center;
+  }
+
+  .workspace-sidebar:not(.is-open) .workspace-sidebar__brand-lockup {
+    display: none;
+  }
+
+  .workspace-sidebar__toggle {
+    display: inline-grid;
+  }
+
+  .workspace-sidebar:not(.is-open) {
+    align-content: start;
+    gap: 0;
+  }
+
+  .workspace-sidebar:not(.is-open) .calculator-tabs,
+  .workspace-sidebar:not(.is-open) .workspace-sidebar__account {
+    display: none;
+  }
+
+  .calculator-tabs {
+    grid-template-columns: 1fr;
+    overflow: visible;
+  }
+
+  .report-calendar-chart {
+    grid-template-columns: repeat(var(--calendar-month-count, 12), minmax(min(100%, 280px), min(100%, 280px)));
+    border-radius: 20px;
+  }
+
+  .report-calendar-period {
+    min-width: min(100%, 280px);
+  }
+
+  .report-calendar-period__track {
+    min-height: 340px;
+  }
+
+  .section-head__title-row h2 {
+    white-space: normal;
+  }
+
+  .currency-input input {
+    font-size: 1.55rem;
+  }
+}
+
+@media (max-height: 700px) {
+  .workspace-sidebar {
+    gap: 14px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+  }
+
+  .workspace-sidebar__brand {
+    min-height: 38px;
+  }
+
+  .workspace-sidebar__profile {
+    min-height: 58px;
+    padding: 10px;
+  }
+
+  .calculator-tabs {
+    gap: 6px;
+  }
+
+  .calculator-tabs__tab {
+    min-height: 44px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+
+  .calculator-tabs__icon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .workspace-sidebar__account {
+    gap: 8px;
+  }
+
+  .workspace-sidebar__account-actions .primary-action,
+  .workspace-sidebar__account-actions .secondary-action {
+    min-height: 42px;
+  }
+}

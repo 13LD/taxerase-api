@@ -1,0 +1,17 @@
+/* Invoice, expenses, and reports placeholder tabs. */
+
+.workspace-placeholder {
+  min-height: 360px;
+}
+
+.workspace-placeholder h2 {
+  margin: 0 0 12px;
+  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  letter-spacing: -0.04em;
+}
+
+.workspace-placeholder p:last-child {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}

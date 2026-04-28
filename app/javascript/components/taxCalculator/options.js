@@ -3,12 +3,6 @@ export const profileLabels = {
   self_employed: "B2B contract"
 };
 
-export const ageBracketOptions = [
-  { value: "under_65", label: "Under 65" },
-  { value: "from_65_to_74", label: "65 to 74" },
-  { value: "age_75_plus", label: "75+" }
-];
-
 export const defaultDisabilityLevelOptions = [
   { value: "none", label: "None" },
   { value: "level_33_to_64", label: "33% to 64%" },

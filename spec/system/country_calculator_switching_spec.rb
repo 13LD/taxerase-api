@@ -81,6 +81,24 @@ RSpec.describe "Country calculator switching", type: :system, js: true do
     end
   end
 
+  it "keeps a manually selected tax profile param when changing country" do
+    visit root_path
+
+    within(".calculator-card") do
+      click_button "B2B contract"
+      expect(page).to have_current_path(/profile_type=self_employed/, url: true)
+
+      select "Netherlands", from: "Country"
+      expect(page).to have_text("Resident self-employed - Netherlands", wait: 20)
+      expect(page).to have_select("Country", selected: "Netherlands", wait: 20)
+      expect(page).to have_button("B2B contract", class: /is-active/)
+      expect(page).to have_field("Deductible expenses")
+    end
+
+    expect(page).to have_current_path(/country=NL/, url: true)
+    expect(page).to have_current_path(/profile_type=self_employed/, url: true)
+  end
+
   it "shows the Spain Beckham Law profile with its own description and breakdown" do
     visit root_path(country: "ES")
 

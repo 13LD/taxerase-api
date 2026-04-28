@@ -1,0 +1,46 @@
+<% content_for :title, "Taxerase | Create account" %>
+
+<main class="page-shell auth-page-shell">
+  <section class="liquid-card auth-card auth-card--wide">
+    <div class="section-head">
+      <div>
+        <p class="section-kicker">New account</p>
+        <h2>Create account</h2>
+        <p class="section-note">Create your login first. Country and work type are set on your profile after sign in.</p>
+      </div>
+    </div>
+
+    <%= render "devise/shared/error_messages", resource: resource %>
+
+    <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { class: "auth-form" }) do |f| %>
+      <div class="field-row field-row--single">
+        <div class="field">
+          <%= f.label :email, class: "field-label" %>
+          <div class="input-shell">
+            <%= f.email_field :email, autofocus: true, autocomplete: "email", placeholder: "name@example.com" %>
+          </div>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <%= f.label :password, class: "field-label" %>
+          <div class="input-shell">
+            <%= f.password_field :password, autocomplete: "new-password", placeholder: "Minimum 8 characters" %>
+          </div>
+        </div>
+
+        <div class="field">
+          <%= f.label :password_confirmation, "Confirm password", class: "field-label" %>
+          <div class="input-shell">
+            <%= f.password_field :password_confirmation, autocomplete: "new-password" %>
+          </div>
+        </div>
+      </div>
+
+      <%= f.submit "Create account", class: "primary-action" %>
+    <% end %>
+
+    <%= render "devise/shared/links" %>
+  </section>
+</main>

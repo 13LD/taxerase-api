@@ -126,6 +126,73 @@ RSpec.describe "Pages", type: :request do
       expect(response.body).to include("&quot;code&quot;:&quot;PT&quot;")
     end
 
+    it "uses the signed-in user's profile country when no country is requested" do
+      user = User.create!(
+        email: "profile-country@example.com",
+        password: "password123",
+        confirmed_at: Time.current
+      )
+      user.create_profile!(country_code: "PT", profile_type: "self_employed")
+
+      post user_session_path, params: {
+        user: {
+          email: user.email,
+          password: "password123"
+        }
+      }
+      get root_path
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("Taxerase | Portugal Tax Calculator")
+      expect(response.body).to include("&quot;code&quot;:&quot;PT&quot;")
+      expect(response.body).to include("&quot;default_tax_regime_key&quot;:&quot;self_employed_portugal&quot;")
+      expect(response.body).to include("&quot;profile_type&quot;:&quot;self_employed&quot;")
+    end
+
+    it "lets explicit country and profile type params override signed-in profile defaults" do
+      user = User.create!(
+        email: "profile-override@example.com",
+        password: "password123",
+        confirmed_at: Time.current
+      )
+      user.create_profile!(country_code: "PT", profile_type: "self_employed")
+
+      post user_session_path, params: {
+        user: {
+          email: user.email,
+          password: "password123"
+        }
+      }
+      get root_path, params: { country: "NL", profile_type: "employee", tab: "calendar" }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("Taxerase | Netherlands Tax Calculator")
+      expect(response.body).to include("&quot;code&quot;:&quot;NL&quot;")
+      expect(response.body).to include("&quot;default_tax_regime_key&quot;:&quot;employee_netherlands&quot;")
+    end
+
+    it "ignores unsupported profile type params and uses the signed-in profile default" do
+      user = User.create!(
+        email: "unsupported-profile-param@example.com",
+        password: "password123",
+        confirmed_at: Time.current
+      )
+      user.create_profile!(country_code: "PT", profile_type: "self_employed")
+
+      post user_session_path, params: {
+        user: {
+          email: user.email,
+          password: "password123"
+        }
+      }
+      get root_path, params: { profile_type: "contractor" }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("Taxerase | Portugal Tax Calculator")
+      expect(response.body).to include("&quot;default_tax_regime_key&quot;:&quot;self_employed_portugal&quot;")
+      expect(response.body).to include("&quot;profile_type&quot;:&quot;self_employed&quot;")
+    end
+
     it "falls back to the first available seeded calculator when a registered country is missing" do
       reset_country_cache!
       Country.find_by!(code: "PT").destroy!
@@ -137,6 +204,33 @@ RSpec.describe "Pages", type: :request do
       expect(response.body).to include("Taxerase | Spain Tax Calculator")
       expect(response.body).not_to include("Portugal")
       expect(response.body).to include("&quot;code&quot;:&quot;ES&quot;")
+    end
+
+    it "falls back when the signed-in profile country has no seed row" do
+      user = User.create!(
+        email: "stale-profile-country@example.com",
+        password: "password123",
+        confirmed_at: Time.current
+      )
+      user.create_profile!(country_code: "PT", profile_type: "self_employed")
+
+      post user_session_path, params: {
+        user: {
+          email: user.email,
+          password: "password123"
+        }
+      }
+
+      reset_country_cache!
+      Country.find_by!(code: "PT").destroy!
+      reset_country_cache!
+
+      get root_path
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("Taxerase | Spain Tax Calculator")
+      expect(response.body).to include("&quot;code&quot;:&quot;ES&quot;")
+      expect(response.body).to include("&quot;selected_country_name&quot;:null")
     end
   end
 
@@ -152,6 +246,82 @@ RSpec.describe "Pages", type: :request do
       expect(json.dig("calculator_props", "country", "code")).to eq("NL")
       expect(json.dig("calculator_props", "regime_options").map { |entry| entry["key"] })
         .to include("employee_netherlands", "self_employed_netherlands")
+    end
+
+    it "applies the signed-in user's profile type to calculator props when no profile type is requested" do
+      user = User.create!(
+        email: "api-profile-type@example.com",
+        password: "password123",
+        confirmed_at: Time.current
+      )
+      user.create_profile!(country_code: "PT", profile_type: "self_employed")
+
+      post user_session_path, params: {
+        user: {
+          email: user.email,
+          password: "password123"
+        }
+      }
+      get api_v1_country_calculator_path(country_code: "NL")
+
+      expect(response).to have_http_status(:ok)
+
+      json = JSON.parse(response.body)
+      expect(json.dig("calculator_props", "default_tax_regime_key")).to eq("self_employed_netherlands")
+      expect(json.dig("calculator_props", "initial_result", "metadata", "tax_regime_key"))
+        .to eq("self_employed_netherlands")
+    end
+
+    it "ignores unsupported API profile type params and uses the signed-in profile default" do
+      user = User.create!(
+        email: "api-unsupported-profile-type@example.com",
+        password: "password123",
+        confirmed_at: Time.current
+      )
+      user.create_profile!(country_code: "PT", profile_type: "self_employed")
+
+      post user_session_path, params: {
+        user: {
+          email: user.email,
+          password: "password123"
+        }
+      }
+      get api_v1_country_calculator_path(country_code: "NL"), params: { profile_type: "contractor" }
+
+      expect(response).to have_http_status(:ok)
+
+      json = JSON.parse(response.body)
+      expect(json.dig("calculator_props", "default_tax_regime_key")).to eq("self_employed_netherlands")
+      expect(json.dig("calculator_props", "initial_result", "metadata", "tax_regime_key"))
+        .to eq("self_employed_netherlands")
+    end
+
+    it "returns calculator props when auth profile country has no seed row" do
+      user = User.create!(
+        email: "api-stale-profile-country@example.com",
+        password: "password123",
+        confirmed_at: Time.current
+      )
+      user.create_profile!(country_code: "PT", profile_type: "employee")
+
+      post user_session_path, params: {
+        user: {
+          email: user.email,
+          password: "password123"
+        }
+      }
+
+      reset_country_cache!
+      Country.find_by!(code: "PT").destroy!
+      reset_country_cache!
+
+      get api_v1_country_calculator_path(country_code: "NL")
+
+      expect(response).to have_http_status(:ok)
+
+      json = JSON.parse(response.body)
+      expect(json.dig("calculator_props", "country", "code")).to eq("NL")
+      expect(json.dig("calculator_props", "auth", "selected_country_name")).to be_nil
     end
 
     it "returns Andorra calculator props" do

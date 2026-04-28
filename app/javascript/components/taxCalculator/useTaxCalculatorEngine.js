@@ -40,8 +40,7 @@ export default function useTaxCalculatorEngine({
   defaultTaxRegimeKey,
   inputCurrencyOptions = [],
   initialResult,
-  incomeLabels: _incomeLabels = {},
-  periodLabels: _periodLabels = {},
+  onCategoryPreferenceChange = null,
   profileLabels = {},
   regimeControls = [],
   regimeOptions,
@@ -235,15 +234,6 @@ export default function useTaxCalculatorEngine({
   const resultMatchesSelection =
     selectedCalculationResultSignature !== null &&
     selectedCalculationResultSignature === resultCalculationSignature;
-  const displayStatus = !selectedRegime
-    ? "unavailable"
-    : !isSupportedRegime
-      ? "unavailable"
-      : status === "error"
-        ? "error"
-        : resultMatchesSelection
-          ? status
-          : "loading";
   const displayCurrencyCode = resultMatchesSelection
     ? (result?.metadata?.display_currency_code || countryCurrencyCode)
     : (selectedInputCurrencyCode || countryCurrencyCode);
@@ -336,6 +326,7 @@ export default function useTaxCalculatorEngine({
 
   function handleCategoryChange(category) {
     setSelectedCategoryPreference(category);
+    onCategoryPreferenceChange?.(category);
     prepareAutoRefresh();
   }
 
@@ -530,7 +521,6 @@ export default function useTaxCalculatorEngine({
   return {
     assumptionItems,
     detailCards,
-    displayStatus,
     displayedSources,
     formProps: {
       ageBracket,
