@@ -11,7 +11,7 @@ module Api
         def create
           calculation = calculation_params.to_h.symbolize_keys
 
-          render json: Taxerase::Netherlands::CalculationRouter.call(
+          render json: calculator_result_payload(Taxerase::Netherlands::CalculationRouter.call(
             gross_income: calculation[:gross_income],
             input_currency_code: calculation[:input_currency_code],
             salary_period: calculation[:salary_period],
@@ -25,13 +25,14 @@ module Api
             children_under_three_count: calculation[:children_under_three_count],
             disability_level: calculation[:disability_level],
             **calculation.slice(*optional_input_keys)
-          )
+          ))
         end
 
         private
 
         def calculation_params
-          params.require(:calculation).permit(
+          @calculation_params ||= calculator_calculation_params(
+            Taxerase::Netherlands::CalculationRouter,
             :gross_income,
             :input_currency_code,
             :salary_period,
@@ -44,7 +45,8 @@ module Api
             :children_count,
             :children_under_three_count,
             :disability_level,
-            *optional_input_keys
+            *optional_input_keys,
+            public_defaults: { age_bracket: "under_aow_age" }
           )
         end
 

@@ -2,6 +2,8 @@ import React from "react";
 import MetricCard from "./MetricCard";
 
 export default function TaxCalculatorResults({ detailCards, headlineMetrics }) {
+  const showDetailCards = detailCards.length > 0;
+
   return (
     <section className="liquid-card results-card">
       <div className="section-head">
@@ -22,11 +24,13 @@ export default function TaxCalculatorResults({ detailCards, headlineMetrics }) {
         ))}
       </div>
 
-      <div className="detail-grid">
-        {detailCards.map((card) => (
-          <MetricCard key={card.label} label={card.label} value={card.value} />
-        ))}
-      </div>
+      {showDetailCards ? (
+        <div className="detail-grid">
+          {detailCards.map((card) => (
+            <MetricCard key={card.label} label={card.label} value={card.value} />
+          ))}
+        </div>
+      ) : null}
     </section>
   );
 }

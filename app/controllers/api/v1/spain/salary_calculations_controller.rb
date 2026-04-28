@@ -9,7 +9,7 @@ module Api
         rescue_from Taxerase::InputCurrencyHandler::ValidationError, with: :render_validation_error
 
         def create
-          render json: Taxerase::Spain::CalculationRouter.call(
+          render json: calculator_result_payload(Taxerase::Spain::CalculationRouter.call(
             gross_income: calculation_params[:gross_income],
             input_currency_code: calculation_params[:input_currency_code],
             salary_period: calculation_params[:salary_period],
@@ -51,13 +51,14 @@ module Api
             corporate_self_employed: calculation_params[:corporate_self_employed],
             apply_reta_pluriactivity: calculation_params[:apply_reta_pluriactivity],
             employment_common_contingencies_paid: calculation_params[:employment_common_contingencies_paid]
-          )
+          ))
         end
 
         private
 
         def calculation_params
-          params.require(:calculation).permit(
+          @calculation_params ||= calculator_calculation_params(
+            Taxerase::Spain::CalculationRouter,
             :gross_income,
             :input_currency_code,
             :salary_period,
@@ -98,7 +99,8 @@ module Api
             :family_collaborator,
             :corporate_self_employed,
             :apply_reta_pluriactivity,
-            :employment_common_contingencies_paid
+            :employment_common_contingencies_paid,
+            public_defaults: { age_bracket: "under_65" }
           )
         end
 

@@ -85,6 +85,7 @@ function renderRegimeControl(control, value, onChange, currencyCode) {
 }
 
 export default function TaxCalculatorForm({
+  advancedOptionsEnabled,
   ageBracket,
   ageBracketOptions,
   ageFieldHint,
@@ -226,17 +227,19 @@ export default function TaxCalculatorForm({
         />
       ) : null}
 
-      <SegmentedControl
-        hint="Determines whether the income amount is used as a yearly value or annualized from a monthly value."
-        label={periodLabel}
-        onChange={onSalaryPeriodChange}
-        options={salaryPeriodOptions}
-        value={salaryPeriod}
-      />
+      {advancedOptionsEnabled ? (
+        <SegmentedControl
+          hint="Determines whether the income amount is used as a yearly value or annualized from a monthly value."
+          label={periodLabel}
+          onChange={onSalaryPeriodChange}
+          options={salaryPeriodOptions}
+          value={salaryPeriod}
+        />
+      ) : null}
 
-      {regimeControls.map((control) =>
+      {advancedOptionsEnabled ? regimeControls.map((control) =>
         renderRegimeControl(control, regimeControlValues[control.key], onRegimeControlChange, currencyCode)
-      )}
+      ) : null}
 
       {showPersonalReliefFields && (showAgeField || showChildrenFields) ? (
         <div

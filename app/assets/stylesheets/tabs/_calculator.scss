@@ -19,6 +19,32 @@
 .calculator-home-tab {
   margin-top: 0;
 }
+
+.calculator-auth-note {
+  display: grid;
+  gap: 14px;
+}
+
+.calculator-auth-note h3,
+.calculator-auth-note p {
+  margin: 0;
+}
+
+.calculator-auth-note h3 {
+  color: var(--ink);
+  font-size: 1.18rem;
+  line-height: 1.25;
+}
+
+.calculator-auth-note p:not(.section-kicker) {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.calculator-auth-note .secondary-action {
+  justify-self: start;
+}
+
 .section-head--calculator {
   display: grid;
   gap: 10px;

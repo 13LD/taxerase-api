@@ -6,15 +6,11 @@ class PagesController < ApplicationController
     )
 
     @page_title = calculator_definition.page_title
-    @calculator_props = calculator_definition.build_props(
-      profile_category: calculator_profile_category
-    ).merge(auth: calculator_auth_props)
+    @calculator_props = calculator_props_payload(calculator_definition)
   rescue KeyError, ActiveRecord::RecordNotFound, ArgumentError
     calculator_definition = Taxerase::CountryCalculators::Registry.default_available
 
     @page_title = calculator_definition.page_title
-    @calculator_props = calculator_definition.build_props(
-      profile_category: calculator_profile_category
-    ).merge(auth: calculator_auth_props)
+    @calculator_props = calculator_props_payload(calculator_definition)
   end
 end

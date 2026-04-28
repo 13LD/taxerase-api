@@ -2,6 +2,7 @@ import React, { startTransition, useCallback, useEffect, useRef, useState } from
 import CalculatorHomeTab from "./CalculatorHomeTab";
 import ComparisonTab from "./ComparisonTab";
 import ReportCalendarPanel from "./ReportCalendarPanel";
+import { authPathWithReturnTo } from "./authPaths";
 import { requestCountryCalculator } from "./taxCalculator/api";
 
 const TAB_OPTIONS = [
@@ -67,6 +68,19 @@ const PLACEHOLDER_PANELS = [
   }
 ];
 
+const CALENDAR_ACCESS_MODAL_COPY = {
+  sign_in_required: {
+    title: "Sign in to open the calendar",
+    body: "Calendar workflows are available for authorized users. Sign in to return to this workspace after authentication.",
+    actionLabel: "Sign in"
+  },
+  profile_country_required: {
+    title: "Add a country to your profile",
+    body: "Update your profile country before opening the calendar. Taxerase uses your saved country for calculator and calendar context.",
+    actionLabel: "Edit profile"
+  }
+};
+
 function normalizeTab(tab) {
   const normalizedTab = LEGACY_TAB_ALIASES[tab] || tab;
 
@@ -80,21 +94,6 @@ function activeTabFromLocation() {
   return normalizeTab(currentUrl.searchParams.get("tab"));
 }
 
-function currentReturnPath() {
-  if (typeof window === "undefined") return "/";
-
-  return `${window.location.pathname}${window.location.search}`;
-}
-
-function authPathWithReturnTo(path) {
-  if (typeof window === "undefined") return path;
-
-  const url = new URL(path || "/sign_in", window.location.origin);
-  url.searchParams.set("return_to", currentReturnPath());
-
-  return `${url.pathname}${url.search}`;
-}
-
 function currentProfileTypeParam() {
   if (typeof window === "undefined") return null;
 
@@ -106,9 +105,84 @@ function profileTypeParamForCategory(category) {
   return PROFILE_CATEGORY_PARAMS[category] || null;
 }
 
+function calendarAccessBlockReason(signedIn, profileCountryCode) {
+  if (!signedIn) return "sign_in_required";
+  if (!profileCountryCode) return "profile_country_required";
+
+  return null;
+}
+
+function calendarAccessBlockReasonForTab(tab, signedIn, profileCountryCode) {
+  if (tab !== "calendar") return null;
+
+  return calendarAccessBlockReason(signedIn, profileCountryCode);
+}
+
+function accessibleTab(tab, auth) {
+  return calendarAccessBlockReasonForTab(tab, auth?.signed_in, auth?.profile_country_code)
+    ? "calculator"
+    : tab;
+}
+
+function CalendarAccessModal({ auth, onClose, reason }) {
+  if (!reason) return null;
+
+  const modalCopy = CALENDAR_ACCESS_MODAL_COPY[reason];
+  const actionPath = reason === "profile_country_required"
+    ? authPathWithReturnTo(auth?.profile_path || "/profile/edit")
+    : authPathWithReturnTo(auth?.sign_in_path || "/sign_in");
+
+  return (
+    <div
+      className="workspace-modal-backdrop"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+      role="presentation"
+    >
+      <section
+        aria-labelledby="calendar-access-title"
+        aria-modal="true"
+        className="workspace-modal"
+        role="dialog"
+      >
+        <div className="workspace-modal__head">
+          <h2 id="calendar-access-title">{modalCopy.title}</h2>
+          <button
+            aria-label="Close"
+            className="workspace-modal__close"
+            onClick={onClose}
+            type="button"
+          />
+        </div>
+        <p>{modalCopy.body}</p>
+        <div className="workspace-modal__actions">
+          <a className="primary-action" href={actionPath}>
+            {modalCopy.actionLabel}
+          </a>
+          <button className="secondary-action" onClick={onClose} type="button">
+            Stay here
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
 export default function CountryCalculatorApp(initialProps = {}) {
   const [calculatorProps, setCalculatorProps] = useState(initialProps);
-  const [activeTab, setActiveTab] = useState(() => activeTabFromLocation());
+  const [activeTab, setActiveTab] = useState(() => (
+    accessibleTab(activeTabFromLocation(), initialProps.auth || {})
+  ));
+  const [calendarAccessModal, setCalendarAccessModal] = useState(() => {
+    const requestedTab = activeTabFromLocation();
+
+    return calendarAccessBlockReasonForTab(
+      requestedTab,
+      initialProps.auth?.signed_in,
+      initialProps.auth?.profile_country_code
+    );
+  });
   const [countrySwitchErrors, setCountrySwitchErrors] = useState([]);
   const [isCountrySwitching, setIsCountrySwitching] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -116,18 +190,59 @@ export default function CountryCalculatorApp(initialProps = {}) {
   const activeTabRef = useRef(activeTab);
   const auth = calculatorProps.auth || {};
 
+  const updateUrl = useCallback((mutateSearchParams) => {
+    const nextUrl = new URL(window.location.href);
+    mutateSearchParams(nextUrl.searchParams);
+    window.history.replaceState({}, "", nextUrl.toString());
+  }, []);
+
   useEffect(() => {
     activeTabRef.current = activeTab;
   }, [activeTab]);
 
   useEffect(() => {
     const handlePopState = () => {
-      setActiveTab(activeTabFromLocation());
+      const requestedTab = activeTabFromLocation();
+      const blockReason = calendarAccessBlockReasonForTab(
+        requestedTab,
+        auth.signed_in,
+        auth.profile_country_code
+      );
+
+      if (blockReason) {
+        setActiveTab("calculator");
+        setCalendarAccessModal(blockReason);
+        updateUrl((searchParams) => {
+          searchParams.set("tab", "calculator");
+        });
+        return;
+      }
+
+      setCalendarAccessModal(null);
+      setActiveTab(requestedTab);
     };
 
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
-  }, []);
+  }, [auth.profile_country_code, auth.signed_in, updateUrl]);
+
+  useEffect(() => {
+    if (!calendarAccessModal) return undefined;
+
+    const requestedTab = activeTabFromLocation();
+    if (requestedTab === "calendar") {
+      updateUrl((searchParams) => {
+        searchParams.set("tab", activeTabRef.current);
+      });
+    }
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") setCalendarAccessModal(null);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [calendarAccessModal, updateUrl]);
 
   useEffect(
     () => () => {
@@ -136,20 +251,27 @@ export default function CountryCalculatorApp(initialProps = {}) {
     []
   );
 
-  const updateUrl = useCallback((mutateSearchParams) => {
-    const nextUrl = new URL(window.location.href);
-    mutateSearchParams(nextUrl.searchParams);
-    window.history.replaceState({}, "", nextUrl.toString());
-  }, []);
-
   const handleTabChange = useCallback((nextTab) => {
     const normalizedTab = normalizeTab(nextTab);
+    const blockReason = calendarAccessBlockReasonForTab(
+      normalizedTab,
+      auth.signed_in,
+      auth.profile_country_code
+    );
+
+    if (blockReason) {
+      setCalendarAccessModal(blockReason);
+      setIsSidebarOpen(false);
+      return;
+    }
+
+    setCalendarAccessModal(null);
     setActiveTab(normalizedTab);
     setIsSidebarOpen(false);
     updateUrl((searchParams) => {
       searchParams.set("tab", normalizedTab);
     });
-  }, [updateUrl]);
+  }, [auth.profile_country_code, auth.signed_in, updateUrl]);
 
   const handleCountryChangeRequest = useCallback(
     async (nextCountryCode) => {
@@ -361,6 +483,12 @@ export default function CountryCalculatorApp(initialProps = {}) {
           </div>
         ))}
       </main>
+
+      <CalendarAccessModal
+        auth={auth}
+        onClose={() => setCalendarAccessModal(null)}
+        reason={calendarAccessModal}
+      />
     </section>
   );
 }

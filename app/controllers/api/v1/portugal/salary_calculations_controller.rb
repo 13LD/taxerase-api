@@ -8,7 +8,7 @@ module Api
         rescue_from Taxerase::InputCurrencyHandler::ValidationError, with: :render_validation_error
 
         def create
-          render json: Taxerase::Portugal::CalculationRouter.call(
+          render json: calculator_result_payload(Taxerase::Portugal::CalculationRouter.call(
             gross_income: calculation_params[:gross_income],
             input_currency_code: calculation_params[:input_currency_code],
             salary_period: calculation_params[:salary_period],
@@ -45,13 +45,14 @@ module Api
             start_activity_year: calculation_params[:start_activity_year],
             social_security_exemption: calculation_params[:social_security_exemption],
             social_security_adjustment_mode: calculation_params[:social_security_adjustment_mode]
-          )
+          ))
         end
 
         private
 
         def calculation_params
-          params.require(:calculation).permit(
+          @calculation_params ||= calculator_calculation_params(
+            Taxerase::Portugal::CalculationRouter,
             :gross_income,
             :input_currency_code,
             :salary_period,
@@ -87,7 +88,8 @@ module Api
             :self_employed_tax_regime,
             :start_activity_year,
             :social_security_exemption,
-            :social_security_adjustment_mode
+            :social_security_adjustment_mode,
+            public_defaults: { age_bracket: "standard" }
           )
         end
 

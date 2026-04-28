@@ -269,8 +269,45 @@ RSpec.describe "Tax workspace tabs", type: :system, js: true do
     expect(page).to have_text("Tax calendar")
   end
 
+  it "shows an authorization modal instead of opening the calendar for guests" do
+    visit root_path
+
+    within(".calculator-tabs") do
+      click_button "Calendar"
+    end
+
+    expect(page).to have_css("[role='dialog']", text: "Sign in to open the calendar")
+    expect(page).to have_text("Calendar workflows are available for authorized users.")
+    expect(page).to have_link("Sign in", href: %r{/sign_in\?return_to=})
+    expect(page).to have_css(".calculator-card", visible: true)
+    expect(page).to have_no_css("#calendar-panel", visible: true)
+    expect(page).to have_current_path(root_path, url: false)
+  end
+
+  it "asks signed-in users without a profile country to update their profile before opening the calendar" do
+    user = User.create!(
+      email: "calendar-needs-profile@example.com",
+      password: "password123",
+      confirmed_at: Time.current
+    )
+    login_as(user, scope: :user)
+
+    visit root_path
+
+    within(".calculator-tabs") do
+      click_button "Calendar"
+    end
+
+    expect(page).to have_css("[role='dialog']", text: "Add a country to your profile")
+    expect(page).to have_text("Update your profile country before opening the calendar.")
+    expect(page).to have_link("Edit profile", href: %r{/profile/edit\?return_to=})
+    expect(page).to have_css(".calculator-card", visible: true)
+    expect(page).to have_no_css("#calendar-panel", visible: true)
+  end
+
   it "shows the report calendar and placeholder invoice, expenses, and reports workspaces from the sidebar" do
     freeze_browser_date("2026-04-25T12:00:00Z")
+    sign_in_calculator_user(country_code: "ES", profile_type: "self_employed")
 
     visit root_path
 
@@ -357,6 +394,7 @@ RSpec.describe "Tax workspace tabs", type: :system, js: true do
 
   it "shows the Netherlands tax calendar with workflow cards and spillover deadlines" do
     freeze_browser_date("2026-04-25T12:00:00Z")
+    sign_in_calculator_user(country_code: "NL", profile_type: "self_employed")
 
     visit root_path(country: "NL")
 
@@ -420,6 +458,7 @@ RSpec.describe "Tax workspace tabs", type: :system, js: true do
       deviceScaleFactor: 1,
       mobile: false
     )
+    sign_in_calculator_user(country_code: "ES", profile_type: "self_employed")
     visit root_path(tab: "calendar")
 
     expect(page).to have_text("Modelo 130", wait: 20)
@@ -528,6 +567,7 @@ RSpec.describe "Tax workspace tabs", type: :system, js: true do
       deviceScaleFactor: 1,
       mobile: true
     )
+    sign_in_calculator_user(country_code: "ES", profile_type: "self_employed")
     visit root_path(tab: "calendar")
 
     expect(page.evaluate_script("window.innerWidth")).to be <= 720
@@ -561,6 +601,7 @@ RSpec.describe "Tax workspace tabs", type: :system, js: true do
       deviceScaleFactor: 1,
       mobile: true
     )
+    sign_in_calculator_user(country_code: "ES", profile_type: "self_employed")
     visit root_path(tab: "calendar")
 
     expect(page).to have_text("Modelo 130", wait: 20)

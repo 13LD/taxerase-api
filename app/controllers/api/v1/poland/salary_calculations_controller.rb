@@ -8,7 +8,7 @@ module Api
         rescue_from Taxerase::InputCurrencyHandler::ValidationError, with: :render_validation_error
 
         def create
-          render json: Taxerase::Poland::CalculationRouter.call(
+          render json: calculator_result_payload(Taxerase::Poland::CalculationRouter.call(
             gross_income: calculation_params[:gross_income],
             input_currency_code: calculation_params[:input_currency_code],
             salary_period: calculation_params[:salary_period],
@@ -48,13 +48,14 @@ module Api
             months_since_business_start: calculation_params[:months_since_business_start],
             business_days_in_month: calculation_params[:business_days_in_month],
             previous_year_average_monthly_income: calculation_params[:previous_year_average_monthly_income]
-          )
+          ))
         end
 
         private
 
         def calculation_params
-          params.require(:calculation).permit(
+          @calculation_params ||= calculator_calculation_params(
+            Taxerase::Poland::CalculationRouter,
             :gross_income,
             :input_currency_code,
             :salary_period,
@@ -93,7 +94,8 @@ module Api
             :cooperating_person,
             :months_since_business_start,
             :business_days_in_month,
-            :previous_year_average_monthly_income
+            :previous_year_average_monthly_income,
+            public_defaults: { age_bracket: "age_26_to_retirement" }
           )
         end
 
