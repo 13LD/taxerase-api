@@ -7,7 +7,7 @@ class ApplicationController < ActionController::Base
   private
 
   def store_auth_return_path
-    return unless request.get?
+    return unless request.get? || request.head?
 
     return_path = safe_return_path(params[:return_to])
     if return_path.present?
