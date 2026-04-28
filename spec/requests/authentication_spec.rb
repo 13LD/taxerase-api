@@ -44,8 +44,27 @@ RSpec.describe "Authentication", type: :request do
     expect(response).to redirect_to("/?country=PT&tab=calendar")
   end
 
+  it "preserves stale auth return paths when return_to is absent" do
+    user = User.create!(
+      email: "stale-return-absent@example.com",
+      password: "password123",
+      confirmed_at: Time.current
+    )
+    user.create_profile!(country_code: "CZ", profile_type: "employee")
+
+    get new_user_session_path(return_to: "/?country=PT&tab=calendar")
+    get new_user_session_path
+    post user_session_path, params: {
+      user: {
+        email: user.email,
+        password: "password123"
+      }
+    }
+
+    expect(response).to redirect_to("/?country=PT&tab=calendar")
+  end
+
   [
-    [ "absent", {} ],
     [ "blank", { return_to: "" } ],
     [ "unsafe", { return_to: "https://example.net/phish" } ]
   ].each_with_index do |(case_name, params), index|

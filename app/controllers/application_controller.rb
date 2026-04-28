@@ -9,6 +9,8 @@ class ApplicationController < ActionController::Base
   def store_auth_return_path
     return unless request.get? || request.head?
 
+    return unless params.key?(:return_to)
+
     return_path = safe_return_path(params[:return_to])
     if return_path.present?
       session["user_return_to"] = return_path
