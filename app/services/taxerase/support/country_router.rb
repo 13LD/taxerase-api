@@ -1,10 +1,11 @@
 module Taxerase
   module Support
     module CountryRouter
-      def default_regime_key(tax_year)
+      def default_regime_key(tax_year, category: "employee")
         TaxRegime.default_supported_key_for(
           country:,
           tax_year:,
+          category:,
           supported_methods: supported_method_keys
         )
       end

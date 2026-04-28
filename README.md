@@ -53,12 +53,13 @@ This starts:
 
 - the Rails server
 - the JavaScript watcher that builds `app/assets/builds/application.js`
+- the Sass watcher that builds `app/assets/builds/application.css`
 
 Open `http://127.0.0.1:3000`.
 
 ## Tests And CI
 
-Build the frontend bundle before request specs so Propshaft can serve `application.js`.
+Build the frontend bundle before request specs so Propshaft can serve `application.js` and `application.css`.
 
 ```sh
 yarn build

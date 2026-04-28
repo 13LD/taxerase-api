@@ -8,37 +8,31 @@ const TAB_OPTIONS = [
   {
     key: "calculator",
     label: "Calculator",
-    description: "Country tax estimate.",
     iconLabel: "C"
   },
   {
     key: "comparison",
     label: "Comparison",
-    description: "Two-country workspace.",
     iconLabel: "Co"
   },
   {
     key: "calendar",
     label: "Calendar",
-    description: "Filing dates workspace.",
     iconLabel: "Ca"
   },
   {
     key: "invoice",
-    label: "Invoice",
-    description: "Billing workspace.",
+    label: "Invoices",
     iconLabel: "In"
   },
   {
     key: "expenses",
     label: "Expenses",
-    description: "Expense tracking lane.",
     iconLabel: "Ex"
   },
   {
     key: "reports",
     label: "Reports",
-    description: "Tax report workspace.",
     iconLabel: "R"
   }
 ];
@@ -47,11 +41,16 @@ const LEGACY_TAB_ALIASES = {
   invoice_expenses: "invoice"
 };
 
+const PROFILE_CATEGORY_PARAMS = {
+  employee: "employee",
+  self_employed: "self_employed"
+};
+
 const PLACEHOLDER_PANELS = [
   {
     key: "invoice",
-    kicker: "Invoice",
-    title: "Invoice",
+    kicker: "Invoices",
+    title: "Invoices",
     body: "Invoice workflows will live here."
   },
   {
@@ -81,6 +80,32 @@ function activeTabFromLocation() {
   return normalizeTab(currentUrl.searchParams.get("tab"));
 }
 
+function currentReturnPath() {
+  if (typeof window === "undefined") return "/";
+
+  return `${window.location.pathname}${window.location.search}`;
+}
+
+function authPathWithReturnTo(path) {
+  if (typeof window === "undefined") return path;
+
+  const url = new URL(path || "/sign_in", window.location.origin);
+  url.searchParams.set("return_to", currentReturnPath());
+
+  return `${url.pathname}${url.search}`;
+}
+
+function currentProfileTypeParam() {
+  if (typeof window === "undefined") return null;
+
+  const currentUrl = new URL(window.location.href);
+  return currentUrl.searchParams.get("profile_type");
+}
+
+function profileTypeParamForCategory(category) {
+  return PROFILE_CATEGORY_PARAMS[category] || null;
+}
+
 export default function CountryCalculatorApp(initialProps = {}) {
   const [calculatorProps, setCalculatorProps] = useState(initialProps);
   const [activeTab, setActiveTab] = useState(() => activeTabFromLocation());
@@ -89,6 +114,7 @@ export default function CountryCalculatorApp(initialProps = {}) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const requestAbortControllerRef = useRef(null);
   const activeTabRef = useRef(activeTab);
+  const auth = calculatorProps.auth || {};
 
   useEffect(() => {
     activeTabRef.current = activeTab;
@@ -139,6 +165,7 @@ export default function CountryCalculatorApp(initialProps = {}) {
       try {
         const response = await requestCountryCalculator({
           countryCode: nextCountryCode,
+          profileType: currentProfileTypeParam() || auth.profile_type,
           signal: abortController.signal
         });
         const payload = await response.json();
@@ -169,8 +196,18 @@ export default function CountryCalculatorApp(initialProps = {}) {
         setIsCountrySwitching(false);
       }
     },
-    [calculatorProps.country?.code, updateUrl]
+    [auth.profile_type, calculatorProps.country?.code, updateUrl]
   );
+
+  const handleProfileTypeChangeRequest = useCallback((category) => {
+    const profileType = profileTypeParamForCategory(category);
+    if (!profileType) return;
+
+    updateUrl((searchParams) => {
+      searchParams.set("profile_type", profileType);
+      searchParams.set("tab", activeTabRef.current);
+    });
+  }, [updateUrl]);
 
   return (
     <section className="tabbed-calculator-shell">
@@ -216,16 +253,51 @@ export default function CountryCalculatorApp(initialProps = {}) {
             >
               <span className="calculator-tabs__icon" aria-hidden="true">{tab.iconLabel}</span>
               <span>{tab.label}</span>
-              <small>{tab.description}</small>
             </button>
           ))}
         </div>
 
-        <div className="workspace-sidebar__profile" aria-label="User profile">
-          <span className="workspace-sidebar__avatar" aria-hidden="true">U</span>
-          <div>
-            <strong>User profile</strong>
-            <span>Account space</span>
+        <div className="workspace-sidebar__account" aria-label="User profile">
+          {auth.signed_in ? (
+            <a
+              className="workspace-sidebar__profile"
+              href={authPathWithReturnTo(auth.profile_path || "/profile/edit")}
+            >
+              <span className="workspace-sidebar__avatar" aria-hidden="true">
+                {(auth.email || "U").charAt(0).toUpperCase()}
+              </span>
+              <div>
+                <strong>Edit profile</strong>
+                <span title={auth.email || undefined}>
+                  {auth.selected_country_name || auth.email || "Account space"}
+                </span>
+              </div>
+            </a>
+          ) : (
+            <div className="workspace-sidebar__profile">
+              <span className="workspace-sidebar__avatar" aria-hidden="true">U</span>
+              <div>
+                <strong>Guest</strong>
+                <span>Limited workspace</span>
+              </div>
+            </div>
+          )}
+          <div className="workspace-sidebar__account-actions">
+            {auth.signed_in ? (
+              <form action={auth.sign_out_path || "/sign_out"} method="post">
+                <input name="_method" type="hidden" value="delete" />
+                <input
+                  name="authenticity_token"
+                  type="hidden"
+                  value={auth.authenticity_token || ""}
+                />
+                <button className="secondary-action" type="submit">Sign out</button>
+              </form>
+            ) : (
+              <a className="primary-action" href={authPathWithReturnTo(auth.sign_in_path)}>
+                Sign in
+              </a>
+            )}
           </div>
         </div>
       </aside>
@@ -244,6 +316,7 @@ export default function CountryCalculatorApp(initialProps = {}) {
             countrySwitchErrors={countrySwitchErrors}
             isCountrySwitching={isCountrySwitching}
             onCountryChangeRequest={handleCountryChangeRequest}
+            onProfileTypeChangeRequest={handleProfileTypeChangeRequest}
           />
         </div>
 
@@ -267,6 +340,7 @@ export default function CountryCalculatorApp(initialProps = {}) {
           <ReportCalendarPanel
             active={activeTab === "calendar"}
             countryCode={calculatorProps.country?.code}
+            profileType={currentProfileTypeParam() || auth.profile_type}
           />
         </div>
 

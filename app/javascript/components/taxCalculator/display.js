@@ -5,7 +5,7 @@ export function pendingOutputValue(selectedRegime, isSupportedRegime) {
   return isSupportedRegime ? "Calculating..." : "Research pending";
 }
 
-export function buildPlaceholderDetailCards({
+function buildPlaceholderDetailCards({
   applyThirtyPercentRuling,
   selectedCategory,
   selectedRegion,
@@ -126,20 +126,6 @@ export function buildDetailCards({
     deductibleExpenses,
     currencyCode
   });
-}
-
-export function buildDisplayStatus({
-  displayStatus,
-  isSupportedRegime,
-  resultMatchesSelection,
-  selectedRegime,
-  status
-}) {
-  if (!selectedRegime) return "unavailable";
-  if (!isSupportedRegime) return "unavailable";
-  if (status === "error") return "error";
-  if (resultMatchesSelection) return status;
-  return displayStatus || "loading";
 }
 
 export function buildDisplayedSources({ resultMatchesSelection, result, selectedRegime }) {

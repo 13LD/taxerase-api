@@ -1,0 +1,10 @@
+<% if resource.errors.any? %>
+  <div class="error-panel" role="alert">
+    <p><%= pluralize(resource.errors.count, "issue") %> prevented this from being saved.</p>
+    <ul>
+      <% resource.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>

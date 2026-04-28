@@ -19,12 +19,13 @@
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
 
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
+    <%# Includes the Sass-compiled stylesheet from app/assets/builds %>
     <%= stylesheet_link_tag :app %>
     <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
   </head>
 
   <body class="taxerase-body">
+    <%= render "shared/flash" %>
     <%= yield %>
   </body>
 </html>

@@ -1,0 +1,285 @@
+/* Calendar tab. */
+
+.report-calendar-card {
+  display: grid;
+  gap: 18px;
+}
+
+.report-calendar-chart {
+  display: grid;
+  grid-template-columns: repeat(var(--calendar-month-count, 12), minmax(172px, 1fr));
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-gutter: stable;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.report-calendar-period {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-width: 172px;
+  border-right: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(10, 18, 32, 0.42);
+  scroll-snap-align: start;
+}
+
+.report-calendar-period:last-child {
+  border-right: 0;
+}
+
+.report-calendar-period--empty {
+  background: rgba(10, 18, 32, 0.24);
+}
+
+.report-calendar-period--current {
+  position: relative;
+  background: rgba(17, 45, 80, 0.58);
+  box-shadow: inset 0 0 0 2px rgba(114, 170, 255, 0.62);
+}
+
+.report-calendar-period--current .report-calendar-period__head {
+  background: rgba(114, 170, 255, 0.12);
+}
+
+.report-calendar-period__head {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 3px;
+  min-height: 58px;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  color: var(--ink);
+  font-weight: 850;
+}
+
+.report-calendar-period__head span {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 750;
+}
+
+.report-calendar-period__track {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  min-height: 390px;
+  padding: 12px;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 33.333% 100%, 100% 56px;
+}
+
+.report-calendar-chart__item {
+  position: relative;
+  display: grid;
+  gap: 4px;
+  min-height: 86px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 10px;
+  color: #fff;
+  cursor: help;
+  font: inherit;
+  text-align: left;
+  outline: none;
+  box-shadow: 0 16px 34px rgba(7, 18, 35, 0.18);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.report-calendar-chart__item:hover,
+.report-calendar-chart__item:focus-visible {
+  z-index: 4;
+  transform: translateY(-2px);
+  box-shadow: 0 20px 40px rgba(7, 18, 35, 0.28);
+}
+
+.report-calendar-chart__item--submission {
+  background: linear-gradient(135deg, #3aaaf5, #1d6fd6);
+}
+
+.report-calendar-chart__item--payment {
+  background: linear-gradient(135deg, #36bf91, #168b67);
+}
+
+.report-calendar-chart__item strong,
+.report-calendar-chart__item time {
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.report-calendar-chart__item strong {
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
+
+.report-calendar-chart__item time {
+  font-size: 0.82rem;
+  font-weight: 850;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+.report-calendar-tooltip {
+  max-height: 0;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.82rem;
+  font-weight: 650;
+  line-height: 1.45;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transition: max-height 0.18s ease, opacity 0.18s ease, padding-top 0.18s ease;
+}
+
+.report-calendar-chart__item:hover .report-calendar-tooltip,
+.report-calendar-chart__item:focus-visible .report-calendar-tooltip {
+  max-height: 180px;
+  opacity: 1;
+  padding-top: 6px;
+}
+
+.report-calendar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  color: var(--muted);
+  font-weight: 750;
+}
+
+.report-calendar-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.report-calendar-legend__swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+}
+
+.report-calendar-legend__swatch--submission {
+  background: #3aaaf5;
+}
+
+.report-calendar-legend__swatch--payment {
+  background: #36bf91;
+}
+
+.report-calendar-workflows {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 10px;
+}
+
+.report-calendar-workflow {
+  display: grid;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+}
+
+.report-calendar-workflow[open] {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.report-calendar-workflow__summary {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.report-calendar-workflow__summary::-webkit-details-marker {
+  display: none;
+}
+
+.report-calendar-workflow__summary > span:first-child {
+  display: grid;
+  gap: 7px;
+}
+
+.report-calendar-workflow__summary strong {
+  color: var(--ink);
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+}
+
+.report-calendar-workflow__summary small,
+.report-calendar-workflow__step p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.report-calendar-workflow__meta {
+  flex: 0 0 auto;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: rgba(114, 170, 255, 0.14);
+  color: #9dc2ff;
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.report-calendar-workflow__steps {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0 14px 14px;
+  list-style: none;
+}
+
+.report-calendar-workflow__step {
+  display: flex;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.report-calendar-workflow__step-number {
+  display: inline-grid;
+  flex: 0 0 26px;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.report-calendar-workflow__step strong {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--ink);
+}
+
+.report-calendar-workflow__reference {
+  display: inline-flex;
+  width: fit-content;
+  margin-top: 8px;
+  color: #a8d4ff;
+  font-size: 0.86rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.report-calendar-workflow__reference:hover {
+  color: #d9ecff;
+  text-decoration: underline;
+}

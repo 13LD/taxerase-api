@@ -9,7 +9,9 @@ module Api
 
         render json: {
           page_title: definition.page_title,
-          calculator_props: definition.build_props
+          calculator_props: definition.build_props(
+            profile_category: calculator_profile_category
+          ).merge(auth: calculator_auth_props)
         }
       rescue ActiveRecord::RecordNotFound, ArgumentError
         render_not_found(

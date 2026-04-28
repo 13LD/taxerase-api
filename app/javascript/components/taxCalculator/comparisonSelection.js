@@ -10,7 +10,7 @@ export function findComparisonCountryEntry(comparisonCatalog, countryCode) {
   return comparisonCatalog.find((entry) => entry.country.code === countryCode) || null;
 }
 
-export function buildComparisonTaxYearsForCountry(countryEntry, selectedCategory) {
+function buildComparisonTaxYearsForCountry(countryEntry, selectedCategory) {
   return Array.from(
     new Set(
       (countryEntry?.regime_options || [])

@@ -1,0 +1,35 @@
+<% content_for :title, "Taxerase | Change password" %>
+
+<main class="page-shell auth-page-shell">
+  <section class="liquid-card auth-card">
+    <div class="section-head">
+      <div>
+        <p class="section-kicker">Account recovery</p>
+        <h2>Change password</h2>
+        <p class="section-note">Choose a new password for your Taxerase account.</p>
+      </div>
+    </div>
+
+    <%= render "devise/shared/error_messages", resource: resource %>
+
+    <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :put, class: "auth-form" }) do |f| %>
+      <%= f.hidden_field :reset_password_token %>
+
+      <div class="field">
+        <%= f.label :password, "New password", class: "field-label" %>
+        <div class="input-shell">
+          <%= f.password_field :password, autofocus: true, autocomplete: "new-password", placeholder: "Minimum 8 characters" %>
+        </div>
+      </div>
+
+      <div class="field">
+        <%= f.label :password_confirmation, "Confirm password", class: "field-label" %>
+        <div class="input-shell">
+          <%= f.password_field :password_confirmation, autocomplete: "new-password" %>
+        </div>
+      </div>
+
+      <%= f.submit "Change password", class: "primary-action" %>
+    <% end %>
+  </section>
+</main>

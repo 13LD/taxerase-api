@@ -1,0 +1,8 @@
+<% flash_messages = flash.to_hash.slice("notice", "alert") %>
+<% if flash_messages.present? %>
+  <div class="flash-stack" role="status" aria-live="polite">
+    <% flash_messages.each do |kind, message| %>
+      <p class="flash-message flash-message--<%= kind %>"><%= message %></p>
+    <% end %>
+  </div>
+<% end %>

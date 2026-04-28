@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_25_162000) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_28_121000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -54,6 +54,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_25_162000) do
     t.string "url", null: false
     t.index ["country_id"], name: "index_official_tax_sources_on_country_id"
     t.index ["key"], name: "index_official_tax_sources_on_key", unique: true
+  end
+
+  create_table "profiles", force: :cascade do |t|
+    t.string "country_code", default: "ES", null: false
+    t.datetime "created_at", null: false
+    t.string "profile_type", default: "employee", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["country_code"], name: "index_profiles_on_country_code"
+    t.index ["profile_type"], name: "index_profiles_on_profile_type"
+    t.index ["user_id"], name: "index_profiles_on_user_id", unique: true
   end
 
   create_table "report_events", force: :cascade do |t|
@@ -171,7 +182,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_25_162000) do
     t.index ["tax_regime_id"], name: "index_tax_source_usages_on_tax_regime_id"
   end
 
+  create_table "users", force: :cascade do |t|
+    t.datetime "confirmation_sent_at"
+    t.string "confirmation_token"
+    t.datetime "confirmed_at"
+    t.datetime "created_at", null: false
+    t.string "email", default: "", null: false
+    t.string "encrypted_password", default: "", null: false
+    t.datetime "remember_created_at"
+    t.datetime "reset_password_sent_at"
+    t.string "reset_password_token"
+    t.string "unconfirmed_email"
+    t.datetime "updated_at", null: false
+    t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
+    t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+  end
+
   add_foreign_key "official_tax_sources", "countries"
+  add_foreign_key "profiles", "users"
   add_foreign_key "report_events", "tax_reports"
   add_foreign_key "report_workflows", "tax_reports"
   add_foreign_key "tax_brackets", "tax_regimes"

@@ -1,0 +1,41 @@
+<% content_for :title, "Taxerase | Profile" %>
+
+<main class="page-shell auth-page-shell">
+  <section class="liquid-card auth-card auth-card--wide">
+    <div class="section-head">
+      <div>
+        <p class="section-kicker">Profile</p>
+        <h2>Profile settings</h2>
+        <p class="section-note">Choose the country and work type that control your default workspace.</p>
+      </div>
+    </div>
+
+    <%= render "devise/shared/error_messages", resource: @profile %>
+
+    <%= form_with(model: @profile, url: profile_path, method: :patch, class: "auth-form") do |f| %>
+      <%= hidden_field_tag :return_to, @profile_return_to %>
+
+      <div class="field-row">
+        <div class="field">
+          <%= f.label :country_code, "Country", class: "field-label" %>
+          <div class="select-shell">
+            <%= f.select :country_code, auth_country_options, selected: @profile.country_code %>
+          </div>
+        </div>
+
+        <div class="field">
+          <%= f.label :profile_type, "Type", class: "field-label" %>
+          <div class="select-shell">
+            <%= f.select :profile_type, profile_type_options, selected: @profile.profile_type %>
+          </div>
+        </div>
+      </div>
+
+      <%= f.submit "Save profile", class: "primary-action" %>
+    <% end %>
+
+    <div class="auth-link-row">
+      <span><%= link_to "Back to workspace", @profile_return_to %></span>
+    </div>
+  </section>
+</main>

@@ -1,0 +1,39 @@
+<% content_for :title, "Taxerase | Sign in" %>
+
+<main class="page-shell auth-page-shell">
+  <section class="liquid-card auth-card">
+    <div class="section-head">
+      <div>
+        <h2>Sign in</h2>
+        <p class="section-note">Use the account that stores your country profile and detailed tax inputs.</p>
+      </div>
+    </div>
+
+    <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "auth-form" }) do |f| %>
+      <div class="field">
+        <%= f.label :email, class: "field-label" %>
+        <div class="input-shell">
+          <%= f.email_field :email, autofocus: true, autocomplete: "email", placeholder: "name@example.com" %>
+        </div>
+      </div>
+
+      <div class="field">
+        <%= f.label :password, class: "field-label" %>
+        <div class="input-shell">
+          <%= f.password_field :password, autocomplete: "current-password" %>
+        </div>
+      </div>
+
+      <% if devise_mapping.rememberable? %>
+        <label class="checkbox-shell">
+          <%= f.check_box :remember_me %>
+          <span>Remember this device</span>
+        </label>
+      <% end %>
+
+      <%= f.submit "Sign in", class: "primary-action" %>
+    <% end %>
+
+    <%= render "devise/shared/links" %>
+  </section>
+</main>

@@ -1,0 +1,220 @@
+/* Calculator tab. */
+
+.experience-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.98fr) minmax(0, 1.02fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.glass-stack {
+  display: grid;
+  gap: 24px;
+}
+
+.experience-grid__full-width {
+  grid-column: 1 / -1;
+}
+
+.calculator-home-tab {
+  margin-top: 0;
+}
+.section-head--calculator {
+  display: grid;
+  gap: 10px;
+}
+
+.section-head--calculator .section-kicker {
+  margin-bottom: 0;
+}
+
+.section-head__title-row {
+  min-width: 0;
+}
+
+.section-head__title-row h2 {
+  font-size: clamp(1.12rem, 1.75vw, 1.75rem);
+  line-height: 1.1;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.calculator-form {
+  display: grid;
+  gap: 18px;
+}
+.metric-grid,
+.detail-grid {
+  display: grid;
+  gap: 14px;
+  align-items: stretch;
+}
+
+.source-link {
+  text-decoration: none;
+  color: #72aaff;
+  font-weight: 700;
+}
+.metric-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.metric-grid .metric-card {
+  min-width: 0;
+}
+
+.metric-grid .metric-card--primary,
+.metric-grid .metric-card--secondary {
+  grid-column: span 1;
+}
+
+.metric-grid .metric-card--danger {
+  grid-column: 1 / -1;
+}
+
+.detail-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 14px;
+}
+
+.metric-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 150px;
+  height: 100%;
+  padding: 18px;
+  border-radius: 22px;
+  box-shadow: var(--shadow-soft);
+}
+
+.metric-card--primary {
+  border-color: rgba(114, 170, 255, 0.32);
+  background:
+    linear-gradient(325deg, rgba(18, 116, 255, 0.42), rgba(65, 149, 255, 0.18) 48%, rgba(255, 255, 255, 0.06)),
+    var(--panel);
+  box-shadow: 0 18px 44px rgba(18, 116, 255, 0.18);
+}
+
+.metric-card--secondary {
+  border-color: rgba(47, 201, 143, 0.32);
+  background:
+    linear-gradient(325deg, rgba(47, 201, 143, 0.4), rgba(18, 160, 117, 0.18) 48%, rgba(255, 255, 255, 0.06)),
+    var(--panel);
+  box-shadow: 0 18px 44px rgba(47, 201, 143, 0.16);
+}
+
+.metric-card--danger {
+  grid-column: 1 / -1;
+  border-color: rgba(255, 107, 133, 0.34);
+  background:
+    linear-gradient(325deg, rgba(255, 107, 133, 0.38), rgba(185, 43, 74, 0.2) 50%, rgba(255, 255, 255, 0.06)),
+    var(--panel);
+  box-shadow: 0 18px 44px rgba(255, 107, 133, 0.14);
+}
+
+.metric-label {
+  display: block;
+  min-height: 2.7em;
+  color: rgba(238, 243, 255, 0.62);
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.metric-value {
+  display: block;
+  margin-top: 18px;
+  min-height: 2.1em;
+  max-width: 100%;
+  font-size: clamp(1.2rem, 2.15vw, 2.1rem);
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+.detail-grid .metric-value {
+  font-size: clamp(1.15rem, 1.9vw, 1.85rem);
+  line-height: 1.12;
+}
+
+.assumption-list {
+  display: grid;
+  gap: 10px;
+}
+
+.rule-status-list {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.rule-status {
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+}
+
+.rule-status--needs_review {
+  border-color: rgba(246, 185, 75, 0.34);
+}
+
+.rule-status--not_implemented {
+  border-color: rgba(255, 107, 133, 0.34);
+}
+
+.rule-status__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.rule-status__head strong {
+  color: var(--ink);
+}
+
+.rule-status__head span {
+  flex: 0 0 auto;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.rule-status p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.assumption-list p {
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+}
+
+.source-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.source-link {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+}
