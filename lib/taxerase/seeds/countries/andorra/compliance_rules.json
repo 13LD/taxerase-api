@@ -1,0 +1,541 @@
+{
+  "country_code": "AD",
+  "reports": [
+    {
+      "key": "irpf_form_300",
+      "name": "IRPF annual return",
+      "tax_year": 2026,
+      "tax_years": [ 2025, 2026, 2027 ],
+      "description": "Annual IRPF Form 300 return for the 2025 income year, filed during the 2026 Andorra IRPF campaign.",
+      "workflows": [
+        {
+          "key": "review_irpf_income",
+          "name": "Review IRPF income",
+          "description": "Review employment, self-employment, capital, real-estate, gains, deductions, and any required supporting schedules before filing.",
+          "reference_url": "https://www.e-tramits.ad/tramits/ca/declaracio-de-limpost-sobre-la-renda-de-les-persones-fisiques-irpf/p/tr-irpf"
+        },
+        {
+          "key": "submit_irpf_form_300",
+          "name": "Submit IRPF Form 300",
+          "description": "Submit the annual IRPF return during the official campaign window.",
+          "reference_url": "https://www.e-tramits.ad/tramits/ca/declaracio-de-limpost-sobre-la-renda-de-les-persones-fisiques-irpf/p/tr-irpf"
+        },
+        {
+          "key": "settle_irpf_balance",
+          "name": "Settle IRPF balance",
+          "description": "Pay any balance due by the annual IRPF filing deadline or preserve the refund position.",
+          "reference_url": "https://www.e-tramits.ad/tramits/ca/declaracio-de-limpost-sobre-la-renda-de-les-persones-fisiques-irpf/p/tr-irpf"
+        }
+      ],
+      "events": [
+        {
+          "key": "annual_submission",
+          "title": "2025 IRPF submission window end",
+          "event_type": "submission",
+          "event_date": "2026-09-30",
+          "window_start_date": "2026-04-01",
+          "window_end_date": "2026-09-30",
+          "description": "Form 300 for the 2025 IRPF income year may be filed from 1 April to 30 September 2026."
+        },
+        {
+          "key": "annual_payment",
+          "title": "2025 IRPF payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-09-30",
+          "description": "Any payable IRPF balance is due by the end of the annual filing window."
+        }
+      ]
+    },
+    {
+      "key": "irpf_form_320",
+      "name": "IRPF payment on account",
+      "tax_year": 2026,
+      "tax_years": [ 2025, 2026, 2027 ],
+      "description": "September IRPF Form 320 payment on account for taxpayers with economic-activity income in 2026.",
+      "workflows": [
+        {
+          "key": "confirm_irpf_payment_on_account",
+          "name": "Confirm IRPF payment-on-account status",
+          "description": "Confirm whether economic-activity income requires the September payment on account and choose the applicable calculation method.",
+          "reference_url": "https://www.e-tramits.ad/tramits/ca/impostos/tr-irpf-320"
+        },
+        {
+          "key": "submit_irpf_form_320",
+          "name": "Submit IRPF Form 320",
+          "description": "Submit the payment-on-account declaration during the September window.",
+          "reference_url": "https://www.e-tramits.ad/tramits/ca/impostos/tr-irpf-320"
+        },
+        {
+          "key": "pay_irpf_form_320",
+          "name": "Pay IRPF payment on account",
+          "description": "Settle the payment on account for the current IRPF period during September.",
+          "reference_url": "https://www.e-tramits.ad/tramits/ca/impostos/tr-irpf-320"
+        }
+      ],
+      "events": [
+        {
+          "key": "september_submission",
+          "title": "2026 IRPF payment-on-account submission window end",
+          "event_type": "submission",
+          "event_date": "2026-09-30",
+          "window_start_date": "2026-09-01",
+          "window_end_date": "2026-09-30",
+          "description": "Taxpayers with economic-activity income present the IRPF payment on account during September."
+        },
+        {
+          "key": "september_payment",
+          "title": "2026 IRPF payment-on-account deadline",
+          "event_type": "payment",
+          "event_date": "2026-09-30",
+          "window_start_date": "2026-09-01",
+          "window_end_date": "2026-09-30",
+          "description": "The IRPF payment on account is settled during the September payment-on-account window."
+        }
+      ]
+    },
+    {
+      "key": "igi_form_900_semiannual",
+      "name": "Semiannual IGI return",
+      "tax_year": 2026,
+      "tax_years": [ 2025, 2026, 2027 ],
+      "description": "Semiannual IGI Form 900 return for taxpayers below the EUR 250,000 annual turnover threshold.",
+      "workflows": [
+        {
+          "key": "confirm_semiannual_igi_status",
+          "name": "Confirm semiannual IGI status",
+          "description": "Confirm that prior-year turnover places the taxpayer in the semiannual IGI filing frequency.",
+          "reference_url": "https://www.e-tramits.ad/tramits/ca/impost-general-indirecte-igi/p/tr-igi"
+        },
+        {
+          "key": "submit_semiannual_igi",
+          "name": "Submit semiannual IGI return",
+          "description": "Submit the semiannual IGI declaration in July and January for the preceding semester.",
+          "reference_url": "https://www.e-tramits.ad/tramits/ca/impost-general-indirecte-igi/p/tr-igi"
+        },
+        {
+          "key": "pay_semiannual_igi",
+          "name": "Pay semiannual IGI",
+          "description": "Pay any IGI balance before the voluntary payment window closes.",
+          "reference_url": "https://www.e-tramits.ad/tramits/ca/impost-general-indirecte-igi/p/tr-igi"
+        }
+      ],
+      "events": [
+        {
+          "key": "h1_submission",
+          "title": "H1 2026 IGI submission window end",
+          "event_type": "submission",
+          "event_date": "2026-07-31",
+          "window_start_date": "2026-07-01",
+          "window_end_date": "2026-07-31",
+          "description": "Semiannual IGI for the first semester is filed during July."
+        },
+        {
+          "key": "h1_payment",
+          "title": "H1 2026 IGI payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-07-31",
+          "description": "Any payable first-semester IGI is due with the July return window."
+        },
+        {
+          "key": "h2_submission",
+          "title": "H2 2026 IGI submission window end",
+          "event_type": "submission",
+          "event_date": "2027-01-31",
+          "window_start_date": "2027-01-01",
+          "window_end_date": "2027-01-31",
+          "description": "Semiannual IGI for the second semester is filed during January of the following year."
+        },
+        {
+          "key": "h2_payment",
+          "title": "H2 2026 IGI payment deadline",
+          "event_type": "payment",
+          "event_date": "2027-01-31",
+          "description": "Any payable second-semester IGI is due with the January return window."
+        }
+      ]
+    },
+    {
+      "key": "igi_form_900_quarterly",
+      "name": "Quarterly IGI return",
+      "tax_year": 2026,
+      "tax_years": [ 2025, 2026, 2027 ],
+      "description": "Quarterly IGI Form 900 return for taxpayers below the EUR 3,600,000 annual turnover threshold and for most new activities.",
+      "workflows": [
+        {
+          "key": "confirm_quarterly_igi_status",
+          "name": "Confirm quarterly IGI status",
+          "description": "Confirm that prior-year turnover or new-activity status places the taxpayer in the quarterly IGI filing frequency.",
+          "reference_url": "https://www.e-tramits.ad/tramits/ca/impost-general-indirecte-igi/p/tr-igi"
+        },
+        {
+          "key": "submit_quarterly_igi",
+          "name": "Submit quarterly IGI return",
+          "description": "Submit each quarterly IGI declaration in the month after the quarter ends.",
+          "reference_url": "https://www.e-tramits.ad/tramits/ca/impost-general-indirecte-igi/p/tr-igi"
+        },
+        {
+          "key": "pay_quarterly_igi",
+          "name": "Pay quarterly IGI",
+          "description": "Pay any quarterly IGI balance before the voluntary payment window closes.",
+          "reference_url": "https://www.e-tramits.ad/tramits/ca/impost-general-indirecte-igi/p/tr-igi"
+        }
+      ],
+      "events": [
+        {
+          "key": "q1_submission",
+          "title": "Q1 2026 IGI submission window end",
+          "event_type": "submission",
+          "event_date": "2026-04-30",
+          "window_start_date": "2026-04-01",
+          "window_end_date": "2026-04-30",
+          "description": "Quarterly IGI for Q1 is filed during April."
+        },
+        {
+          "key": "q1_payment",
+          "title": "Q1 2026 IGI payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-04-30",
+          "description": "Any payable Q1 IGI is due with the April return window."
+        },
+        {
+          "key": "q2_submission",
+          "title": "Q2 2026 IGI submission window end",
+          "event_type": "submission",
+          "event_date": "2026-07-31",
+          "window_start_date": "2026-07-01",
+          "window_end_date": "2026-07-31",
+          "description": "Quarterly IGI for Q2 is filed during July."
+        },
+        {
+          "key": "q2_payment",
+          "title": "Q2 2026 IGI payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-07-31",
+          "description": "Any payable Q2 IGI is due with the July return window."
+        },
+        {
+          "key": "q3_submission",
+          "title": "Q3 2026 IGI submission window end",
+          "event_type": "submission",
+          "event_date": "2026-10-31",
+          "window_start_date": "2026-10-01",
+          "window_end_date": "2026-10-31",
+          "description": "Quarterly IGI for Q3 is filed during October."
+        },
+        {
+          "key": "q3_payment",
+          "title": "Q3 2026 IGI payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-10-31",
+          "description": "Any payable Q3 IGI is due with the October return window."
+        },
+        {
+          "key": "q4_submission",
+          "title": "Q4 2026 IGI submission window end",
+          "event_type": "submission",
+          "event_date": "2027-01-31",
+          "window_start_date": "2027-01-01",
+          "window_end_date": "2027-01-31",
+          "description": "Quarterly IGI for Q4 is filed during January of the following year."
+        },
+        {
+          "key": "q4_payment",
+          "title": "Q4 2026 IGI payment deadline",
+          "event_type": "payment",
+          "event_date": "2027-01-31",
+          "description": "Any payable Q4 IGI is due with the January return window."
+        }
+      ]
+    },
+    {
+      "key": "igi_form_900_monthly",
+      "name": "Monthly IGI return",
+      "tax_year": 2026,
+      "tax_years": [ 2025, 2026, 2027 ],
+      "description": "Monthly IGI Form 900 return for taxpayers at or above the EUR 3,600,000 annual turnover threshold.",
+      "workflows": [
+        {
+          "key": "confirm_monthly_igi_status",
+          "name": "Confirm monthly IGI status",
+          "description": "Confirm that prior-year turnover places the taxpayer in the monthly IGI filing frequency.",
+          "reference_url": "https://www.e-tramits.ad/tramits/ca/impost-general-indirecte-igi/p/tr-igi"
+        },
+        {
+          "key": "submit_monthly_igi",
+          "name": "Submit monthly IGI return",
+          "description": "Submit each monthly IGI declaration during the following month.",
+          "reference_url": "https://www.e-tramits.ad/tramits/ca/impost-general-indirecte-igi/p/tr-igi"
+        },
+        {
+          "key": "pay_monthly_igi",
+          "name": "Pay monthly IGI",
+          "description": "Pay any monthly IGI balance before the voluntary payment window closes.",
+          "reference_url": "https://www.e-tramits.ad/tramits/ca/impost-general-indirecte-igi/p/tr-igi"
+        }
+      ],
+      "events": [
+        {
+          "key": "jan_submission",
+          "title": "January 2026 IGI submission window end",
+          "event_type": "submission",
+          "event_date": "2026-02-28",
+          "window_start_date": "2026-02-01",
+          "window_end_date": "2026-02-28",
+          "description": "Monthly IGI for January is filed during February."
+        },
+        {
+          "key": "jan_payment",
+          "title": "January 2026 IGI payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-02-28",
+          "description": "Any payable January IGI is due with the February return window."
+        },
+        {
+          "key": "feb_submission",
+          "title": "February 2026 IGI submission window end",
+          "event_type": "submission",
+          "event_date": "2026-03-31",
+          "window_start_date": "2026-03-01",
+          "window_end_date": "2026-03-31",
+          "description": "Monthly IGI for February is filed during March."
+        },
+        {
+          "key": "feb_payment",
+          "title": "February 2026 IGI payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-03-31",
+          "description": "Any payable February IGI is due with the March return window."
+        },
+        {
+          "key": "mar_submission",
+          "title": "March 2026 IGI submission window end",
+          "event_type": "submission",
+          "event_date": "2026-04-30",
+          "window_start_date": "2026-04-01",
+          "window_end_date": "2026-04-30",
+          "description": "Monthly IGI for March is filed during April."
+        },
+        {
+          "key": "mar_payment",
+          "title": "March 2026 IGI payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-04-30",
+          "description": "Any payable March IGI is due with the April return window."
+        },
+        {
+          "key": "apr_submission",
+          "title": "April 2026 IGI submission window end",
+          "event_type": "submission",
+          "event_date": "2026-05-31",
+          "window_start_date": "2026-05-01",
+          "window_end_date": "2026-05-31",
+          "description": "Monthly IGI for April is filed during May."
+        },
+        {
+          "key": "apr_payment",
+          "title": "April 2026 IGI payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-05-31",
+          "description": "Any payable April IGI is due with the May return window."
+        },
+        {
+          "key": "may_submission",
+          "title": "May 2026 IGI submission window end",
+          "event_type": "submission",
+          "event_date": "2026-06-30",
+          "window_start_date": "2026-06-01",
+          "window_end_date": "2026-06-30",
+          "description": "Monthly IGI for May is filed during June."
+        },
+        {
+          "key": "may_payment",
+          "title": "May 2026 IGI payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-06-30",
+          "description": "Any payable May IGI is due with the June return window."
+        },
+        {
+          "key": "jun_submission",
+          "title": "June 2026 IGI submission window end",
+          "event_type": "submission",
+          "event_date": "2026-07-31",
+          "window_start_date": "2026-07-01",
+          "window_end_date": "2026-07-31",
+          "description": "Monthly IGI for June is filed during July."
+        },
+        {
+          "key": "jun_payment",
+          "title": "June 2026 IGI payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-07-31",
+          "description": "Any payable June IGI is due with the July return window."
+        },
+        {
+          "key": "jul_submission",
+          "title": "July 2026 IGI submission window end",
+          "event_type": "submission",
+          "event_date": "2026-08-31",
+          "window_start_date": "2026-08-01",
+          "window_end_date": "2026-08-31",
+          "description": "Monthly IGI for July is filed during August."
+        },
+        {
+          "key": "jul_payment",
+          "title": "July 2026 IGI payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-08-31",
+          "description": "Any payable July IGI is due with the August return window."
+        },
+        {
+          "key": "aug_submission",
+          "title": "August 2026 IGI submission window end",
+          "event_type": "submission",
+          "event_date": "2026-09-30",
+          "window_start_date": "2026-09-01",
+          "window_end_date": "2026-09-30",
+          "description": "Monthly IGI for August is filed during September."
+        },
+        {
+          "key": "aug_payment",
+          "title": "August 2026 IGI payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-09-30",
+          "description": "Any payable August IGI is due with the September return window."
+        },
+        {
+          "key": "sep_submission",
+          "title": "September 2026 IGI submission window end",
+          "event_type": "submission",
+          "event_date": "2026-10-31",
+          "window_start_date": "2026-10-01",
+          "window_end_date": "2026-10-31",
+          "description": "Monthly IGI for September is filed during October."
+        },
+        {
+          "key": "sep_payment",
+          "title": "September 2026 IGI payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-10-31",
+          "description": "Any payable September IGI is due with the October return window."
+        },
+        {
+          "key": "oct_submission",
+          "title": "October 2026 IGI submission window end",
+          "event_type": "submission",
+          "event_date": "2026-11-30",
+          "window_start_date": "2026-11-01",
+          "window_end_date": "2026-11-30",
+          "description": "Monthly IGI for October is filed during November."
+        },
+        {
+          "key": "oct_payment",
+          "title": "October 2026 IGI payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-11-30",
+          "description": "Any payable October IGI is due with the November return window."
+        },
+        {
+          "key": "nov_submission",
+          "title": "November 2026 IGI submission window end",
+          "event_type": "submission",
+          "event_date": "2026-12-31",
+          "window_start_date": "2026-12-01",
+          "window_end_date": "2026-12-31",
+          "description": "Monthly IGI for November is filed during December."
+        },
+        {
+          "key": "nov_payment",
+          "title": "November 2026 IGI payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-12-31",
+          "description": "Any payable November IGI is due with the December return window."
+        },
+        {
+          "key": "dec_submission",
+          "title": "December 2026 IGI submission window end",
+          "event_type": "submission",
+          "event_date": "2027-01-31",
+          "window_start_date": "2027-01-01",
+          "window_end_date": "2027-01-31",
+          "description": "Monthly IGI for December is filed during January of the following year."
+        },
+        {
+          "key": "dec_payment",
+          "title": "December 2026 IGI payment deadline",
+          "event_type": "payment",
+          "event_date": "2027-01-31",
+          "description": "Any payable December IGI is due with the January return window."
+        }
+      ]
+    },
+    {
+      "key": "is_form_805",
+      "name": "Corporate tax return",
+      "tax_year": 2026,
+      "tax_years": [ 2025, 2026, 2027 ],
+      "description": "Corporate tax Form 805 for the 2025 calendar-year period, filed during July 2026, with the September 2026 Form 810 payment-on-account reminder.",
+      "workflows": [
+        {
+          "key": "prepare_is_accounts",
+          "name": "Prepare IS accounts",
+          "description": "Prepare the annual accounts and corporate tax schedules before opening the Form 805 declaration.",
+          "reference_url": "https://www.e-tramits.ad/tramits/ca/declaracio-de-limpost-sobre-societats-is/p/tr-isu"
+        },
+        {
+          "key": "submit_is_form_805",
+          "name": "Submit IS Form 805",
+          "description": "Submit the corporate tax return in the natural month following the six months after the tax period closes.",
+          "reference_url": "https://www.e-tramits.ad/tramits/ca/declaracio-de-limpost-sobre-societats-is/p/tr-isu"
+        },
+        {
+          "key": "settle_is_balance",
+          "name": "Settle corporate tax balance",
+          "description": "Pay any corporate tax balance by the end of the annual filing window.",
+          "reference_url": "https://www.e-tramits.ad/tramits/ca/declaracio-de-limpost-sobre-societats-is/p/tr-isu"
+        },
+        {
+          "key": "submit_is_form_810",
+          "name": "Submit IS Form 810 payment on account",
+          "description": "Submit the corporate tax payment-on-account declaration during the ninth month after the period starts.",
+          "reference_url": "https://www.e-tramits.ad/tramits/ca/declaracio-de-limpost-sobre-societats-is/p/tr-isu"
+        }
+      ],
+      "events": [
+        {
+          "key": "annual_submission",
+          "title": "2025 IS submission window end",
+          "event_type": "submission",
+          "event_date": "2026-07-31",
+          "window_start_date": "2026-07-01",
+          "window_end_date": "2026-07-31",
+          "description": "For a calendar-year period ending 31 December 2025, Form 805 is filed during July 2026."
+        },
+        {
+          "key": "annual_payment",
+          "title": "2025 IS payment deadline",
+          "event_type": "payment",
+          "event_date": "2026-07-31",
+          "description": "Any payable corporate tax balance is due by the end of the July filing window."
+        },
+        {
+          "key": "payment_on_account_submission",
+          "title": "2026 IS payment-on-account submission window end",
+          "event_type": "submission",
+          "event_date": "2026-09-30",
+          "window_start_date": "2026-09-01",
+          "window_end_date": "2026-09-30",
+          "description": "Corporate tax payment on account is filed during the ninth month after the period starts."
+        },
+        {
+          "key": "payment_on_account",
+          "title": "2026 IS payment-on-account deadline",
+          "event_type": "payment",
+          "event_date": "2026-09-30",
+          "window_start_date": "2026-09-01",
+          "window_end_date": "2026-09-30",
+          "description": "The corporate tax payment on account is due during the September payment-on-account window."
+        }
+      ]
+    }
+  ]
+}

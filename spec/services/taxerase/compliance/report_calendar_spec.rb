@@ -203,6 +203,64 @@ RSpec.describe Taxerase::Compliance::ReportCalendar do
         hash_including(event_type: "payment", event_date: "2026-12-21")
       )
     end
+
+    it "serializes Andorra compliance reports across the same multi-year window" do
+      payload = described_class.call(country_code: "AD", tax_year: 2026)
+      reports = expect_multi_year_payload(payload, country_code: "AD")
+      irpf = report_by_key_and_year(reports, "irpf_form_300", 2026)
+      irpf_payment = report_by_key_and_year(reports, "irpf_form_320", 2026)
+      semiannual_igi = report_by_key_and_year(reports, "igi_form_900_semiannual", 2026)
+      quarterly_igi = report_by_key_and_year(reports, "igi_form_900_quarterly", 2026)
+      monthly_igi = report_by_key_and_year(reports, "igi_form_900_monthly", 2026)
+      corporate_tax = report_by_key_and_year(reports, "is_form_805", 2026)
+
+      expect(reports.map { |report| report.fetch(:name) }).to include(
+        "IRPF annual return",
+        "IRPF payment on account",
+        "Semiannual IGI return",
+        "Quarterly IGI return",
+        "Monthly IGI return",
+        "Corporate tax return"
+      )
+      expect(irpf.fetch(:events)).to include(
+        hash_including(
+          event_type: "submission",
+          event_date: "2026-09-30",
+          window_start_date: "2026-04-01",
+          window_end_date: "2026-09-30"
+        ),
+        hash_including(event_type: "payment", event_date: "2026-09-30")
+      )
+      expect(irpf_payment.fetch(:events)).to include(
+        hash_including(
+          event_type: "submission",
+          event_date: "2026-09-30",
+          window_start_date: "2026-09-01",
+          window_end_date: "2026-09-30"
+        )
+      )
+      expect(semiannual_igi.fetch(:events)).to include(
+        hash_including(event_type: "submission", event_date: "2026-07-31"),
+        hash_including(event_type: "payment", event_date: "2027-01-31")
+      )
+      expect(quarterly_igi.fetch(:events)).to include(
+        hash_including(event_type: "submission", event_date: "2026-04-30"),
+        hash_including(event_type: "payment", event_date: "2027-01-31")
+      )
+      expect(monthly_igi.fetch(:events)).to include(
+        hash_including(event_type: "submission", event_date: "2026-02-28"),
+        hash_including(event_type: "payment", event_date: "2027-01-31")
+      )
+      expect(corporate_tax.fetch(:events)).to include(
+        hash_including(event_type: "submission", event_date: "2026-07-31"),
+        hash_including(
+          event_type: "payment",
+          event_date: "2026-09-30",
+          window_start_date: "2026-09-01",
+          window_end_date: "2026-09-30"
+        )
+      )
+    end
   end
 
   def expect_multi_year_payload(payload, country_code:)

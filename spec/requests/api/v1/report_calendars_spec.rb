@@ -313,14 +313,95 @@ RSpec.describe "Api::V1::ReportCalendars", type: :request do
       )
     end
 
-    it "returns an empty report list for countries without compliance report data" do
+    it "returns Andorra report deadlines with IRPF, IGI, and IS workflows" do
       get api_v1_country_report_calendar_path(country_code: "AD"), params: { tax_year: 2026 }
 
       expect(response).to have_http_status(:ok)
 
       json = JSON.parse(response.body)
+      reports = expect_multi_year_calendar(json, country_code: "AD", expected_reports_per_year: 6)
+      irpf = report_by_key_and_year(reports, "irpf_form_300", 2026)
+      irpf_payment = report_by_key_and_year(reports, "irpf_form_320", 2026)
+      semiannual_igi = report_by_key_and_year(reports, "igi_form_900_semiannual", 2026)
+      quarterly_igi = report_by_key_and_year(reports, "igi_form_900_quarterly", 2026)
+      monthly_igi = report_by_key_and_year(reports, "igi_form_900_monthly", 2026)
+      corporate_tax = report_by_key_and_year(reports, "is_form_805", 2026)
 
-      expect(json.dig("country", "code")).to eq("AD")
+      expect(reports.map { |report| report["name"] }).to include(
+        "IRPF annual return",
+        "IRPF payment on account",
+        "Semiannual IGI return",
+        "Quarterly IGI return",
+        "Monthly IGI return",
+        "Corporate tax return"
+      )
+      expect(irpf["events"]).to include(
+        hash_including(
+          "event_type" => "submission",
+          "event_date" => "2026-09-30",
+          "window_start_date" => "2026-04-01",
+          "window_end_date" => "2026-09-30"
+        ),
+        hash_including("event_type" => "payment", "event_date" => "2026-09-30")
+      )
+      expect(workflow_by_key(irpf, "submit_irpf_form_300")["reference_url"]).to eq(andorra_irpf_reference_url)
+      expect(irpf_payment["events"]).to include(
+        hash_including(
+          "event_type" => "submission",
+          "event_date" => "2026-09-30",
+          "window_start_date" => "2026-09-01",
+          "window_end_date" => "2026-09-30"
+        )
+      )
+      expect(workflow_by_key(irpf_payment, "submit_irpf_form_320")["reference_url"])
+        .to eq(andorra_irpf_payment_reference_url)
+      expect(semiannual_igi["events"]).to include(
+        hash_including("event_type" => "submission", "event_date" => "2026-07-31"),
+        hash_including("event_type" => "payment", "event_date" => "2027-01-31")
+      )
+      expect(quarterly_igi["events"]).to include(
+        hash_including(
+          "event_type" => "submission",
+          "event_date" => "2026-04-30",
+          "window_start_date" => "2026-04-01",
+          "window_end_date" => "2026-04-30"
+        ),
+        hash_including("event_type" => "payment", "event_date" => "2027-01-31")
+      )
+      expect(workflow_by_key(quarterly_igi, "submit_quarterly_igi")["reference_url"]).to eq(andorra_igi_reference_url)
+      expect(monthly_igi["events"]).to include(
+        hash_including("event_type" => "submission", "event_date" => "2026-02-28"),
+        hash_including("event_type" => "payment", "event_date" => "2027-01-31")
+      )
+      expect(corporate_tax["events"]).to include(
+        hash_including(
+          "event_type" => "submission",
+          "event_date" => "2026-07-31",
+          "window_start_date" => "2026-07-01",
+          "window_end_date" => "2026-07-31"
+        ),
+        hash_including(
+          "event_type" => "payment",
+          "event_date" => "2026-09-30",
+          "window_start_date" => "2026-09-01",
+          "window_end_date" => "2026-09-30"
+        )
+      )
+      expect(workflow_by_key(corporate_tax, "submit_is_form_805")["reference_url"]).to eq(andorra_is_reference_url)
+      expect(workflow_by_key(corporate_tax, "submit_is_form_810")["reference_url"])
+        .to eq(andorra_is_payment_reference_url)
+    end
+
+    it "returns an empty report list for countries without compliance report data" do
+      Country.create!(code: "ZZ", name: "No Calendar", currency_code: "EUR")
+
+      get api_v1_country_report_calendar_path(country_code: "ZZ"), params: { tax_year: 2026 }
+
+      expect(response).to have_http_status(:ok)
+
+      json = JSON.parse(response.body)
+
+      expect(json.dig("country", "code")).to eq("ZZ")
       expect(json["reports"]).to eq([])
     end
   end
@@ -381,5 +462,25 @@ RSpec.describe "Api::V1::ReportCalendars", type: :request do
 
   def czech_control_statement_reference_url
     "https://portal.gov.cz/en/sluzby-vs/vat-control-statement-S20031"
+  end
+
+  def andorra_irpf_reference_url
+    "https://www.e-tramits.ad/tramits/ca/declaracio-de-limpost-sobre-la-renda-de-les-persones-fisiques-irpf/p/tr-irpf"
+  end
+
+  def andorra_irpf_payment_reference_url
+    "https://www.e-tramits.ad/tramits/ca/impostos/tr-irpf-320"
+  end
+
+  def andorra_igi_reference_url
+    "https://www.e-tramits.ad/tramits/ca/impost-general-indirecte-igi/p/tr-igi"
+  end
+
+  def andorra_is_reference_url
+    "https://www.e-tramits.ad/tramits/ca/declaracio-de-limpost-sobre-societats-is/p/tr-isu"
+  end
+
+  def andorra_is_payment_reference_url
+    "https://www.e-tramits.ad/tramits/ca/declaracio-de-limpost-sobre-societats-is/p/tr-isu"
   end
 end

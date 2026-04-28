@@ -61,6 +61,13 @@ RSpec.describe Taxerase::Seeds::TaxData do
       czech_vat_return = czech_republic.tax_reports.find_by!(key: "vat_return_monthly", tax_year: 2026)
       czech_control_statement = czech_republic.tax_reports.find_by!(key: "vat_control_statement_monthly", tax_year: 2026)
       czech_pausalni_dan = czech_republic.tax_reports.find_by!(key: "pausalni_dan_monthly", tax_year: 2026)
+      andorra_irpf = andorra.tax_reports.find_by!(key: "irpf_form_300", tax_year: 2026)
+      andorra_irpf_payment = andorra.tax_reports.find_by!(key: "irpf_form_320", tax_year: 2026)
+      andorra_semiannual_igi = andorra.tax_reports.find_by!(key: "igi_form_900_semiannual", tax_year: 2026)
+      andorra_quarterly_igi = andorra.tax_reports.find_by!(key: "igi_form_900_quarterly", tax_year: 2026)
+      andorra_monthly_igi = andorra.tax_reports.find_by!(key: "igi_form_900_monthly", tax_year: 2026)
+      andorra_corporate_tax = andorra.tax_reports.find_by!(key: "is_form_805", tax_year: 2026)
+      andorra_quarterly_igi_2027 = andorra.tax_reports.find_by!(key: "igi_form_900_quarterly", tax_year: 2027)
 
       expect(spain.tax_reports.where(tax_year: 2025..2027).group(:tax_year).count).to eq(
         2025 => 5,
@@ -132,6 +139,41 @@ RSpec.describe Taxerase::Seeds::TaxData do
       expect(czech_vat_return.report_events.find_by!(key: "nov_payment").event_date).to eq(Date.new(2026, 12, 28))
       expect(czech_control_statement.report_workflows.pluck(:name)).to include("Submit control statement")
       expect(czech_pausalni_dan.report_events.find_by!(key: "dec_payment").event_date).to eq(Date.new(2026, 12, 21))
+
+      expect(andorra.tax_reports.where(tax_year: 2025..2027).group(:tax_year).count).to eq(
+        2025 => 6,
+        2026 => 6,
+        2027 => 6
+      )
+      expect(andorra_irpf.report_workflows.pluck(:name)).to include("Submit IRPF Form 300")
+      expect(workflow_for(andorra_irpf, "submit_irpf_form_300").reference_url).to eq(andorra_irpf_reference_url)
+      expect(andorra_irpf.report_events.find_by!(key: "annual_submission").window_start_date)
+        .to eq(Date.new(2026, 4, 1))
+      expect(andorra_irpf.report_events.find_by!(key: "annual_payment").event_date).to eq(Date.new(2026, 9, 30))
+      expect(andorra_irpf_payment.report_workflows.pluck(:name)).to include("Submit IRPF Form 320")
+      expect(workflow_for(andorra_irpf_payment, "submit_irpf_form_320").reference_url)
+        .to eq(andorra_irpf_payment_reference_url)
+      expect(andorra_irpf_payment.report_events.find_by!(key: "september_payment").window_end_date)
+        .to eq(Date.new(2026, 9, 30))
+      expect(andorra_semiannual_igi.report_events.find_by!(key: "h2_payment").event_date)
+        .to eq(Date.new(2027, 1, 31))
+      expect(workflow_for(andorra_quarterly_igi, "submit_quarterly_igi").reference_url)
+        .to eq(andorra_igi_reference_url)
+      expect(andorra_quarterly_igi.report_events.find_by!(key: "q1_submission").window_start_date)
+        .to eq(Date.new(2026, 4, 1))
+      expect(andorra_quarterly_igi_2027.report_events.find_by!(key: "q4_payment").event_date)
+        .to eq(Date.new(2028, 1, 31))
+      expect(andorra_monthly_igi.report_events.find_by!(key: "jan_submission").event_date)
+        .to eq(Date.new(2026, 2, 28))
+      expect(andorra_monthly_igi.report_events.find_by!(key: "dec_payment").event_date)
+        .to eq(Date.new(2027, 1, 31))
+      expect(workflow_for(andorra_corporate_tax, "submit_is_form_805").reference_url).to eq(andorra_is_reference_url)
+      expect(workflow_for(andorra_corporate_tax, "submit_is_form_810").reference_url)
+        .to eq(andorra_is_payment_reference_url)
+      expect(andorra_corporate_tax.report_events.find_by!(key: "annual_submission").window_end_date)
+        .to eq(Date.new(2026, 7, 31))
+      expect(andorra_corporate_tax.report_events.find_by!(key: "payment_on_account").event_date)
+        .to eq(Date.new(2026, 9, 30))
     end
   end
 
@@ -169,6 +211,26 @@ RSpec.describe Taxerase::Seeds::TaxData do
 
   def ksef_reference_url
     "https://ksef.podatki.gov.pl/informacje-ogolne-ksef-20/zakres-obowiazkowego-ksef/"
+  end
+
+  def andorra_irpf_reference_url
+    "https://www.e-tramits.ad/tramits/ca/declaracio-de-limpost-sobre-la-renda-de-les-persones-fisiques-irpf/p/tr-irpf"
+  end
+
+  def andorra_irpf_payment_reference_url
+    "https://www.e-tramits.ad/tramits/ca/impostos/tr-irpf-320"
+  end
+
+  def andorra_igi_reference_url
+    "https://www.e-tramits.ad/tramits/ca/impost-general-indirecte-igi/p/tr-igi"
+  end
+
+  def andorra_is_reference_url
+    "https://www.e-tramits.ad/tramits/ca/declaracio-de-limpost-sobre-societats-is/p/tr-isu"
+  end
+
+  def andorra_is_payment_reference_url
+    "https://www.e-tramits.ad/tramits/ca/declaracio-de-limpost-sobre-societats-is/p/tr-isu"
   end
 
   def source_mismatches_for(country)
